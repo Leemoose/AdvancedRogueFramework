@@ -119,7 +119,8 @@ class DungeonGenerator:
         player,
         branch: str,
         dungeon_data,
-        use_legacy_spawning: bool = False
+        use_legacy_spawning: bool = False,
+        gateway_data=None
     ):
         """
         Initialize and generate a dungeon floor.
@@ -130,6 +131,7 @@ class DungeonGenerator:
             branch: Dungeon branch name
             dungeon_data: DungeonData configuration object
             use_legacy_spawning: If True, use old spawn code (for backwards compatibility)
+            gateway_data: GatewayData configuration object (optional)
         """
         logger.debug("Initializing DungeonGenerator for depth %d, branch %s", depth, branch)
         self.mapData = dungeon_data.get_map_data(branch, depth)
@@ -138,7 +140,7 @@ class DungeonGenerator:
         self.summoner = []
 
         # Generate the map using the configured generator
-        self.tile_map = TileMap(self.mapData, depth, branch)
+        self.tile_map = TileMap(self.mapData, depth, branch, gateway_data=gateway_data)
         self.monster_map = TrackingMap(self.get_width(), self.get_height())
         self.interact_map = TrackingMap(self.get_width(), self.get_height())
         self.item_map = TrackingMap(self.get_width(), self.get_height())

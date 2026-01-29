@@ -248,14 +248,23 @@ class Player(Objects):
             start = (self.x, self.y)
             all_stairs_seen = []
             to_visit_stairs = []
+
+            # Include down stairs
             for stairs in loop.generator.tile_map.get_stairs():
                 if stairs.get_level_change() == 1 and stairs.get_seen():
                     all_stairs_seen.append(stairs.get_location())
                     if stairs.get_location() not in self.visited_stairs and stairs.get_location() != start:
                         to_visit_stairs.append(stairs.get_location())
 
+            # Also include gateways
+            for gateway in loop.generator.tile_map.get_gateway():
+                if gateway.get_seen():
+                    all_stairs_seen.append(gateway.get_location())
+                    if gateway.get_location() not in self.visited_stairs and gateway.get_location() != start:
+                        to_visit_stairs.append(gateway.get_location())
+
             if len(all_stairs_seen) == 0:
-                loop.add_message("You have not found the stairs or a portal yet")
+                loop.add_message("You have not found the stairs or a gateway yet")
                 loop.change_loop(LoopType.action)
                 return
 
@@ -348,12 +357,17 @@ class Player(Objects):
         logger.debug("Exiting smart_attack, target=%s", attack_target)
 
     def down_stairs(self, loop):
-        if (loop.generator.tile_map.get_entity(self.x, self.y).has_trait("stairs")
-                and loop.generator.tile_map.get_entity(self.x, self.y).get_level_change() == 1):
+        current_tile = loop.generator.tile_map.get_entity(self.x, self.y)
+
+        # Check for gateway first
+        if current_tile.has_trait("gateway"):
+            logger.debug("Player using gateway at (%d, %d)", self.x, self.y)
+            self.do_gateway(loop)
+        elif current_tile.has_trait("stairs") and current_tile.get_level_change() == 1:
             logger.debug("Player going down stairs at (%d, %d)", self.x, self.y)
             self.do_stairs(loop)
         elif self.character.can_take_action():
-            loop.add_message("There are no stairs here!")
+            loop.add_message("There are no stairs or gateway here!")
 
     def up_stairs(self, loop):
         if (loop.generator.tile_map.get_entity(self.x, self.y).has_trait("stairs")
@@ -367,6 +381,15 @@ class Player(Objects):
         if self.character.can_take_action():
             loop.change_floor()
             logger.debug("Floor changed successfully")
+        else:
+            loop.add_message("You can't move!")
+
+    def do_gateway(self, loop):
+        """Use a gateway to travel to another branch."""
+        self.spend_energy("move")
+        if self.character.can_take_action():
+            loop.change_branch()
+            logger.debug("Branch changed successfully via gateway")
         else:
             loop.add_message("You can't move!")
 

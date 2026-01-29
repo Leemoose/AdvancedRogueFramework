@@ -10,7 +10,7 @@ import random
 from logging_config import get_logger, log_high_priority
 
 from .room import Room
-from dungeon_generation.tiles import UpStairs, DownStairs, Floor, Wall
+from dungeon_generation.tiles import UpStairs, DownStairs, Floor, Wall, Gateway
 
 logger = get_logger(__name__)
 
@@ -194,6 +194,49 @@ def place_stairs(tilemap) -> None:
         logger.debug("Placed additional UpStairs at (%d, %d) (depth > 1)", startx, starty)
 
     logger.info("Stairs placement complete: %d total stairs", len(tilemap.stairs))
+
+
+def place_gateways(tilemap, gateway_data) -> None:
+    """
+    Place gateways on the tilemap based on gateway_data configuration.
+
+    Args:
+        tilemap: The tilemap to place gateways on
+        gateway_data: GatewayData configuration object containing connection info
+    """
+    branch = tilemap.get_branch()
+    depth = tilemap.get_depth()
+
+    logger.info("Placing gateways on floor depth=%d, branch=%s", depth, branch)
+
+    if not gateway_data.has_gateway(branch, depth):
+        logger.debug("No gateways configured for %s floor %d", branch, depth)
+        return
+
+    destinations = gateway_data.get_destinations(branch, depth)
+    logger.debug("Found %d gateway destinations for %s floor %d", len(destinations), branch, depth)
+
+    for dest in destinations:
+        # Check spawn chance for random connections
+        conn = gateway_data.get_connection(branch, depth, dest.branch, dest.depth)
+        if conn and conn.spawn_chance < 1.0:
+            if random.random() > conn.spawn_chance:
+                logger.debug("Gateway to %s floor %d skipped (spawn_chance=%.2f)",
+                           dest.branch, dest.depth, conn.spawn_chance)
+                continue
+
+        # Place the gateway
+        startx, starty = tilemap.get_random_location()
+
+        # Create gateway - it will be paired later during init_game
+        gateway = Gateway(startx, starty, level=depth, branch=branch)
+        tilemap.gateway.append(gateway)
+        tilemap.place_tile(gateway)
+
+        logger.debug("Placed Gateway at (%d, %d) for connection to %s floor %d",
+                    startx, starty, dest.branch, dest.depth)
+
+    logger.info("Gateway placement complete: %d total gateways", len(tilemap.gateway))
 
 
 def render_to_map(tilemap) -> None:

@@ -18,6 +18,7 @@ from logging_config import get_logger
 
 import item_implementation
 from dungeon_generation import mapping as M
+from dungeon_generation.configuration_data.gateway_data import GatewayData
 import player
 from navigation_utility import shadowcasting
 from loop_workflow import MessageHandler, targets as T
@@ -459,6 +460,53 @@ class Loops:
         logger.info("Changed to floor %d in branch %s", new_level, self.get_branch())
         logger.debug("Exiting change_floor")
 
+    def change_branch(self):
+        """Handle player moving between dungeon branches via gateways."""
+        logger.debug("Entering change_branch")
+
+        # Process any pending energy
+        if self.player.character.energy < 0:
+            energy_spent = -self.player.character.energy
+            self.time_passes(energy_spent)
+            self.monster_loop(energy_spent)
+            self.player.character.energy = 0
+
+        playerx, playery = self.player.get_location()
+        logger.debug("Player at gateway position (%d, %d)", playerx, playery)
+
+        current_gateway = self.generator.tile_map.get_entity(playerx, playery)
+        if not current_gateway.has_trait("gateway"):
+            logger.warning("change_branch called but player not on gateway")
+            return
+
+        if not current_gateway.has_outgoing():
+            logger.warning("Gateway has no outgoing connection")
+            self.add_message("This gateway leads nowhere!")
+            return
+
+        # Get destination from the paired gateway
+        dest_gateway = current_gateway.outgoing
+        dest_branch = dest_gateway.get_branch()
+        dest_depth = dest_gateway.get_depth()
+
+        logger.info("Traveling through gateway from %s:%d to %s:%d",
+                   self.get_branch(), self.get_depth(), dest_branch, dest_depth)
+
+        # Move player to destination gateway location
+        self.player.x, self.player.y = dest_gateway.get_location()
+        self.player.visited_stairs = []
+
+        # Update generator to destination floor
+        self.generator = self.memory.get_saved_floor(dest_branch, dest_depth)
+
+        # Update memory state
+        self.memory.floor_level = dest_depth
+        self.memory.branch = dest_branch
+
+        self.add_message(f"You travel through the gateway to {dest_branch}.")
+        logger.info("Changed to branch %s floor %d", dest_branch, dest_depth)
+        logger.debug("Exiting change_branch")
+
     # =========================================================================
     # GAME INITIALIZATION
     # =========================================================================
@@ -467,27 +515,146 @@ class Loops:
         """Initialize a new game, generating all dungeon floors."""
         logger.info("Initializing game")
 
+        # Create gateway data configuration
+        self.gateway_data = GatewayData()
+
         # Generate all floors for all branches
         for branch in self.dungeon_data.get_branches():
             for level in range(1, self.dungeon_data.get_depth(branch) + 1):
                 generator = M.DungeonGenerator(
-                    level, self.player, branch, self.dungeon_data
+                    level, self.player, branch, self.dungeon_data,
+                    gateway_data=self.gateway_data
                 )
-                self.memory.set_floor("Dungeon", level, generator)
+                self.memory.set_floor(branch, level, generator)
 
-        # Set initial memory state
-        self.memory.set_memory(1, "Dungeon", self.player, self.keyboard)
+        # Pair all gateways after all floors are generated
+        self._pair_all_gateways()
+
+        # Set initial memory state (player starts in Hub floor 1 for testing)
+        self.memory.set_memory(1, "Hub", self.player, self.keyboard)
         self.generator = self.memory.get_current_saved_floor()
 
-        # Position player at entry stairs
-        for stairs in self.generator.tile_map.get_stairs():
-            if stairs.get_level_change() == -1:
-                x, y = stairs.get_location()
-                self.player.x = x
-                self.player.y = y
-                self.targets.set_target((x, y))
+        # Position player at a gateway in Hub (or fallback to stairs)
+        placed = False
+        for gateway in self.generator.tile_map.get_gateway():
+            x, y = gateway.get_location()
+            self.player.x = x
+            self.player.y = y
+            self.targets.set_target((x, y))
+            placed = True
+            break
+
+        if not placed:
+            for stairs in self.generator.tile_map.get_stairs():
+                if stairs.get_level_change() == -1:
+                    x, y = stairs.get_location()
+                    self.player.x = x
+                    self.player.y = y
+                    self.targets.set_target((x, y))
+                    break
 
         logger.info("Game initialization complete")
+
+    def _pair_all_gateways(self):
+        """
+        Pair all gateways based on gateway_data configuration.
+
+        This creates the actual connections between gateway tiles on different floors.
+        Must be called after all floors are generated.
+
+        For one-way connections (like Hub -> branches), we create a "virtual" destination
+        by using the up-stairs location on the destination floor as the arrival point.
+        """
+        logger.info("Pairing all gateways")
+
+        # Get all lairs that have gateways
+        gateway_lairs = self.gateway_data.get_all_gateway_lairs()
+
+        for lair in gateway_lairs:
+            source_branch = lair.branch
+            source_depth = lair.depth
+
+            # Check if this branch/depth exists in our generators
+            if source_branch not in self.memory.generators:
+                logger.warning("Branch %s not found in generators", source_branch)
+                continue
+            if source_depth not in self.memory.generators[source_branch]:
+                logger.warning("Depth %d not found in branch %s", source_depth, source_branch)
+                continue
+
+            source_generator = self.memory.generators[source_branch][source_depth]
+            source_gateways = list(source_generator.tile_map.get_gateway())
+
+            # Get destinations for this lair
+            destinations = self.gateway_data.get_destinations(source_branch, source_depth)
+
+            # Match gateways to destinations
+            gateway_index = 0
+            for dest in destinations:
+                dest_branch = dest.branch
+                dest_depth = dest.depth
+
+                # Check if destination exists
+                if dest_branch not in self.memory.generators:
+                    logger.warning("Destination branch %s not found", dest_branch)
+                    continue
+                if dest_depth not in self.memory.generators[dest_branch]:
+                    logger.warning("Destination depth %d not found in branch %s", dest_depth, dest_branch)
+                    continue
+
+                # Find unpaired source gateway
+                if gateway_index >= len(source_gateways):
+                    logger.warning("Not enough gateways at %s:%d for all destinations",
+                                 source_branch, source_depth)
+                    break
+
+                source_gateway = source_gateways[gateway_index]
+
+                # Skip if this gateway is already paired
+                if source_gateway.has_outgoing():
+                    gateway_index += 1
+                    continue
+
+                dest_generator = self.memory.generators[dest_branch][dest_depth]
+                dest_gateways = dest_generator.tile_map.get_gateway()
+
+                # Try to find an unpaired gateway at destination
+                dest_gateway = None
+                for g in dest_gateways:
+                    if not g.has_incoming():
+                        dest_gateway = g
+                        break
+
+                if dest_gateway is None:
+                    # No gateway at destination - create a virtual gateway at stairs location
+                    # This handles one-way connections where destination doesn't have a return gateway
+                    from dungeon_generation.tiles import Gateway
+
+                    # Find up-stairs to use as arrival point
+                    arrival_x, arrival_y = None, None
+                    for stairs in dest_generator.tile_map.get_stairs():
+                        if stairs.get_level_change() == -1:  # Up stairs
+                            arrival_x, arrival_y = stairs.get_location()
+                            break
+
+                    # Fallback to any passable location
+                    if arrival_x is None:
+                        arrival_x, arrival_y = dest_generator.get_random_passable_location()
+
+                    # Create virtual gateway (just for the destination point)
+                    dest_gateway = Gateway(arrival_x, arrival_y, level=dest_depth, branch=dest_branch)
+                    dest_generator.tile_map.gateway.append(dest_gateway)
+                    logger.debug("Created virtual gateway at %s:%d (%d, %d)",
+                               dest_branch, dest_depth, arrival_x, arrival_y)
+
+                # Pair the gateways (one-way: source.outgoing -> dest)
+                source_gateway.pair_gateway(dest_gateway)
+                logger.info("Paired gateway: %s:%d -> %s:%d",
+                           source_branch, source_depth, dest_branch, dest_depth)
+
+                gateway_index += 1
+
+        logger.info("Gateway pairing complete")
 
     def load_game(self):
         """Load a saved game."""

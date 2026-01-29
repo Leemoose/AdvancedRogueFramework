@@ -12,7 +12,7 @@ from typing import Optional, TYPE_CHECKING
 from logging_config import get_logger
 
 from .maps import Maps
-from .map_utility import construct_rooms, render_to_map, place_stairs
+from .map_utility import construct_rooms, render_to_map, place_stairs, place_gateways
 
 # Import generators - use lazy loading to avoid circular imports
 if TYPE_CHECKING:
@@ -84,7 +84,8 @@ class TileMap(Maps):
     The generator type is determined by mapData.generator_type.
     """
 
-    def __init__(self, mapData, depth: int, branch: str, use_legacy_generation: bool = False):
+    def __init__(self, mapData, depth: int, branch: str, use_legacy_generation: bool = False,
+                 gateway_data=None):
         """
         Initialize the TileMap.
 
@@ -136,8 +137,13 @@ class TileMap(Maps):
         logger.debug("Placing stairs...")
         place_stairs(self)
 
-        logger.info("TileMap initialization complete: %d rooms, %d stairs",
-                   len(self.rooms), len(self.stairs))
+        # Place gateways if gateway_data is provided
+        if gateway_data is not None:
+            logger.debug("Placing gateways...")
+            place_gateways(self, gateway_data)
+
+        logger.info("TileMap initialization complete: %d rooms, %d stairs, %d gateways",
+                   len(self.rooms), len(self.stairs), len(self.gateway))
 
     def __str__(self) -> str:
         """Return ASCII representation of the map."""
@@ -170,6 +176,10 @@ class TileMap(Maps):
     def get_stairs(self) -> list:
         """Return list of all stairs on this floor."""
         return self.stairs
+
+    def get_gateway(self) -> list:
+        """Return list of all gateways on this floor."""
+        return self.gateway
 
     def place_tile(self, tile) -> None:
         """

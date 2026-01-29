@@ -122,10 +122,37 @@ class BranchParams:
     def countCorpses(self, depth):
         return 0
     
-    # specific branches can overwrite this with any restrictions they can check on the monster
-    # returns true on tiles that can be spawned on
-    # def check_monster_restrictions(self, monster, tileMap, location, generator):
-    #     return generator.get_passable(location)
+    # Monster spawn restriction system
+    # Specific branches can override this to restrict monster spawning to specific tiles
+    # Returns True if the monster can spawn at the given location
+    # Returns False if the monster cannot spawn there
+    #
+    # Usage: Override check_monster_restrictions in branch-specific params classes
+    # Example: OceanParams could restrict "deep_water" monsters to water tiles only
+    check_monster_restrictions = None
+
+    def can_spawn_monster_at(self, monster, tile_map, location, generator):
+        """
+        Check if a monster can spawn at the given location.
+
+        This method first checks the branch-specific restrictions (if any),
+        then falls back to basic passability checks.
+
+        Args:
+            monster: The monster to spawn (may have a 'restriction' attribute)
+            tile_map: The TileMap instance
+            location: Tuple (x, y) of the spawn location
+            generator: The DungeonGenerator instance
+
+        Returns:
+            True if the monster can spawn at this location
+        """
+        # Check branch-specific restrictions first
+        if self.check_monster_restrictions is not None:
+            return self.check_monster_restrictions(monster, tile_map, location, generator)
+
+        # Default: just check if tile is passable
+        return generator.get_passable(location)
 
         
 
@@ -193,6 +220,45 @@ class OceanParams(BranchParams):
         super().__init__()
         self.branch_name = "Ocean"
         self.seen = set()
+
+        # Ocean branch has harder encounters
+        self.difficulty_base = 5
+        self.difficulty_growth = 0
+
+        # Define monster restrictions for Ocean
+        # This is a placeholder - implement actual restriction logic when
+        # water tiles and water-restricted monsters are added
+        self.check_monster_restrictions = self._ocean_monster_restrictions
+
+    def _ocean_monster_restrictions(self, monster, tile_map, location, generator):
+        """
+        Ocean-specific monster spawn restrictions.
+
+        Monsters with restriction='deep_water' can only spawn on deep water tiles.
+        Other monsters spawn normally on passable tiles.
+
+        Args:
+            monster: The monster to spawn
+            tile_map: The TileMap instance
+            location: Tuple (x, y) of the spawn location
+            generator: The DungeonGenerator instance
+
+        Returns:
+            True if the monster can spawn at this location
+        """
+        # Check if monster has a water restriction
+        if hasattr(monster, 'restriction') and monster.restriction == "deep_water":
+            # Check if tile is deep water (when water tiles are implemented)
+            # For now, just check passability
+            x, y = location
+            if hasattr(tile_map, 'track_map_render'):
+                tile_char = tile_map.track_map_render[x][y]
+                if tile_char != "dw":  # "dw" = deep water (future tile type)
+                    return False
+            return generator.get_passable(location)
+
+        # Default: just check passability
+        return generator.get_passable(location)
 
 
 params_list = [DungeonParams(),

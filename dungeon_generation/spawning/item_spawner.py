@@ -134,11 +134,11 @@ class ItemSpawner():
         #     item = item_spawn.GetFreshCopy()
         #     item_implementation.append(item)
 
-        for i in range(distribution.countCorpses(depth)):
-            rarity = random.random()
-            item_spawn = random.choice(commonCorpsesAtDepth)
-            item = item_spawn.GetFreshCopy()
-            items.append(item)
+        if len(commonCorpsesAtDepth) > 0:
+            for i in range(distribution.countCorpses(depth)):
+                item_spawn = random.choice(commonCorpsesAtDepth)
+                item = item_spawn.GetFreshCopy()
+                items.append(item)
 
 
         return items

@@ -89,33 +89,54 @@ class DungeonData:
                         spawn_params={'formation': 'circle', 'elite_radius': 5})
         }
 
-        # Forest branch (commented out - can be enabled)
-        # self.master_map_data["Forest"] = {
-        #     1: MapData(20, 30, 4, 5, 1.0, 1,
-        #                generator_type='cave',
-        #                spawn_strategy='random',
-        #                generator_params={'fill_probability': 0.40}),
-        #     2: MapData(60, 60, 15, 10, .05, 1,
-        #                generator_type='cave',
-        #                spawn_strategy='guarding_items'),
-        #     3: MapData(60, 60, 15, 10, .1, 0,
-        #                generator_type='cave',
-        #                spawn_strategy='elite_group'),
-        # }
+        # Forest branch - 5 floors of organic caves
+        self.master_map_data["Forest"] = {
+            1: MapData(30, 30, 5, 6, 0.3, 1,
+                       generator_type='cave',
+                       spawn_strategy='random',
+                       generator_params={'fill_probability': 0.40}),
+            2: MapData(35, 35, 6, 7, 0.2, 1,
+                       generator_type='cave',
+                       spawn_strategy='random',
+                       generator_params={'fill_probability': 0.42}),
+            3: MapData(40, 40, 7, 8, 0.2, 0,
+                       generator_type='cave',
+                       spawn_strategy='guarding_items',
+                       generator_params={'fill_probability': 0.43}),
+            4: MapData(45, 45, 8, 8, 0.1, 0,
+                       generator_type='cave',
+                       spawn_strategy='elite_group',
+                       generator_params={'fill_probability': 0.44}),
+            5: MapData(50, 50, 9, 9, 0.1, 0,
+                       generator_type='cave',
+                       spawn_strategy='elite_group',
+                       generator_params={'fill_probability': 0.45},
+                       spawn_params={'formation': 'circle'})
+        }
 
-        # Throne branch (commented out - can be enabled)
-        # self.master_map_data["Throne"] = {
-        #     1: MapData(20, 60, 4, 5, 1.0, 1,
-        #                generator_type='pillar_hall',
-        #                spawn_strategy='elite_group')
-        # }
+        # Throne branch - 1 floor boss arena
+        self.master_map_data["Throne"] = {
+            1: MapData(40, 60, 6, 8, 0.5, 1,
+                       generator_type='pillar_hall',
+                       spawn_strategy='elite_group',
+                       generator_params={'pillar_spacing': 5, 'pillar_density': 0.6},
+                       spawn_params={'formation': 'circle', 'elite_radius': 5})
+        }
 
-        # Hub branch (commented out - can be enabled)
-        # self.master_map_data["Hub"] = {
-        #     1: MapData(10, 10, 4, 5, 1.0, 1,
-        #                generator_type='rooms_corridors',
-        #                spawn_strategy='random')
-        # }
+        # Hub branch - 1 floor central nexus (minimal combat)
+        self.master_map_data["Hub"] = {
+            1: MapData(25, 25, 5, 6, 0.8, 1,
+                       generator_type='rooms_corridors',
+                       spawn_strategy='random')
+        }
+
+        # Ocean branch - 1 floor water-themed area
+        self.master_map_data["Ocean"] = {
+            1: MapData(60, 60, 8, 10, 0.3, 0,
+                       generator_type='cave',
+                       spawn_strategy='guarding_items',
+                       generator_params={'fill_probability': 0.48})
+        }
 
     def get_branches(self):
         """Return all available branch names."""
