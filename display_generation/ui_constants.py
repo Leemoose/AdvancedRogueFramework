@@ -1086,21 +1086,33 @@ class HelpText:
 
 # ==============================================================================
 # TILE EQUIPMENT IDS (for player rendering)
+# See asset_registry.py for the complete ID numbering scheme.
 # ==============================================================================
 
 class EquipmentTileIDs:
-    """Tile IDs for equipment rendering on player sprite."""
-    BOOTS = 5200
-    GLOVES = 5100
-    HELMET = 5300
-    BODY_ARMOR = 5400
-    PANTS = 5500
+    """
+    Tile IDs for equipment rendering on player sprite.
+
+    These IDs correspond to TileID.PLAYER_*_CRAWL constants in asset_registry.py.
+    Range: 1030-1034 (Player Crawl Overlays)
+    """
+    BOOTS = 1031       # TileID.PLAYER_BOOTS_CRAWL
+    GLOVES = 1030      # TileID.PLAYER_GLOVES_CRAWL
+    HELMET = 1032      # TileID.PLAYER_HEAD_CRAWL
+    BODY_ARMOR = 1033  # TileID.PLAYER_BODY_CRAWL
+    PANTS = 1034       # TileID.PLAYER_LEGS_CRAWL
 
 
 # ==============================================================================
 # UI ELEMENT IDS (for targeting cursor, etc)
+# See asset_registry.py for the complete ID numbering scheme.
 # ==============================================================================
 
 class UITileIDs:
-    """Tile IDs for UI elements."""
-    TARGETING_CURSOR = 901
+    """
+    Tile IDs for UI elements.
+
+    These IDs correspond to TileID constants in asset_registry.py.
+    Range: 9000-9099 (System UI)
+    """
+    TARGETING_CURSOR = 9000  # TileID.TARGET

@@ -3,7 +3,7 @@ from monster_implementation import MonsterAI, create_skeleton_behaviors
 from item_implementation.weapons import Bow
 
 class SkeletonArcher(Skeleton):
-    def __init__(self, x=-1, y=-1, render_tag=1051, name="Skeleton Archer", experience_given=15):
+    def __init__(self, x=-1, y=-1, render_tag=2501, name="Skeleton Archer", experience_given=15):  # TileID.SKELETON_CENTAUR from asset_registry.py
         super().__init__(x=x, y=y, render_tag=render_tag, name=name, experience_given=experience_given)
         self.brain = MonsterAI(self, create_skeleton_behaviors())  # Same AI as skeleton
         self.description = ""

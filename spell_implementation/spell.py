@@ -15,7 +15,7 @@ class Spell():
         self.targets_monster = False
         self.action_cost = action_cost
         self.threshold = 0.0
-        self.render_tag = 902  # placeholder icon, skill assets are fixed so not given in user input
+        self.render_tag = 9100  # placeholder icon, skill assets are fixed so not given in user input
         self.required_intelligence = required_intelligence
 
     def activate(self, target, generator):

@@ -39,13 +39,13 @@ class Item(Objects):
 
 
 class Gold(Item):
-    def __init__(self, amount, x=-1, y=-1, id_tag = -1, render_tag = 210, name = "Gold"):
+    def __init__(self, amount, x=-1, y=-1, id_tag = -1, render_tag = 1200, name = "Gold"):  # TileID.GOLD
         super().__init__(x,y, id_tag, render_tag, name)
         self.traits["gold"] = True
         self.amount = amount
 
 class DestroyedDummy(Item):
-    def __init__(self, x=-1, y=-1, id_tag = -1, render_tag = 125, name = "Destroyed Dummy"):
+    def __init__(self, x=-1, y=-1, id_tag = -1, render_tag = 1131, name = "Destroyed Dummy"):  # TileID.DESTROYED_DUMMY
         super().__init__(x,y, id_tag, render_tag, name)
 
 """
@@ -93,7 +93,7 @@ class Consumeable(Item):
 
 
 class YellowFlowerPetal(Consumeable):
-    def __init__(self, render_tag = 4200):
+    def __init__(self, render_tag = 6400):  # TileID.YELLOW_FLOWER_PETAL
         super().__init__(render_tag, "Yellow Flower Petal")
         self.description = "A yellow flower petal."
         self.action_description = "Heal by 5."

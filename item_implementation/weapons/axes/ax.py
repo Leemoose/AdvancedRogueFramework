@@ -1,7 +1,7 @@
 from item_implementation.weapons.weapons import Weapon
 
 class Axe(Weapon):
-    def __init__(self, render_tag=4600):
+    def __init__(self, render_tag=3100):
         super().__init__(-1, -1, 0, render_tag=render_tag, name="Axe", damage_min=3, damage_max=4)
         self.melee = True
         self.name = "Basic Axe"

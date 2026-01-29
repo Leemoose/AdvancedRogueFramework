@@ -24,11 +24,11 @@ class Orb(Item):
         self.traits['orb'] = True
 
 class ForestOrb(Orb):
-    def __init__(self, x = -1, y=-1, id_tag = 4000, render_tag = 0, name = "Forest Orb"):
+    def __init__(self, x = -1, y=-1, id_tag = 4000, render_tag = 7000, name = "Forest Orb"):  # TileID.FOREST_ORB
         super().__init__(x,y, id_tag, render_tag, name)
         self.traits["forest_orb"] = True
 
 class OceanOrb(Orb):
-    def __init__(self, x = -1, y=-1, id_tag = 4010, render_tag = 0, name = "Ocean Orb"):
+    def __init__(self, x = -1, y=-1, id_tag = 4010, render_tag = 7001, name = "Ocean Orb"):  # TileID.OCEAN_ORB
         super().__init__(x,y, id_tag, render_tag, name)
         self.traits["ocean_orb"] = True

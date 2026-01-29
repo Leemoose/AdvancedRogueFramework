@@ -249,11 +249,6 @@ class GameObject:
         """Get the visual lookup ID."""
         return self.render_tag
 
-    @property
-    def shaded_render_tag(self) -> int:
-        """Get the ID for shaded/unseen version of this entity."""
-        return -self.render_tag
-
     def set_render_tag(self, render_tag: int) -> None:
         """Set the visual lookup ID."""
         self.render_tag = render_tag

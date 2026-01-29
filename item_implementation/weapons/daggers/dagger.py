@@ -9,7 +9,7 @@ DAGGERS
 
 
 class Dagger(Weapon):
-    def __init__(self, render_tag=321, attack_cost=20):
+    def __init__(self, render_tag=3300, attack_cost=20):
         super().__init__(-1, -1, 0, render_tag, name = "Basic dagger", attack_cost= attack_cost, damage_min=1, damage_max=3)
         self.description = "I swear that tip is getting rounder... Larry!. Enchanting it might make it more pointy and precise."
 

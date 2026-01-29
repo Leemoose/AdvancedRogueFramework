@@ -9,7 +9,7 @@ class BurningAttack(Spell):
         self.targetted = True
         self.targets_monster = True
         self.burn_duration = burn_duration
-        self.render_tag = 904
+        self.render_tag = 9102
 
     def activate(self, defender, loop):
         self.parent.character.change_mana(-self.cost)

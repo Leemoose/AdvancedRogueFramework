@@ -54,21 +54,20 @@ class Tile(Objects):
 
 
 class Floor(Tile):
-    def __init__(self, x, y, render_tag = 2000, passable = True, blocks_vision = False, id_tag = 0):
+    def __init__(self, x, y, render_tag = 100, passable = True, blocks_vision = False, id_tag = 0):  # 100 = COLORFUL_FLOOR (see asset_registry.py)
         super().__init__(x, y,  render_tag = render_tag, passable = passable, id_tag = id_tag, blocks_vision=blocks_vision)
         self.traits["floor"] = True
 
 class Door(Floor):
-    def __init__(self, x, y, render_tag = 30, passable = True, blocks_vision = True, id_tag = 0):
+    def __init__(self, x, y, render_tag = 300, passable = True, blocks_vision = True, id_tag = 0):  # 300 = DOOR_CLOSED (see asset_registry.py)
         super().__init__(x, y,  render_tag = render_tag, passable = passable, id_tag = id_tag, blocks_vision=blocks_vision)
 
     def open(self):
-        self.render_tag = 31
-        self.shaded_render_tag = -31
+        self.render_tag = 301  # 301 = DOOR_OPEN (see asset_registry.py)
         self.blocks_vision = False
 
 class Wall(Tile):
-    def __init__(self, x, y, render_tag = 2100, passable = False, blocks_vision = True, id_tag = 0):
+    def __init__(self, x, y, render_tag = 200, passable = False, blocks_vision = True, id_tag = 0):  # 200 = COLORFUL_WALL (see asset_registry.py)
         super().__init__(x, y,  render_tag = render_tag, passable = passable, blocks_vision = blocks_vision, id_tag = id_tag)
         self.traits["wall"] = True
 
@@ -95,17 +94,17 @@ class Stairs(Tile):
 
 
 class DownStairs(Stairs):
-    def __init__(self, x, y, render_tag = 91, passable = True, id_tag = 0):
+    def __init__(self, x, y, render_tag = 410, passable = True, id_tag = 0):  # 410 = STAIRS_DOWN (see asset_registry.py)
         super().__init__(x, y, render_tag = render_tag, passable = passable, id_tag = id_tag)
         self.level_change = 1
 
 class UpStairs(Stairs):
-    def __init__(self, x, y, render_tag = 90, passable = True, id_tag = 0):
+    def __init__(self, x, y, render_tag = 400, passable = True, id_tag = 0):  # 400 = STAIRS_UP (see asset_registry.py)
         super().__init__(x, y, render_tag = render_tag, passable = passable, id_tag = id_tag)
         self.level_change = -1
 
 class Gateway(Tile):
-    def __init__(self, x, y, level = 1, branch = "Dungeon", render_tag = 92, passable = True, id_tag = 0):
+    def __init__(self, x, y, level = 1, branch = "Dungeon", render_tag = 420, passable = True, id_tag = 0):  # 420 = GATEWAY (see asset_registry.py)
         super().__init__(x, y, render_tag = render_tag, passable = passable, id_tag = id_tag)
         self.branch = branch
         self.level = level

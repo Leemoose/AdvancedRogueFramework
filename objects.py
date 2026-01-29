@@ -3,7 +3,6 @@ class Objects():
     def __init__(self, x = -1, y = -1, id_tag = -1, render_tag = -1, name = "Unknown object"):
         self.id_tag = id_tag
         self.render_tag = render_tag
-        self.shaded_render_tag = -render_tag
         self.name = name
         self.description = ""
         self.traits = {"object": True}

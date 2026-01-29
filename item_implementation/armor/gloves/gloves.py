@@ -2,7 +2,7 @@ from item_implementation.armor.armor import Armor
 from item_implementation.statupgrade import statUpgrades
 
 class Gloves(Armor):
-    def __init__(self, render_tag = 3100):
+    def __init__(self, render_tag = 4200):
         super().__init__(-1,-1, 0, render_tag = render_tag, name = "Gloves")
         self.equipment_type = "Gloves"
         self.description = "Gloves to keep your hands toasty warm. Enchanting is especially effective on these."

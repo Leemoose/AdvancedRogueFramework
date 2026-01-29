@@ -6,7 +6,7 @@ class SapVitality(Spell):
         self.damage = damage
         self.targetted = True
         self.targets_monster = True
-        self.render_tag = 904
+        self.render_tag = 9102
 
     def activate(self, defender, loop):
         self.parent.character.change_mana(-self.cost)

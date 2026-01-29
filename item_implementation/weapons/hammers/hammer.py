@@ -9,7 +9,7 @@ HAMMERS
 """
 
 class Hammer(Weapon):
-    def __init__(self, render_tag = 4700):
+    def __init__(self, render_tag = 3200):
         super().__init__(-1, -1, 0, render_tag, "Hammer", damage_min=2, damage_max=5)
         self.melee = True
         self.name = "Hammer"

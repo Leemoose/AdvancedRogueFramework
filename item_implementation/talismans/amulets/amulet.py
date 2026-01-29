@@ -5,7 +5,7 @@ AMULETS
 from item_implementation.equipment import Equipment
 
 class Amulet(Equipment):
-    def __init__(self, render_tag = 3600, name = "Amulet"):
+    def __init__(self, render_tag = 5100, name = "Amulet"):
         super().__init__(-1,-1, 0, render_tag = render_tag, name = name)
         self.equipment_type = "Amulet"
         self.can_be_levelled = False

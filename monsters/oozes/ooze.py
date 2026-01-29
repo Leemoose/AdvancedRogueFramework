@@ -7,7 +7,7 @@ Oozes are slow moving monsters that will destroy any item they touch. Sometimes 
 """
 
 class Ooze(Monster):
-    def __init__(self, x=-1, y=-1, render_tag=1000, name="Ooze"):
+    def __init__(self, x=-1, y=-1, render_tag=2000, name="Ooze"):  # TileID.BROWN_OOZE from asset_registry.py
         super().__init__(x=x, y=y, render_tag=render_tag, name=name, experience_given=5, health=5, gold=0)
         self.brain = MonsterAI(self, create_ooze_behaviors())
         self.description = "These amorphous blobs of translucent, gelatinous matter emerge from the depths of the rifts. Their bodies pulse with a sickly green glow, fueled by the chaotic energies of their environment. Rift Slimes mindlessly dissolve anything they touch with acidic secretions, leaving behind only a faint, acrid odor. They show no preference or intelligence, simply drawn to any item_implementation they encounter, which they swiftly corrode beyond recognition.."

@@ -10,7 +10,7 @@ SWORDS
 
 
 class Sword(Weapon):
-    def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=4800, name="Sword", damage_min=2, damage_max=3,
+    def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=3000, name="Sword", damage_min=2, damage_max=3,
                  armor_piercing=2, attack_cost=80):
         super().__init__(x=x, y=y, id_tag=id_tag, render_tag=render_tag, name=name, damage_min=damage_min,
                          damage_max=damage_max, armor_piercing=armor_piercing, attack_cost=attack_cost)
@@ -29,7 +29,7 @@ class Sword(Weapon):
 
 #
 # class LongSword(Sword):
-#     def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=340, name="Longsword", damage_min=4, damage_max=12,
+#     def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=3000, name="Longsword", damage_min=4, damage_max=12,
 #                  armor_piercing=8, attack_cost=80):
 #         super().__init__(x=x, y=y, id_tag=id_tag, render_tag=render_tag, name=name, damage_min=damage_min,
 #                          damage_max=damage_max, armor_piercing=armor_piercing, attack_cost=attack_cost)
@@ -37,7 +37,7 @@ class Sword(Weapon):
 #
 #
 # class Claymore(Sword):
-#     def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=340, name="Claymore", damage_min=8, damage_max=20,
+#     def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=3000, name="Claymore", damage_min=8, damage_max=20,
 #                  armor_piercing=8, attack_cost=80):
 #         super().__init__(x=x, y=y, id_tag=id_tag, render_tag=render_tag, name=name, damage_min=damage_min,
 #                          damage_max=damage_max, armor_piercing=armor_piercing, attack_cost=attack_cost)
@@ -45,7 +45,7 @@ class Sword(Weapon):
 #
 #
 # class TwoHandedSword(Sword):
-#     def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=340, name="Two Handed Sword", damage_min=4, damage_max=12,
+#     def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=3000, name="Two Handed Sword", damage_min=4, damage_max=12,
 #                  armor_piercing=10, attack_cost=80):
 #         super().__init__(x=x, y=y, id_tag=id_tag, render_tag=render_tag, name=name, damage_min=damage_min,
 #                          damage_max=damage_max, armor_piercing=armor_piercing, attack_cost=attack_cost)
@@ -54,7 +54,7 @@ class Sword(Weapon):
 #
 #
 # class GreatSword(TwoHandedSword):
-#     def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=340, name="Greatsword", damage_min=8, damage_max=20,
+#     def __init__(self, x=-1, y=-1, id_tag=-1, render_tag=3000, name="Greatsword", damage_min=8, damage_max=20,
 #                  armor_piercing=15, attack_cost=80):
 #         super().__init__(x=x, y=y, id_tag=id_tag, render_tag=render_tag, name=name, damage_min=damage_min,
 #                          damage_max=damage_max, armor_piercing=armor_piercing, attack_cost=attack_cost)

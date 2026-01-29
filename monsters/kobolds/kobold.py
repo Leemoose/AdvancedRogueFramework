@@ -7,7 +7,7 @@ from item_implementation.weapons import Spear
 Kobolds wield spears, reposition to stay at range, and use burning hands in melee.
 """
 class Kobold(Monster):
-    def __init__(self, x=-1, y=-1, render_tag=1020, name="Kobold"):
+    def __init__(self, x=-1, y=-1, render_tag=2200, name="Kobold"):  # TileID.KOBOLD from asset_registry.py
         super().__init__(x=x, y=y, render_tag=render_tag, name=name, experience_given=10, health=20, mana=10, gold=5)
         self.skills = []
         self.mage.add_spell(BurningAttack(self, cooldown=10, cost=0, damage=10, burn_damage=4, burn_duration=5, range=1.5))

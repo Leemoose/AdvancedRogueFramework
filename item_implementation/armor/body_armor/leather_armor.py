@@ -1,7 +1,7 @@
 from .bodyarmor import BodyArmor
 from item_implementation.statupgrade import statUpgrades
 class LeatherArmor(BodyArmor):
-    def __init__(self, render_tag = 3000):
+    def __init__(self, render_tag = 4001):
         super().__init__(render_tag, "Leather Armor")
         self.description = "A comfortable piece of armor, that helps you feel lighter on your feet. "
         self.wearer = None  # item_implementation with stat buffs need to keep track of owner for level ups

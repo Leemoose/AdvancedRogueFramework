@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 class Player(Objects):
     def __init__(self, x, y):
-        super().__init__(x, y, 1, 5000, "Player")
+        super().__init__(x, y, 1, 1000, "Player")  # TileID.PLAYER from asset_registry.py
         logger.debug("Initializing Player at position (%d, %d)", x, y)
         self.character = C.Character(self, mana=PlayerConfig.STARTING_MANA, health=PlayerConfig.STARTING_HEALTH)
         self.mage = Mage(self)

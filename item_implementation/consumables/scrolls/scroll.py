@@ -124,7 +124,7 @@ class Scroll(Item):
 #         loop.targets.store_skill(0, entity.character.ready_skill, entity, temp_cast=True)
 #
 # class BlinkScrorb(Scroll):
-#     def __init__(self, render_tag=450):
+#     def __init__(self, render_tag=6100):
 #         super().__init__(render_tag, "Blink Scrorb")
 #         self.description = "A scrorb that lets you cast blink once."
 #         self.rarity = "Rare"

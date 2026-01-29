@@ -6,7 +6,7 @@ RINGS
 """
 
 class Ring(Equipment):
-    def __init__(self, render_tag = 3500, name = "Ring"):
+    def __init__(self, render_tag = 5000, name = "Ring"):
         super().__init__(-1, -1, 0, render_tag, name = name)
         self.equipment_type = "Ring"
         self.description = "A ring that does something."
@@ -46,7 +46,7 @@ class Ring(Equipment):
 #
 #
 # class RingOfMight(Ring):
-#     def __init__(self, render_tag = 503):
+#     def __init__(self, render_tag = 5003):
 #         super().__init__(render_tag, "Ring of Might")
 #         self.equipment_type = "Ring"
 #         self.name = "Ring of Might"

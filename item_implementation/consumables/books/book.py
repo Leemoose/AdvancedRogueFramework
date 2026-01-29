@@ -46,28 +46,28 @@ class Book(Item):
             return None
 
 #class BookofSummoning(Book):
-#    def __init__(self, render_tag = 480):
+#    def __init__(self, render_tag = 6200):
 #        self.school = spell.SummonSchool()
 #        self.skill = self.school.random_spell()
 #        super().__init__(render_tag, skill = self.skill, name = "Book of Summoning")
 #        self.name = "Book of Summoning"
 #
 # class BookofSpace(Book):
-#     def __init__(self, render_tag = 480):
+#     def __init__(self, render_tag = 6200):
 #         self.school = SpaceSchool()
 #         self.skill = self.school.random_spell()
 #         super().__init__(render_tag, skill = self.skill, name = "Book of Space")
 #         self.name = "Book of Space"
 #
 # class BookofFire(Book):
-#     def __init__(self, render_tag = 480):
+#     def __init__(self, render_tag = 6200):
 #         self.school = FireSchool()
 #         self.skill = self.school.random_spell()
 #         super().__init__(render_tag, skill = self.skill, name = "Book of Fire")
 #         self.name = "Book of Fire"
 #
 # class BookofHypnosis(Book):
-#     def __init__(self, render_tag = 480):
+#     def __init__(self, render_tag = 6200):
 #         self.school = MindSchool()
 #         self.skill = self.school.random_spell()
 #         super().__init__(render_tag, skill = self.skill, name = "Book of Hypnosis")

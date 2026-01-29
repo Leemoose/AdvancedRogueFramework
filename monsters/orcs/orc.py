@@ -2,7 +2,7 @@ from monsters.monster import Monster
 from monster_implementation import MonsterAI, create_orc_behaviors
 
 class Orc(Monster):
-    def __init__(self, x=-1, y=-1, render_tag=1030, name="Orc", experience_given=20, health=20, min_damage=4, max_damage=8, rarity="Common"):
+    def __init__(self, x=-1, y=-1, render_tag=2300, name="Orc", experience_given=20, health=20, min_damage=4, max_damage=8, rarity="Common"):  # TileID.ORC_KNIGHT from asset_registry.py
         super().__init__(x=x, y=y, render_tag=render_tag, name=name, experience_given=experience_given, health=health, min_damage=min_damage, max_damage=max_damage, rarity=rarity)
         self.brain = MonsterAI(self, create_orc_behaviors())
         self.character.skills = []

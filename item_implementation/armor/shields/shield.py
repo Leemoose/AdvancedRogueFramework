@@ -2,7 +2,7 @@ from item_implementation.armor.armor import Armor
 from item_implementation.statupgrade import statUpgrades
 
 class Shield(Armor):
-    def __init__(self, x=-1, y=-1, render_tag=3400, name="Shield"):
+    def __init__(self, x=-1, y=-1, render_tag=3600, name="Shield"):
         super().__init__(x=x, y=y, id_tag=0, render_tag=render_tag, name=name)
         self.equipment_type = "Shield"
         self.name = name
@@ -14,7 +14,7 @@ class Shield(Armor):
 
 #
 # class BasicShield(Shield):
-#     def __init__(self, x=-1, y=-1, render_tag=311):
+#     def __init__(self, x=-1, y=-1, render_tag=3600):
 #         super().__init__(x=x, y=y, render_tag=render_tag, name="Basic Shield")
 #         self.armor = 3
 #         self.description = "A shield that you can use to block things."

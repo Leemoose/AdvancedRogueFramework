@@ -2,7 +2,7 @@ from .potion import Potion
 from spell_implementation.effects.might import Might
 
 class MightPotion(Potion):
-    def __init__(self, render_tag=404):
+    def __init__(self, render_tag=6003):
         super().__init__(render_tag, "Might Potion")
         self.description = "A potion that makes you stronger for a few turns."
         self.rarity = "Rare"

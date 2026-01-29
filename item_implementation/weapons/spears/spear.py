@@ -1,6 +1,6 @@
 from item_implementation.weapons.weapons import Weapon
 class Spear(Weapon):
-    def __init__(self, render_tag=4500):
+    def __init__(self, render_tag=3410):  # TileID.CRAWL_SPEAR
         super().__init__(-1, -1, 0, render_tag=render_tag, name="Spear", damage_min=2, damage_max=3)
         self.melee = True
         self.range = 2.9

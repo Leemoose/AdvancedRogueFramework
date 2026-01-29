@@ -13,7 +13,7 @@ class Interactable(Objects):
         pass
 
 class Campfire(Interactable):
-    def __init__(self, render_tag = 2100,x=-1, y = -1, name="Campfire"): #3000 is also render tag
+    def __init__(self, render_tag = 720, x=-1, y = -1, name="Campfire"):  # TileID.CAMPFIRE from asset_registry.py
         super().__init__(render_tag, x, y, name=name)
         self.description = "It is a cozy fireplace"
 
@@ -23,7 +23,7 @@ class Campfire(Interactable):
             self.active = False
             loop.add_message("You rested at the campfire")
             loop.player.character.change_health(loop.player.character.get_max_health()-loop.player.character.get_health())
-            self.render_tag = 3001
+            self.render_tag = 721  # TileID.CAMPFIRE_BURNT from asset_registry.py
 
 class OrbPedastool(Interactable):
     def __init__(self, render_tag=0, x=-1, y=-1, name="Orb Pedastool"):
@@ -50,27 +50,27 @@ class OrbPedastool(Interactable):
                     break
 
 class ForestOrbPedastool(OrbPedastool):
-    def __init__(self, render_tag = 3900, x=-1, y=-1, name="Forest Orb Pedastool"):
+    def __init__(self, render_tag = 740, x=-1, y=-1, name="Forest Orb Pedastool"):  # TileID.FOREST_ORB_PEDESTAL
         super().__init__( render_tag= render_tag, x=x, y=y, name = name)
         self.name = name
         self.orb = ForestOrb()
-        self.deactivated_render_tag = 3901
-        self.main_render_tag = 3900
+        self.deactivated_render_tag = 741  # TileID.FOREST_ORB_PEDESTAL_EMPTY
+        self.main_render_tag = 740  # TileID.FOREST_ORB_PEDESTAL
         self.traits["forest_orb_pedastool"] = True
         self.orb_type = "forest_orb"
 
 class OceanOrbPedastool(OrbPedastool):
-    def __init__(self, render_tag = 3910, x=-1, y=-1, name="Ocean Orb Pedastool"):
+    def __init__(self, render_tag = 742, x=-1, y=-1, name="Ocean Orb Pedastool"):  # TileID.OCEAN_ORB_PEDESTAL
         super().__init__( render_tag= render_tag, x=x, y=y, name = name)
         self.name = name
         self.orb = OceanOrb()
-        self.deactivated_render_tag = 3911
-        self.main_render_tag = 3910
+        self.deactivated_render_tag = 743  # TileID.OCEAN_ORB_PEDESTAL_EMPTY
+        self.main_render_tag = 742  # TileID.OCEAN_ORB_PEDESTAL
         self.traits["ocean_orb_pedastool"] = True
         self.orb_type = "ocean_orb"
 
 class YellowPlant(Interactable):
-    def __init__(self, render_tag = 3800,x=-1, y = -1, name="Yellow Plant"): #3000 is also render tag
+    def __init__(self, render_tag = 730, x=-1, y = -1, name="Yellow Plant"):  # TileID.YELLOW_PLANT
         super().__init__(render_tag, x, y, name=name)
         self.used = False
         self.description = "Beautiful yellow plant. I wonder if I can pluck it?"

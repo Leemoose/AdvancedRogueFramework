@@ -350,7 +350,7 @@ ORC
 #         self.gold_value = 0
 
 class BossOrb(Monster):
-    def __init__(self, x=-1, y=-1, render_tag=1060, name="ORB OF YENDORB"):
+    def __init__(self, x=-1, y=-1, render_tag=2000, name="ORB OF YENDORB"):  # Using TileID.BROWN_OOZE as placeholder
         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
         self.character = C.Character(self)
         self.character.skills = []

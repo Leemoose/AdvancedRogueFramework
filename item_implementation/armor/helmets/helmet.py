@@ -5,7 +5,7 @@ from item_implementation.armor.armor import Armor
 from item_implementation.statupgrade import statUpgrades
 
 class Helmet(Armor):
-    def __init__(self, render_tag= 3200, name="Helmet"):
+    def __init__(self, render_tag= 4100, name="Helmet"):
         super().__init__(-1, -1, 0, render_tag, name = name)
         self.equipment_type = "Helmet"
         self.description = "A helmet that protects your head. You like how round it is."

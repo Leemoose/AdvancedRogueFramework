@@ -4,7 +4,7 @@ SHIELDS
 """
 from item_implementation.equipment import Equipment
 class Armor(Equipment):
-    def __init__(self, x=-1,y=-1, id_tag=-1, render_tag = 1, name = "Armor"):
+    def __init__(self, x=-1,y=-1, id_tag=-1, render_tag = 4000, name = "Armor"):  # TileID.ARMOR_BASIC
         super().__init__(x=x, y=y, id_tag=id_tag, render_tag = render_tag, name = name)
         self.name = "Armor"
 
