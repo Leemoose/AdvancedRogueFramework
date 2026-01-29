@@ -33,6 +33,7 @@ from .mapping_utility import (
     get_random_direction
 )
 from logging_config import get_logger, log_high_priority
+from src.core.directions import Directions
 
 if TYPE_CHECKING:
     from .spawn_strategies.base import MonsterSpawnStrategy
@@ -253,7 +254,7 @@ class DungeonGenerator:
 
     def count_passable_neighbors(self, x, y):
         count = 0
-        for direction in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
+        for direction in Directions.ALL_8:
             if self.get_passable((x + direction[0], y + direction[1])):
                 count += 1
         return count
@@ -312,7 +313,7 @@ class DungeonGenerator:
             return None
         if not move and self.monster_map.get_has_no_entity(location[0], location[1]) and self.get_not_on_player(location[0], location[1]) and self.tile_map.get_has_no_entity(location[0], location[1]):
             return location
-        for direction in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
+        for direction in Directions.ALL_8:
             if self.get_passable((location[0] + direction[0], location[1] + direction[1])):
                 return (location[0] + direction[0], location[1] + direction[1])
         return None
@@ -353,7 +354,7 @@ class DungeonGenerator:
         if count_passable > 6:
             return False
         else:
-            directions = [(0, 1), (1, 0), (-1, 0), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
+            directions = Directions.ALL_8
             min_passable = 8
             for dx, dy in directions:
                 adj_x = x + dx

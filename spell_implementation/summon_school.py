@@ -31,7 +31,7 @@ class SummonSchool(School):
             x, y = self.parent.get_location()
             location = loop.generator.nearest_empty_tile((x, y), move=True,search = True)
             logger.info("Activated a spell.")
-            if location != None:
+            if location is not None:
                 monster = self.create_monster()
                 loop.generator.place_monster_at_location(monster, location[0], location[1])
                 loop.add_message("A {} was summoned!".format(monster.name))

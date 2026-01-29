@@ -6,6 +6,9 @@ from loop_workflow import LoopType
 from character_implementation import Inventory
 from spell_implementation.fire_school.burning_attack import BurningAttack
 from item_implementation.consumables.potions import MightPotion
+from src.core.player_config import PlayerConfig
+from src.core.directions import Directions
+from src.core.movement import MovementValidator
 
 logger = get_logger(__name__)
 
@@ -14,7 +17,7 @@ class Player(Objects):
     def __init__(self, x, y):
         super().__init__(x, y, 1, 5000, "Player")
         logger.debug("Initializing Player at position (%d, %d)", x, y)
-        self.character = C.Character(self, mana=5, health = 10)
+        self.character = C.Character(self, mana=PlayerConfig.STARTING_MANA, health=PlayerConfig.STARTING_HEALTH)
         self.mage = Mage(self)
         self.inventory = Inventory(self)
         self.body = Body(self)
@@ -23,7 +26,7 @@ class Player(Objects):
         self.traits["player"] = True
 
         self.level = 1
-        self.max_level = 20
+        self.max_level = PlayerConfig.MAX_LEVEL
 
         self.visited_stairs = []
         self.stat_points = 0
@@ -34,9 +37,9 @@ class Player(Objects):
         self.quests = []
         self.quest_recieved = False
 
-        self.character.status.invincible = True
+        self.character.status.invincible = PlayerConfig.DEBUG_MODE
 
-        if self.character.status.get_invincible():  # only get the gun if you're invincible at the start
+        if PlayerConfig.DEBUG_MODE:  # only get the gun if you're invincible at the start
             bug_test_spells = [
                 BurningAttack(self, cooldown=10, cost=0, damage=3, burn_damage=1, burn_duration=10, range=10)
                 # S.Gun(self),  # 1
@@ -52,7 +55,7 @@ class Player(Objects):
             ]
             for spell in bug_test_spells:
                 self.mage.add_spell(spell)
-            self.stat_points = 20 # free stat points for debugging
+            self.stat_points = PlayerConfig.DEBUG_STARTING_STAT_POINTS  # free stat points for debugging
             self.inventory.get_item(MightPotion())
             # self.inventory.get_item(BlinkScrorb())
         logger.debug("Player initialization complete")
@@ -82,34 +85,54 @@ class Player(Objects):
     def get_action_cost(self, action):
         return self.character.get_action_cost(action)
 
+    def spend_energy(self, action_type: str) -> bool:
+        """
+        Deduct energy for performing an action.
+
+        Args:
+            action_type: The type of action (e.g., "move", "attack", "grab")
+
+        Returns:
+            True if energy was deducted, False if action type not found
+        """
+        if action_type in self.character.action_costs:
+            self.character.energy -= self.character.action_costs[action_type]
+            return True
+        return False
+
     def gain_experience(self, experience):
         self.character.attributes.change_experience(experience)
         self.check_for_levelup()
 
     def attack_move(self, move_x, move_y, loop):
-        if not self.character.can_take_action():
-            self.character.energy -= self.character.action_costs[
-                "move"]  # (self.character.move_cost - int(self.character.dexterity + self.character.round_bonus()))
+        from_pos = (self.x, self.y)
+        to_pos = (self.x + move_x, self.y + move_y)
+        x, y = to_pos
+
+        # Use MovementValidator to check if movement is possible
+        move_result = MovementValidator.can_move_to(loop, from_pos, to_pos, self.character)
+
+        if move_result.reason == "Cannot take action":
+            self.spend_energy("move")
             loop.add_message("The player is petrified and cannot move.")
-        else:
-            x = self.x + move_x
-            y = self.y + move_y
-            if loop.generator.in_map(x,y):
-                if loop.generator.get_passable((x, y)) and self.character.can_move():
-                    self.move(move_x, move_y, loop)
-                elif loop.generator.monster_map.get_has_entity(x, y):
-                    defender = loop.generator.monster_map.get_entity(x,y)
-                    self.attack(defender, loop)
-                elif loop.generator.interact_map.get_has_entity(x, y):
-                    self.do_interact(loop, input_direction=(move_x, move_y))
-                elif not self.character.can_move:
-                    loop.add_message("You are currently restricted!")
-                else:
-                    loop.add_message("You cannot move there")
+        elif move_result:
+            # Valid movement
+            self.move(move_x, move_y, loop)
+        elif loop.generator.in_map(x, y):
+            # Movement blocked but position is valid - check for combat or interaction
+            if loop.generator.monster_map.get_has_entity(x, y):
+                defender = loop.generator.monster_map.get_entity(x, y)
+                self.attack(defender, loop)
+            elif loop.generator.interact_map.get_has_entity(x, y):
+                self.do_interact(loop, input_direction=(move_x, move_y))
+            elif move_result.reason == "Movement restricted":
+                loop.add_message("You are currently restricted!")
+            else:
+                loop.add_message("You cannot move there")
 
     def move(self, move_x, move_y, loop):
         if loop.generator.get_passable((self.get_x() + move_x, self.get_y() + move_y)) and self.character.can_move() and self.character.can_take_action():
-            self.character.energy -= self.character.action_costs["move"]
+            self.spend_energy("move")
             self.y += move_y
             self.x += move_x
             self.statistics.add_move_details()
@@ -123,7 +146,7 @@ class Player(Objects):
     def attack(self, defender, loop):
         if defender.has_trait("monster"):
             if self.character.can_take_action() and self.get_distance(defender.get_x(), defender.get_y()) <= self.fighter.get_range():
-                self.character.energy -= self.character.action_costs["attack"]
+                self.spend_energy("attack")
                 #Set target to the defender
                 damage = self.fighter.do_attack(defender, loop)
                 self.statistics.add_attack_details(damage)
@@ -340,7 +363,7 @@ class Player(Objects):
             loop.add_message("There are no stairs here!")
 
     def do_stairs(self, loop):
-        self.character.energy -= self.character.action_costs["move"]
+        self.spend_energy("move")
         if self.character.can_take_action():
             loop.change_floor()
             logger.debug("Floor changed successfully")
@@ -382,7 +405,7 @@ class Player(Objects):
 
     def do_interact(self, loop, input_direction=None):
         if input_direction is None:
-            directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
+            directions = Directions.ALL_8
         else:
             directions = [input_direction]
         for x, y in directions:

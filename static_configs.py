@@ -1,20 +1,22 @@
 from pygame import image
 import pygame
 
+from src.core.constants import TILE_SIZE
+
 
 class TileDict():
     def __init__(self, textSize):
         tiles = {}
         # 1-99 are tile
         tiles[0] = image.load("assets/placeholder.png")
-        tiles[1] = pygame.transform.scale(image.load("assets/tiles/colorful_wall.png"), (32, 32))
-        tiles[-1] = pygame.transform.scale(image.load("assets/tiles/colorful_wall_shaded.png"), (32, 32))
-        tiles[2] = pygame.transform.scale(image.load("assets/tiles/colorful_floor.png"), (32, 32))
-        tiles[-2] = pygame.transform.scale(image.load("assets/tiles/colorful_floor_shaded.png"), (32, 32))
-        tiles[3] = pygame.transform.scale(image.load("assets/tiles/floor_dirty.png"), (32, 32))
-        tiles[-3] = pygame.transform.scale(image.load("assets/tiles/floor_dirty_shaded.png"), (32, 32))
-        tiles[4] = pygame.transform.scale(image.load("assets/tiles/floor_dirty1.png"), (32, 32))
-        tiles[-4] = pygame.transform.scale(image.load("assets/tiles/floor_dirty1_shaded.png"), (32, 32))
+        tiles[1] = pygame.transform.scale(image.load("assets/tiles/colorful_wall.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[-1] = pygame.transform.scale(image.load("assets/tiles/colorful_wall_shaded.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[2] = pygame.transform.scale(image.load("assets/tiles/colorful_floor.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[-2] = pygame.transform.scale(image.load("assets/tiles/colorful_floor_shaded.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[3] = pygame.transform.scale(image.load("assets/tiles/floor_dirty.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[-3] = pygame.transform.scale(image.load("assets/tiles/floor_dirty_shaded.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[4] = pygame.transform.scale(image.load("assets/tiles/floor_dirty1.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[-4] = pygame.transform.scale(image.load("assets/tiles/floor_dirty1_shaded.png"), (TILE_SIZE, TILE_SIZE))
         tiles[5] = image.load("assets/tiles/red_carpet.png")
         tiles[-5] = image.load("assets/tiles/red_carpet_shaded.png")
         tiles[6] = image.load("assets/tiles/wooden_floor.png")
@@ -29,10 +31,10 @@ class TileDict():
         tiles[-10] = image.load("assets/tiles/deep_ocean_floor_shaded.png")
 
 
-        tiles[11] = pygame.transform.scale(image.load("assets/tiles/wall_extra_rounded.png"), (32, 32))
-        tiles[-11] = pygame.transform.scale(image.load("assets/tiles/wall_extra_rounded_shaded.png"), (32, 32))
-        tiles[12] = pygame.transform.scale(image.load("assets/tiles/floor_rounded.png"), (32, 32))
-        tiles[-12] = pygame.transform.scale(image.load("assets/tiles/floor_rounded_shaded.png"), (32, 32))
+        tiles[11] = pygame.transform.scale(image.load("assets/tiles/wall_extra_rounded.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[-11] = pygame.transform.scale(image.load("assets/tiles/wall_extra_rounded_shaded.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[12] = pygame.transform.scale(image.load("assets/tiles/floor_rounded.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[-12] = pygame.transform.scale(image.load("assets/tiles/floor_rounded_shaded.png"), (TILE_SIZE, TILE_SIZE))
         tiles[13] = image.load("assets/tiles/forest_floor.png")
         tiles[-13] = image.load("assets/tiles/forest_floor_shaded.png")
         tiles[14] = image.load("assets/tiles/ocean_wall.png")
@@ -40,7 +42,7 @@ class TileDict():
         tiles[15] = image.load("assets/tiles/stone_floor.png")
         tiles[-15] = image.load("assets/tiles/stone_floor_shaded.png")
 
-        tiles[20] = pygame.transform.scale(image.load("assets/fire.png"), (32, 32))
+        tiles[20] = pygame.transform.scale(image.load("assets/fire.png"), (TILE_SIZE, TILE_SIZE))
 
         tiles[30] = image.load("assets/tiles/door.png")
         tiles[-30] = image.load("assets/tiles/door_shaded.png")

@@ -6,6 +6,7 @@ from .keyboard_utility import *
 from navigation_utility import pathfinding
 from loop_workflow import LoopType
 from logging_config import get_logger, log_high_priority
+from src.core.directions import Directions
 import time
 
 logger = get_logger(__name__)
@@ -102,8 +103,7 @@ class Keyboard():
                 loop.change_loop(LoopType.action)
         else: # special targetting if npc is target, path to adjacent to npc and then interact with npc
             def target_condition(position_tuple):
-                directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (1, 1), (-1, -1), (1, -1), (-1, 1)]
-                for dir in directions:
+                for dir in Directions.ALL_8:
                     if position_tuple[0] + dir[0] == x_tile and position_tuple[1] + dir[1] == y_tile:
                         return True
                 return False

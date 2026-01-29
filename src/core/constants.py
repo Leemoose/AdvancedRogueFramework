@@ -157,6 +157,28 @@ class EquipmentSlot(Enum):
 
 
 # ==============================================================================
+# DISPLAY CONSTANTS
+# ==============================================================================
+
+TILE_SIZE: int = 32  # Size of tiles in pixels
+
+
+# ==============================================================================
+# GAME TIME SYSTEM
+# ==============================================================================
+
+class GameTime:
+    """
+    Constants for the energy-based turn system.
+
+    The game uses an energy system where each turn represents a fixed
+    amount of energy expenditure. Actions consume energy, and when a
+    character's energy drops below zero, game time advances.
+    """
+    ENERGY_PER_TURN = 100  # Energy units that constitute one game turn
+
+
+# ==============================================================================
 # ACTION COSTS
 # ==============================================================================
 

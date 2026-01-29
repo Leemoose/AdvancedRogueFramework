@@ -2,6 +2,7 @@ import objects as O
 import heapq
 import time
 import random
+from src.core.directions import Directions
 
 class Node():
     """A node class for A* Pathfinding"""
@@ -88,7 +89,7 @@ def astar_multi_goal(maze, start, goals, monster_map, player, monster_blocks = F
             return [start]  # Return list to match expected return type
 
         # Generate children
-        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]: # Adjacent squares
+        for new_position in Directions.ALL_8:  # Adjacent squares
 
             # Get node position
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
@@ -128,14 +129,14 @@ def conditional_bfs(maze, start, goal_condition, npc_ID):
     closed_list = set()
     closed_list.add(start)
 
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (1, 1), (-1, -1), (1, -1), (-1, 1)]
+    directions = list(Directions.ALL_8)  # Copy to allow shuffling
 
     while len(open_list) > 0:
         (curr_x, curr_y), path = open_list.pop(0)
 
         if goal_condition((curr_x, curr_y)):
             return path
-        
+
         # randomize direction we check neighbors in
         random.shuffle(directions)
         

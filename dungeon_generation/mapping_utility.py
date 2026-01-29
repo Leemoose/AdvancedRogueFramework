@@ -1,11 +1,11 @@
 import random
 from logging_config import get_logger
+from src.core.directions import Directions
 
 logger = get_logger(__name__)
 
 def get_random_direction():
-    directions = [(0, 1), (1, 0), (-1, 0), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
-    return random.choice(directions)
+    return random.choice(Directions.ALL_8)
 
 def place_spawn_monsters(dungeongenerator, monster_spawner):
     logger.debug("Spawning monsters for depth %d, branch %s", dungeongenerator.get_depth(), dungeongenerator.get_branch())

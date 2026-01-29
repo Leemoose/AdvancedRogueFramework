@@ -25,6 +25,7 @@ from loop_workflow.looptype import LoopType
 from loop_workflow.memory import Memory
 from loop_workflow.game_states import StateManager
 from loop_workflow.states import create_all_states
+from src.core.constants import GameTime
 
 from display_generation import *
 
@@ -382,7 +383,7 @@ class Loops:
         """
         self.timer += time
 
-        for _ in range(int(self.timer // 100)):
+        for _ in range(int(self.timer // GameTime.ENERGY_PER_TURN)):
             self.player.statistics.add_turn_details()
 
             # Player updates
@@ -413,7 +414,7 @@ class Loops:
                 if monster_tile.has_terrain():
                     monster_tile.apply_terrain_effects(monster)
 
-        self.timer = self.timer % 100
+        self.timer = self.timer % GameTime.ENERGY_PER_TURN
 
     # =========================================================================
     # FLOOR TRANSITIONS

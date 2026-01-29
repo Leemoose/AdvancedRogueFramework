@@ -8,6 +8,49 @@ This document tracks all completed refactoring, bug fixes, and improvements. Ite
 
 ## Changelog
 
+### January 29, 2026 (Phase 6: Code Simplification)
+
+**Direction Vectors Centralization** - `src/core/directions.py`:
+- Created `Directions` class with `CARDINAL_4`, `DIAGONAL_4`, `ALL_8` constants
+- Updated 6 files to use centralized direction vectors:
+  - `player.py`, `dungeon_generation/mapping_utility.py`, `dungeon_generation/mapping.py`
+  - `navigation_utility/pathfinding.py`, `loop_workflow/keyboard.py`
+
+**Game Constants Expansion** - `src/core/constants.py`:
+- Added `GameTime.ENERGY_PER_TURN = 100` for turn system
+- Added `TILE_SIZE = 32` for display scaling
+- Updated `loops.py` to use `GameTime.ENERGY_PER_TURN`
+- Updated `static_configs.py` to use `TILE_SIZE` (15 occurrences)
+
+**Spawn Parameter Consolidation** - `dungeon_generation/spawning/spawn_params.py`:
+- Created `BaseSpawnParams` base class with shared logic
+- Refactored `SpawnParams`, `ItemSpawnParams`, `MonsterSpawnParams` to inherit
+- Eliminated duplicate `AllowedAtDepth()` implementations
+- Maintained full backward compatibility
+
+**Asset Registry** - `src/core/asset_registry.py`:
+- Created comprehensive `TileID` class with all tile ID constants
+- Documented all tile ID ranges (0-9000+)
+- Added helper functions: `get_render_tag()`, `get_shaded_id()`, `get_empty_slot_icon()`
+
+**Player Configuration** - `src/core/player_config.py`:
+- Created `PlayerConfig` class with starting stats, max level, debug mode
+- Updated `player.py` to use config values instead of hardcoded numbers
+
+**Movement System** - `src/core/movement.py`:
+- Created `MovementResult` class for movement validation results
+- Created `MovementValidator` with `can_move_to()` static method
+- Refactored `player.py` `attack_move()` to use validator
+
+**Energy System Cleanup** - `player.py`:
+- Added `spend_energy()` helper method
+- Replaced 4 duplicate energy deduction patterns with helper calls
+
+**Code Quality Fixes**:
+- Fixed `!= None` → `is not None` in `summon_school.py`
+
+---
+
 ### January 29, 2026 (Phase 1-4 Completion)
 
 **Build Setup**
@@ -135,12 +178,16 @@ This document tracks all completed refactoring, bug fixes, and improvements. Ite
 src/
 ├── core/
 │   ├── __init__.py
-│   ├── constants.py     # All magic numbers centralized
+│   ├── constants.py     # All magic numbers centralized (+ GameTime, TILE_SIZE)
 │   ├── config.py        # GameConfig with JSON save/load
 │   ├── base.py          # GameObject with type hints
 │   ├── paths.py         # resource_path() for bundled assets
 │   ├── events.py        # EventBus system
-│   └── asset_cache.py   # Image caching
+│   ├── asset_cache.py   # Image caching
+│   ├── directions.py    # Direction vector constants (NEW)
+│   ├── asset_registry.py # Tile ID registry (NEW)
+│   ├── player_config.py # Player initialization config (NEW)
+│   └── movement.py      # Movement validation (NEW)
 ├── world/
 │   ├── __init__.py
 │   ├── maps.py          # Fixed map system
@@ -178,6 +225,10 @@ monster_implementation/
 | Monster AI files | 15 files | `behaviors.py` | ~550 |
 | draw_on_button() | 4 places | `ui_utils.py` | ~80 |
 | get_status_text() | 2 places | `ui_utils.py` | ~30 |
+| Direction vectors | 6 files | `Directions` class | ~20 |
+| Energy deduction | 4 places in player.py | `spend_energy()` method | ~12 |
+| Movement validation | 2 methods in player.py | `MovementValidator` | ~20 |
+| Spawn param logic | 3 classes | `BaseSpawnParams` | ~30 |
 
 ---
 
@@ -187,3 +238,7 @@ monster_implementation/
 - `RogueGame.spec`
 - `src/core/paths.py`
 - `src/core/events.py`
+- `src/core/directions.py`
+- `src/core/asset_registry.py`
+- `src/core/player_config.py`
+- `src/core/movement.py`
