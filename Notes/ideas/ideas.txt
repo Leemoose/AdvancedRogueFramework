@@ -1,0 +1,131 @@
+
+School that changes tile effects
+    -Lava (damage you ever turn you start on them)
+    - ice (if you move onto it, keep moving in that direction)
+    -Smoke (no vision)
+    -Pit(moves to floor below)
+    -Spikes (slow + damage)
+    -Quicksand (can't move)
+    -Silenced (can't cast spells)
+
+Necromancer school
+    -Corpse explosion
+    -Raise skeleton
+    -Resurrect enemy
+    -Bone armor
+    -Cheat death
+    -Army of arms (mass slow)
+
+Swap with monster spell
+Flint and steel (can start a fire on your tile)
+Music
+
+Ocean:
+ (maybe boats?)
+    Add flying
+
+Change monster alertness system
+Skill tree?
+Can create portal to first floor?
+Combining potions with equipment to create status effects
+
+More complicated combat modifiers:
+    Magic penetration <=> MR
+    Mental power <=> Will power
+    Attribute (either suceptible or resistent)
+    True damage
+
+More pathing stuff:
+    Could introduce pathing to specific items (might need ctrl+f for items like dcss to be usable)
+
+More UI:
+    mini-icons that appear on monster/player tiles to indicate active status effects
+
+Add more comments to code
+
+More Spawning:
+    need to add more monsters that fit into new rarity/groups scheme, to allow for more varied generation on later floors
+    monsters on deep water need to get special brains to move through deep water
+
+More NPC interaction:
+    Maybe introduce affinity (i.e. whether npc likes, dislikes or neutral to player)
+        - can be affected by quests or other actions (maybe sensei dislikes if dummy destroyed before giving quest or something)
+        - can affect trade prices
+
+On individual item changes, could show changes in stats that would come from equip (compare to currently equipped)
+
+Need a way to choose what to pick up on tiles with multiple items
+
+Potentially change npc conversations <- in progress
+
+Tutorial: 
+    - maybe throne room shows basic movement and stairs commands
+    - maybe extra room in hub that acts as tutorial for basic mechanics
+        - how to pick up items
+        - how to equip
+        - how to use spells/skills
+        - how to attack
+        - how to quaff
+        - how to read
+
+
+NPC who explains stars to you and gives you a quest to gain a stars interest
+
+Portals have a 5% chance of spluttering out
+
+Potion crafting system (once ocean branch cleared)
+Plant + empty bottle + flameable material = potion
+
+Potions
+Poison, flame, fog, levitation, speed, attraction / marking, divinity, bottled roots
+
+Effects
+Flying
+Confusion
+Berserk
+
+Critical hits
+
+Adding in a village
+
+Tile effects
+Foggy
+Pit: Sucked to next level
+Poison mist
+Snow
+On fire
+Flooded
+Shattered
+Lightened
+Darkened
+Slowed
+Blinded
+Pathway (can go faster)
+Webs
+Rainy
+Tar
+
+Resistance:
+Attribute: Fire, cold, poison, electric, acidic, physical
+Type: Slashing, stabbing, bashing, magical, psyic
+
+Corpses disappear after awhile
+
+A way to make scrolls
+
+Add in testing powers (can see full map, never die, insta kill monsters, etc)
+Combine scrolls to make book
+Ax weapon can chop trees for logs
+Fungus, kelp, plants can be brewed to make potions (fire moss)
+
+Butcher's blade
+Can't run away from monsters, gain buff for each one that dies (temp)
+
+weapons
+Cleaver, scythe, mace, spear, whip, ball and chain
+
+races
+halfling, dwarf, hag witch, sylvan
+
+randomize weapons on rarity and power
+

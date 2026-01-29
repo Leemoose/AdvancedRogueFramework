@@ -1,0 +1,17 @@
+# RogueGame Dependencies
+# =====================
+# Install with: pip install -r requirements.txt
+
+# Core game engine
+pygame>=2.5.0
+
+# GUI components for menus and dialogs
+pygame_gui>=0.6.9
+
+# Serialization for save/load functionality
+dill>=0.3.7
+
+# Development dependencies (optional)
+# ------------------------------------
+# Uncomment these for development/building:
+# pyinstaller>=6.0.0  # For creating standalone executables

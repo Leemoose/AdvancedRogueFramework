@@ -1,0 +1,37 @@
+moving sometimes fails on if self.generator.tile_map.track_map[monster.x][monster.y].on_fire: IndexError: list index out of range
+
+need to test what happens if item and skill book give same skill/spell and deal with that
+maybe give each skill/spell a source parameter and check against that for removing/adding
+
+Dojo art covering stairs?
+
+fix gateways so that there can be a different outgoing and incoming (sort of fixed)
+
+fix gateways so that there can be a different outgoing and incoming (sort of fixed)
+
+monster ai sometimes fails with:
+File "C:\Users\kcdul\OneDrive\Desktop\Roguelike-Framework\roguewriting.py", line 39, in <module>
+    player_turn = loop.action_loop(keyboard, display)
+  File "C:\Users\kcdul\OneDrive\Desktop\Roguelike-Framework\loops.py", line 251, in action_loop
+    self.monster_loop(-self.player.character.energy)
+  File "C:\Users\kcdul\OneDrive\Desktop\Roguelike-Framework\loops.py", line 275, in monster_loop
+    monster.brain.rank_actions(self)
+  File "C:\Users\kcdul\OneDrive\Desktop\Roguelike-Framework\monster_implementation\monster_ai.py", line 68, in rank_actions
+    self.options[called_function][1](self,loop)
+  File "C:\Users\kcdul\OneDrive\Desktop\Roguelike-Framework\monster_implementation\do_actions_utility.py", line 183, in do_move
+    xmove, ymove = moves.pop(1)
+AttributeError: 'tuple' object has no attribute 'pop'
+
+Blink Scrolls will be used up even if you can't blink due to range
+
+fix some of the new night attributes going on in the forest
+
+loading into hub puts me in throne room for some reason, if i had to guess loading doesn't handle branches correctly
+
+font in dialogue interactions messes up apostrophes, if no fix found easily can modify dialogue to only use basic characters
+
+maybe make dialogue box limit based on number of lines instead of current system of number of messages
+
+enchant scroll limit inventory needs to be slightly more specific
+
+for some reason summon hornet not working on damage effect

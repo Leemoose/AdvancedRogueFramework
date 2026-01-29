@@ -1,0 +1,50 @@
+Adding new loop type
+    1. Add new loop type to looptype.py
+    2. Add new screen in folder display_generation (make sure to import)
+    3. Add new keyboard inputs under key_screens
+    3. Link the loop type to correct function under create_screen, update_screen and action_options in loops.py dictionary
+    4. It should work!
+
+Adding spawns to new branches
+    1. Add new parameter class in branch_params.py
+        a. Make sure to assign branch_name identical to branch_name defined in DungeonData
+        b. (Optionally) Specify monster difficulties (including level scaling, difficulty scaling and monster pack size scaling), item distributions and item counts
+        c. (Optionally) Specify any possible spawning restrictions on monsters in check_monster_restrictions. 
+                        Define monster resrictions for specific keywords
+                        In monster.py, set self.restriction to keyword defined in check_monster_restrictions
+                        Note: too many floors with restrictions may make initialization slower
+                
+    
+    2. Add any branch specific items to item_initializations.py
+        a. by default items appear on any branch on any floor
+        b. (Optionally) specify minFloor, maxFloor, or branch for more specific spawning
+    
+    3. Add any branch specific monsters to monster_initializations.py
+        a. by default, monsters are common, do not appear in packs, and appear on any floor in the Dungeon
+        b. (Optionally) specify minFloor, maxFloor or branch for more specific spawning
+        c. (Optionally) specify branch = "all" to spawn across all branches
+        d. (Optionally) specify group to allow monster to appear in packs (with other monsters in same group)
+        e. (Optionally) specify rarity to make monster more rare, and unique within its packs 
+
+Add new NPCs
+    1. Add subclass inheriting from NPC class in NPC.py
+    2. Write dialogue interaction with NPC in npc_dialogue/___.txt and set self.dialogue_file to the path and call self.init_dialogue_queue()
+        a. In dialogues, every line starts with an integer representing order of dialogue
+        b. Dialogue with "-" before any text means the player says it
+        c. Multiple dialogue options at same index for player gives player choice of which option to pick
+        d. Multiple dialogue options at same index for npc chooses a random one from options
+        e. Adding !trait flag means that the dialogue adds the trait to the npc when that dialogue is shown
+                eg: Add !quest_given flag to call self.give_quest(loop) when that dialogue is passed
+        f. Adding ?trait flag means that the dialogue appears only if the npc has trait
+                Can be used with !trait to make dialogue respond to player choices
+                To be used properly, whenever a trait is assigned to npc, make sure to call:
+                    self.check_dialogues_to_add()
+                    self.check_focus(loop)
+        g. Adding @idx flag means that the dialogue will repeat if not chosen as player option
+                idx is the index at which it will appear again (probably after all other npc lines have appeared)
+                ensures player is not locked out of information/quests by choosing wrong dialogue option
+                should only be on player dialogue (maybe can change it so works with npc dialogue too but don't see a reason to do so)
+                must be the last flag before actual dialogue text (i.e. don't do 0 - !trait1 @4 ?trait2 hello world instead do 0 - !trait1 ?trait2 @4 hello world)
+                    this is because of what dialogue is checked against stored list, might change this to work in any order down the line
+    3. Add render tag to static_configs.py
+    4. Define spawning of npc - currently all npcs exist as part of prefabs (see dungeon_generation/maps/prefab.py) and NPCSpawnTiles (see tiles.py)
