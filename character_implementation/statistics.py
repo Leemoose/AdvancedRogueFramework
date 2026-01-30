@@ -21,6 +21,10 @@ class StatTracker():
     def total_monsters_killed(self):
         return sum(self.monsters_killed.values())
 
+    def get_monster_kills(self, monster_type):
+        """Get the number of kills for a specific monster type."""
+        return self.monsters_killed.get(monster_type, 0)
+
     def add_turn_details(self):
         self.turns += 1
 

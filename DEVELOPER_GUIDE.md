@@ -14,8 +14,9 @@ A comprehensive guide for developers contributing to this Python roguelike built
 6. [Dungeon Generation](#dungeon-generation)
 7. [Game States & UI](#game-states--ui)
 8. [Monster AI (Behavior System)](#monster-ai-behavior-system)
-9. [File Structure Reference](#file-structure-reference)
-10. [Common Patterns](#common-patterns)
+9. [NPC & Dialogue System](#npc--dialogue-system)
+10. [File Structure Reference](#file-structure-reference)
+11. [Common Patterns](#common-patterns)
 
 ---
 
@@ -603,6 +604,137 @@ RogueGame-main/
     ├── skills/
     └── crawl-tiles/           # Dungeon Crawl tiles
 ```
+
+---
+
+## NPC & Dialogue System
+
+### Overview
+
+NPCs use a node-based `DialogueTree` system for conversations. Each node represents what the NPC says plus available player options. Options can trigger actions, set traits, and navigate to other nodes.
+
+**Key files:**
+- `interactable_implementation/dialogue.py` - Core dialogue tree system
+- `interactable_implementation/npc.py` - NPC classes
+- `interactable_implementation/quest.py` - Quest system
+
+### Creating a Simple NPC
+
+```python
+from interactable_implementation.npc import NPC
+from interactable_implementation.dialogue import DialogueTree, Option, END
+
+class Merchant(NPC):
+    def __init__(self, x=-1, y=-1, render_tag=121, name="Merchant"):
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
+
+    def build_dialogue_tree(self) -> DialogueTree:
+        tree = DialogueTree("greeting")
+
+        tree.add_node("greeting", "Welcome to my shop!", [
+            Option("What do you sell?", goto="wares"),
+            Option("Goodbye.", goto=END),
+        ])
+
+        tree.add_node("wares", "I have potions and scrolls.", [
+            Option("I'll browse.", goto=END),
+            Option("Not interested.", goto=END),
+        ])
+
+        return tree
+```
+
+### Creating a Quest-Giving NPC
+
+```python
+from interactable_implementation.npc import QuestGiver
+from interactable_implementation.quest import KillCountQuest
+from interactable_implementation.dialogue import DialogueTree, Option, END
+
+class BountyHunter(QuestGiver):
+    def __init__(self, x=-1, y=-1, render_tag=125, name="Bounty Hunter"):
+        self._custom_quest = KillCountQuest(
+            name="Orc Bounty",
+            target_count=3,
+            monster_type="Orc",
+            experience_given=50
+        )
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
+        self.quest = self._custom_quest
+
+    def build_dialogue_tree(self) -> DialogueTree:
+        tree = DialogueTree("greeting")
+
+        tree.add_node("greeting", "Looking for work, adventurer?", [
+            Option("What kind of work?", goto="explain"),
+            Option("Not interested.", goto=END),
+        ])
+
+        tree.add_node("explain", "Orcs have been raiding caravans. Kill 3 of them.", [
+            Option("I'll do it.", goto="accept", action=self._give_quest_action),
+            Option("Too dangerous.", goto=END),
+        ])
+
+        tree.add_node("accept", "Good luck. Return when the job is done.", [
+            Option("Farewell.", goto=END),
+        ])
+
+        # Quest completion node (QuestGiver routes here automatically)
+        tree.add_node("quest_complete", "Well done! Here's your reward.", [
+            Option("Thanks.", goto=END),
+        ])
+
+        return tree
+```
+
+### Dialogue System Features
+
+**Random NPC text** - Pass a list for variety:
+```python
+tree.add_node("greet", ["Hello!", "Hi there!", "Greetings!"], [...])
+```
+
+**Conditional options** - Show only when condition is true:
+```python
+Option("Secret option", goto="secret",
+       condition=lambda npc, loop: npc.has_trait("trusted"))
+```
+
+**Actions on selection** - Execute code when chosen:
+```python
+Option("Accept quest", goto="accepted",
+       action=lambda npc, loop: npc.give_quest(loop))
+```
+
+**Set traits** - Mark state changes:
+```python
+Option("Earn trust", goto="next", sets=["trusted"])
+```
+
+**Node entry callbacks** - Run code when entering a node:
+```python
+tree.add_node("shop", "Welcome!", on_enter=lambda npc, loop: open_shop(loop))
+```
+
+### Registering NPCs for Spawning
+
+Edit `dungeon_generation/spawning/interact_init.py`:
+
+```python
+from interactable_implementation import Merchant
+
+InteractableSpawns.append(
+    InteractableSpawnParams(Merchant(), minFloor=1, maxFloor=3, branch="Hub")
+)
+```
+
+### Quest Types
+
+| Quest Type | Description |
+|------------|-------------|
+| `KillCountQuest` | Kill X monsters (optionally specific type) |
+| `ItemCollectionQuest` | Collect items with specific trait |
+| `ExplorationQuest` | Reach a dungeon depth |
 
 ---
 
