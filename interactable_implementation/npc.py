@@ -1,358 +1,453 @@
+"""
+NPC System.
+
+Provides NPCs that can be talked to, give quests, and (in the future) trade items.
+NPCs inherit from Interactable for clean integration with the existing system.
+
+Dialogue System:
+    Uses a node-based DialogueTree for cleaner, more maintainable conversations.
+    Each node represents what the NPC says plus available player options.
+    Options can trigger actions, set traits, and navigate to other nodes.
+
+Classes:
+    NPC: Base class for all NPCs
+    QuestGiver: NPC that can give and track quests
+
+Example NPCs:
+    ForestHermit: Gives exploration quest
+    VillageElder: Gives goblin slaying quest
+"""
+
 from logging_config import get_logger
+from .interactables import Interactable
+from .quest import Quest, GoblinSlayerQuest, DungeonDelverQuest
+from .dialogue import DialogueTree, DialogueNode, DialogueOption, Option, END, STAY
+from loop_workflow.looptype import LoopType
 
 logger = get_logger(__name__)
 
-# import random
-#
-# import objects as O
-# import quest
-#
-# class NPC(O.Objects):
-#     def __init__(self, render_tag, x, y, name="Unknown npc"):
-#         super().__init__(x, y, 0, render_tag= render_tag, name = name)
-#         self.name = name
-#         self.items = []
-#         self.cost = 5
-#         self.purpose = None #Trade, gossip,
-#         self.gave_quest = False
-#         self.quest = None
-#         self.options = ["Talk", "Trade", "Quest"]
-#         self.has_stuff_to_say = False
-#         self.talking = False #In the midst of talking
-#         self.talking_queue = []
-#         self.dialogue_memory = []
-#         self.dialogue_file = "../npc_dialogue/default.txt"
-#         self.init_dialogue_queue()
-#         self.traits["npc"] = True
-#
-#     def init_dialogue_queue(self):
-#         # a series of data structures that different dialogue flags need to efficiently manipulate dialogue flow
-#         self.dialogue_queue = [] # stores dialogue in easy to track order
-#         self.dialogue_dict = {} # stores indices of each dialogue, keyed by dialogues
-#         self.repeat_dict = {} # store dialogues that if not selected by player should be appended to end of dialoque queue at index stored in value
-#         self.trait_dict = {} # stores dialogues tied to ! and ? flags
-#
-#         with open(self.dialogue_file) as df:
-#             lines = df.readlines()
-#             for line in lines:
-#                 if line[0] == "#" or line.strip() == "":
-#                     continue
-#                 dialogue_index, dialogue = line.split(" ", 1) # split only on first space
-#                 dialogue = dialogue.strip() # remove trailing whitespace
-#                 player = False
-#                 # special markers: "-" -> player dialogue
-#                 #                  "!" -> set trait
-#                 #                  "?" -> conditional on trait
-#                 to_add = []
-#                 special_markers = ["-", "!", "?", "@"]
-#                 while dialogue[0] in special_markers:
-#                     if dialogue[0] == "-":
-#                         player = True
-#                         dialogue = dialogue.split(" ", 1)[1].strip() # split on first space again to remove the "-"
-#                     if dialogue[0] == "!":
-#                         trait, dialogue = dialogue.split(" ", 1)
-#                         trait = trait[1:] # trait is in format !trait, strip leading !
-#                         dialogue = dialogue.strip()
-#                         to_add.append((trait, True)) # second param is whether setting or checking trait
-#                     if dialogue[0] == "?":
-#                         trait, dialogue = dialogue.split(" ", 1)
-#                         trait = trait[1:] # trait is in format ?trait, strip leading ?
-#                         dialogue = dialogue.strip()
-#                         to_add.append((trait, False)) # second param is whether setting (True) or checking (False) trait
-#                     if dialogue[0] == "@":
-#                         idx, dialogue = dialogue.split(" ", 1)
-#                         if len(idx) == 1:
-#                             idx = 1000 # default to high number if idx is not specified with @
-#                         else:
-#                             idx = int(idx[1:])
-#                         dialogue = dialogue.strip()
-#                         self.repeat_dict[dialogue] = idx
-#                 add_to_queue = True
-#                 for trait, set_or_check in to_add:
-#                     if not dialogue in self.trait_dict.keys():
-#                         self.trait_dict[dialogue] = []
-#                     self.trait_dict[dialogue].append((trait, player, set_or_check))
-#                     if not set_or_check and not self.has_trait(trait):
-#                         add_to_queue = False
-#                 self.dialogue_dict[dialogue] = int(dialogue_index)
-#                 if add_to_queue:
-#                     self.insert_into_dialogue_queue(dialogue, player)
-#
-#     def change_purpose(self, purpose, loop):
-#         if isinstance(purpose, int):
-#             if purpose - 1 >= 0 and purpose -1 < len(self.options):
-#                 purpose = self.options[purpose-1]
-#         if purpose == "Talk":
-#             self.talk(loop)
-#             self.purpose = purpose
-#         elif purpose == "Trade":
-#             self.trade(loop)
-#             self.purpose = purpose
-#         elif purpose == "Quest":
-#             self.purpose = purpose
-#             self.give_quest(loop)
-#
-#     def add_to_memory(self, text, left, choice, action, loop):
-#         self.dialogue_memory.append((text, left, choice, action))
-#         if not choice and text in self.trait_dict.keys():
-#             for trait, _, set_or_check in self.trait_dict[text]:
-#                 if set_or_check:
-#                     self.traits[trait] = True
-#                     self.check_dialogues_to_add()
-#                     self.check_focus(loop)
-#
-#     # subclasses can overwrite this to determine which dialogue traits affect npc_focus
-#     def check_focus(self, loop):
-#         if self.has_trait("quest_given"):
-#             self.change_purpose("Quest", loop)
-#
-#     def check_dialogues_to_add(self):
-#         # import pdb; pdb.set_trace()
-#         for text, trait_list in self.trait_dict.items():
-#             added = False
-#             for (trait, player, set_or_check) in trait_list:
-#                 if not set_or_check and self.has_trait(trait):
-#                     self.insert_into_dialogue_queue(text, player)
-#                     self.trait_dict[text].remove((trait, player, set_or_check)) # remove dialogue from trait list so we don't keep adding it to queue
-#
-#
-#     def insert_into_dialogue_queue(self, dialogue, player):
-#         idx = self.dialogue_dict[dialogue]
-#         idx_to_insert = len(self.dialogue_queue)
-#         for i, d in enumerate(self.dialogue_queue):
-#             conv_idx = self.dialogue_dict[d[0]]
-#             if conv_idx == idx:
-#                 self.dialogue_queue[i].insert(-1, dialogue)
-#                 return
-#             if idx < conv_idx:
-#                 idx_to_insert = i
-#                 break
-#         self.dialogue_queue.insert(idx_to_insert, [dialogue, player])
-#
-#
-#     def take_gold(self, i, loop):
-#         if loop.player.inventory.get_gold() >= self.cost:
-#             self.give_item(loop, i)
-#             loop.player.inventory.change_gold_amount(-self.cost)
-#             loop.add_message(
-#                 self.name + " says: 'Ahhh yes, precious gold. You can take that item.'")
-#         else:
-#             loop.add_message(
-#                 self.name + " says: 'You don't have enough gold my friend.'")
-#
-#
-#     def trade(self, loop):
-#         pass
-#
-#     def talk(self, loop):
-#         loop.add_message(
-#             self.name + " says: 'Move along now.'")
-#
-#     def interact(self, loop):
-#         loop.messages = []
-#         loop.npc_focus = self
-#         loop.change_loop("trade")
-#     def give_quest(self, loop):
-#         pass
-#     def give_item(self, loop, number):
-#         player = loop.player
-#         item = self.items[number]
-#         if player.character.get_item(loop, item):
-#             self.items.pop(number)
-#             loop.change_loop("trade")
-#     def continue_talking(self, loop):
-#         loop.add_message(self.talking_queue.pop(0))
-#         if len(self.talking_queue) == 0:
-#             self.talking = False
-#
-# class Bob(NPC):
-#     def __init__(self, render_tag, x, y, name="Bob"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.quest = quest.GoblinQuest()
-#         self.has_stuff_to_say = True
-#
-#     def welcome(self, loop):
-#         super().welcome(loop)
-#         loop.add_message(self.name + " says: 'I see you have survived til now. Not a very impressive feat to be honest."
-#                                      " Charles the blacksmith's son, he came down this way once to show off to his friends."
-#                                      " Never made it back. A shame really. There's something in the air, some miasma as you trek deeper and deeper...'")
-#
-#     def trade(self, loop):
-#         super().trade(loop)
-#         loop.add_message(loop.player.name + " says: 'Enough with the chit chat. What do you have that can help me out?'")
-#         loop.add_message(
-#             self.name + " says: 'See for yourself. Nothing special but it'll get the job done.'")
-#
-#     def talk(self, loop):
-#         # super().talk(loop)
-#         loop.add_message(self.name + " says: 'I didn't scare you off already? There is something foul afoot here. Young boys go missing every month."
-#                                      "The seamstress says there's a demon involved, sucking the souls out and leaving nothing but bones."
-#                                      " It's an old wives tale. My bet is they're sneaking off to the war.'")
-#
-#     def give_quest(self, loop):
-#         if self.gave_quest == True:
-#             if self.quest.check_for_completion(loop):
-#                 self.traits["quest_completed"] = True
-#                 self.check_dialogues_to_add()
-#                 self.check_focus(loop)
-#                 # loop.add_message(self.name + " says: 'Thanks to you those goblins have not been bothering me lately.'")
-#         else:
-#             loop.add_message(loop.player.name + " says: 'Anything I can help out with?'")
-#             loop.add_message(self.name + " says: 'Goblins. I hate those nasty buggers. They keep stealing all my stuff! If you kill 3 of them and bring me back proof, I can reward you handsomely' ;)")
-#             loop.player.add_quest(quest.GoblinQuest())
-#             self.gave_quest = True
-#             self.has_stuff_to_say = False
-#
-# class King(NPC):
-#     def __init__(self, x, y, render_tag= 120, name="King Aldric"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.options = ["Quest"]
-#         self.has_stuff_to_say = True # separate variable from gave_quest in case we want traders to keep this icon
-#         self.quest = quest.KingdomQuest()
-#         self.dialogue_file = "../npc_dialogue/king.txt"
-#         self.init_dialogue_queue()
-#
-#     def give_quest(self, loop):
-#         if self.gave_quest == True:
-#             if self.quest.check_for_completion(loop):
-#                 self.traits["quest_completed"] = True
-#                 self.check_dialogues_to_add()
-#                 self.check_focus(loop)
-#                 # loop.add_message(self.name + " says: 'The Kingdom is now safe.'")
-#         else:
-#             self.talking = True
-#             # loop.add_message(self.name + "'What's this? Another failure! I can't believe we spent so much to summon you from another dimension.'")
-#             # self.talking_queue.append("Guards! Prepare another summoning! We can't fail again else we'll be overrun by the rift monsters. They are nearly at the palace portals!")
-#             # self.talking_queue.append(
-#             #     "Why are you still here?!? Move along to the portal room and we'll be sorted out. Maybe you'll even manage to kill a goblins or two.")
-#             loop.player.add_quest(quest.KingdomQuest())
-#             self.gave_quest = True
-#             self.has_stuff_to_say = False
-#
-# class Guard(NPC):
-#     def __init__(self, x, y, render_tag= 121, name="Guard"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.options = ["Talk"]
-#         self.dialogue_file = "../npc_dialogue/guard.txt"
-#         self.init_dialogue_queue()
-#     def talk(self, loop):
-#         loop.add_message(self.dialogue)
-#
-# class BobBrother(Guard):
-#     def __init__(self, x, y, render_tag= 121, name="Bob's Brother"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.options.append("Quest")
-#         self.has_stuff_to_say = True
-#         self.quest = quest.BrothersQuest()
-#         self.dialogue_file = "../npc_dialogue/bobbrother.txt"
-#         self.init_dialogue_queue()
-#
-#     def check_focus(self, loop):
-#         if self.has_trait("quest_given"):
-#             self.change_purpose("Quest", loop)
-#
-#     def give_quest(self, loop):
-#         if self.gave_quest == True:
-#             if self.quest.check_for_completion(loop):
-#                 self.traits["quest_completed"] = True
-#                 self.check_dialogues_to_add()
-#                 self.check_focus(loop)
-#                 # loop.add_message("Thank you... thank you for bringing him back. I feared the worst, but seeing him... it’s heartbreaking. I owe you more than I can ever repay. At least now, he can have a proper farewell. You’ve given us closure, and for that, I am eternally grateful.")
-#         else:
-#             # loop.add_message("Please, you have to help me. My brother got lost in one of those cursed rifts, and I can't leave my post to search for him. I'm begging you, find him and bring him back. I'll owe you everything if you do.")
-#             loop.player.add_quest(quest.BrothersQuest())
-#             self.has_stuff_to_say = False
-#             self.gave_quest = True
-#
-# class Sensei(NPC):
-#     def __init__(self, x, y, render_tag= 123, name="Sensei"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.options = ["Talk", "Quest"]
-#         self.has_stuff_to_say = True
-#         self.quest = quest.DojoQuest()
-#         self.dialogue_file = "../npc_dialogue/sensei.txt"
-#         self.init_dialogue_queue()
-#
-#     def talk(self, loop):
-#         super().talk(loop)
-#         # loop.add_message(self.name + " says: 'No better place to train than surrounded by monsters.")
-#         # loop.add_message(loop.player.name + " says: 'Who are you?'")
-#         # loop.add_message(self.name + " doesn't seem to hear you.")
-#
-#     def give_quest(self, loop):
-#         if self.gave_quest == True:
-#             if self.quest.check_for_completion(loop):
-#                 self.traits["quest_completed"] = True
-#                 self.check_dialogues_to_add()
-#                 self.check_focus(loop)
-#                 # loop.add_message(self.name + " nods in acknolwedgement of your strength.")
-#         else:
-#             # loop.add_message(self.name + " says: 'Think yourself a master of combat? Prove your training here by destroying this training dummy.'")
-#             loop.player.add_quest(quest.DojoQuest())
-#             self.gave_quest = True
-#             self.has_stuff_to_say = False
-#
-# class Mage(NPC):
-#     def __init__(self, x, y, render_tag= 126, name="Mage"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.options = ["Talk"]
-#         self.has_stuff_to_say = False
-#         self.dialogue_file = "../npc_dialogue/mage.txt"
-#         self.init_dialogue_queue()
-#
-#     def talk(self, loop):
-#         if self.has_stuff_to_say:
-#             self.talking = True
-#
-# class Archmage(NPC):
-#     def __init__(self, x, y, render_tag= 126, name="Archmage Thalor"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.options = ["Talk", "Quest"]
-#         self.has_stuff_to_say = True
-#         self.quest = quest.GoblinQuest()
-#         self.dialogue_file = "../npc_dialogue/archmage.txt"
-#         self.init_dialogue_queue()
-#
-#     def talk(self, loop):
-#         if self.has_stuff_to_say:
-#             self.talking = True
-#
-#     def give_quest(self, loop):
-#         if self.gave_quest == True:
-#             if self.quest.check_for_completion(loop):
-#                 self.traits["quest_completed"] = True
-#                 self.check_dialogues_to_add()
-#                 self.check_focus(loop)
-#                 # loop.add_message("'Keep up the good work.'")
-#         else:
-#             self.talking = True
-#             # loop.add_message("'These beasts just keep coming through the rifts, don't they? I've managed to take care of this wave, but I can't be everywhere at once.'")
-#             # self.talking_queue.append(
-#             #     "'Listen, I know you might just be an unfortunate soul pulled from another world. I wish I could offer more assistance, but our resources are stretched thin.'")
-#             # self.talking_queue.append("'Prove your worth to me, and I can provide you with better support. Bring me back five goblins corpses, and we'll see what we can do for you.'")
-#             loop.player.add_quest(quest.GoblinQuest())
-#             self.gave_quest = True
-#             self.has_stuff_to_say = False
-#
-# class ForestHermit(NPC):
-#     def __init__(self, x=-1, y=-1, render_tag= 3100, name="Forest Hermit"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.options = ["Talk"]
-#         self.has_stuff_to_say = False
-#         self.dialogue_file = "../npc_dialogue/foresthermit.txt"
-#         self.init_dialogue_queue()
-#
-#     def talk(self, loop):
-#         self.talking = True
-#
-# class GrabExplainer(NPC):
-#     def __init__(self, x=-1, y=-1, render_tag= 126, name="Friendly NPC"):
-#         super().__init__(x=x, y=y, render_tag = render_tag, name = name)
-#         self.options = ["Talk"]
-#         self.has_stuff_to_say = True
-#         self.dialogue_file = "../npc_dialogue/grab_explainer.txt"
-#         self.init_dialogue_queue()
-#
-#     def talk(self, loop):
-#         self.talking = True
-#         self.has_stuff_to_say = False
+
+class NPC(Interactable):
+    """
+    Base class for all NPCs.
+
+    NPCs can be talked to and have dialogue trees with branching conversations.
+    They integrate with the existing TradeState for dialogue display.
+
+    Attributes:
+        dialogue_tree: DialogueTree managing the conversation
+        dialogue_memory: History of dialogue for UI display
+        traits: Dict of flags that can be used for conditions
+        options: List of interaction options (Talk, Quest, Trade)
+        purpose: Current interaction mode
+        talking: Whether currently in dialogue
+    """
+
+    def __init__(self, x=-1, y=-1, render_tag=0, name="NPC"):
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
+        self.traits["npc"] = True
+
+        # Dialogue system (new tree-based)
+        self.dialogue_tree: DialogueTree = self.build_dialogue_tree()
+        self.dialogue_memory = []
+
+        # Legacy compatibility - these are used by the UI
+        self.dialogue_queue = []  # Populated from tree for UI compatibility
+        self.dialogue_dict = {}
+        self.trait_dict = {}
+        self.repeat_dict = {}
+
+        # Interaction state
+        self.options = ["Talk"]
+        self.purpose = None
+        self.talking = False
+        self.has_stuff_to_say = True
+
+        # Trading (future)
+        self.items = []
+        self.cost = 5
+
+        # Quest (set by subclasses)
+        self.quest = None
+        self.gave_quest = False
+
+        # Set description
+        self.description = f"{self.name} - An NPC you can talk to."
+
+    def build_dialogue_tree(self) -> DialogueTree:
+        """
+        Build and return the dialogue tree for this NPC.
+
+        Override in subclasses to define conversation structure.
+        Returns a DialogueTree with nodes and options.
+        """
+        tree = DialogueTree("start")
+        tree.add_node("start", "...", [])
+        return tree
+
+    def start_dialogue(self, loop):
+        """
+        Start or restart the dialogue from the beginning.
+
+        Called when player initiates conversation.
+        """
+        self.dialogue_tree.start(self, loop)
+        self._sync_to_queue(loop)
+
+    def _sync_to_queue(self, loop):
+        """
+        Sync the current dialogue tree state to the legacy queue format.
+
+        This maintains compatibility with the existing DialogueInteraction UI.
+        """
+        self.dialogue_queue.clear()
+
+        if self.dialogue_tree.has_ended():
+            return
+
+        # Get current NPC text
+        npc_text = self.dialogue_tree.get_current_text()
+        if npc_text:
+            self.dialogue_queue.append([npc_text, False])
+
+        # Get current options
+        options = self.dialogue_tree.get_current_options(self, loop)
+        if options:
+            # Group all options together (same ID in old system)
+            option_texts = [opt.text for opt in options]
+            self.dialogue_queue.append(option_texts + [True])  # True = player options
+
+    def advance_dialogue(self, choice_index: int, loop):
+        """
+        Advance dialogue by selecting an option.
+
+        Args:
+            choice_index: 0-based index of the selected option
+            loop: Game loop instance
+        """
+        if self.dialogue_tree.has_ended():
+            return
+
+        options = self.dialogue_tree.get_current_options(self, loop)
+
+        if choice_index < 0 or choice_index >= len(options):
+            # No options or invalid - just check if we should end
+            if not options:
+                # NPC monologue - this shouldn't happen with tree system
+                pass
+            return
+
+        # Select the option
+        self.dialogue_tree.select_option(choice_index, self, loop)
+
+        # Sync to legacy queue
+        self._sync_to_queue(loop)
+
+    def add_to_memory(self, text, left, choice, action, loop):
+        """
+        Add dialogue to memory and process trait changes.
+
+        Args:
+            text: The dialogue text
+            left: Whether displayed on left (player) side
+            choice: Whether this was a player choice being displayed
+            action: The action string
+            loop: The game loop instance
+        """
+        self.dialogue_memory.append((text, left, choice, action))
+
+        # When a player choice is confirmed (not just displayed)
+        if not choice and left:
+            # Find and execute the matching option
+            stripped_text = text.split(". ", 1)[-1] if text[0].isdigit() else text
+            options = self.dialogue_tree.get_current_options(self, loop)
+            for i, opt in enumerate(options):
+                if opt.text == stripped_text:
+                    self.dialogue_tree.select_option(i, self, loop)
+                    # Sync the new state to the queue for the UI
+                    self._sync_to_queue(loop)
+                    break
+
+    def _check_focus(self, loop):
+        """
+        Check and update the NPC's purpose based on current state.
+
+        Override in subclasses for custom behavior.
+        """
+        pass
+
+    def change_purpose(self, selection, loop):
+        """
+        Change the NPC's current interaction mode.
+
+        Args:
+            selection: Either an int (dialogue option) or string (mode name)
+            loop: The game loop instance
+        """
+        if isinstance(selection, int):
+            # Dialogue option selected - handled by tree system now
+            pass
+        elif isinstance(selection, str):
+            if selection in self.options:
+                self.purpose = selection.lower()
+                if self.purpose == "quest":
+                    self.give_quest(loop)
+
+    def give_quest(self, loop):
+        """
+        Give the NPC's quest to the player.
+
+        Override in subclasses for custom quest-giving behavior.
+        """
+        if self.quest is None:
+            return
+
+        if self.gave_quest:
+            # Check for completion
+            if self.quest.check_for_completion(loop):
+                self.traits["quest_completed"] = True
+                self.quest.give_reward(loop)
+                self._check_focus(loop)
+                loop.add_message(f"Quest '{self.quest.name}' completed!", (255, 215, 0))
+        else:
+            # Give quest
+            loop.player.add_quest(self.quest)
+            self.gave_quest = True
+            self.traits["quest_given"] = True
+
+            # Set start count for kill quests
+            if hasattr(self.quest, 'set_start_count'):
+                self.quest.set_start_count(loop)
+
+            loop.add_message(f"New quest: {self.quest.name}", (255, 215, 0))
+
+    def interact(self, loop):
+        """
+        Called when player interacts with this NPC.
+
+        Enters dialogue mode via TradeState.
+        """
+        logger.debug("Player interacting with NPC: %s", self.name)
+        loop.npc_focus = self
+        self.talking = True
+
+        # Always restart dialogue from beginning for fresh conversations
+        # The tree will handle conditional starting points
+        self.dialogue_memory.clear()
+        self.start_dialogue(loop)
+
+        loop.change_loop(LoopType.trade)
+
+    # =========================================================================
+    # Legacy compatibility methods (used by existing UI)
+    # =========================================================================
+
+    def get_dialogue_data(self):
+        """Legacy method - returns empty list as we use tree now."""
+        return []
+
+    def insert_into_dialogue_queue(self, text, is_player):
+        """Legacy method - no longer used with tree system."""
+        pass
+
+    def _check_dialogues_to_add(self):
+        """Legacy method - tree handles this automatically."""
+        pass
+
+
+class QuestGiver(NPC):
+    """
+    NPC that primarily exists to give and track a quest.
+
+    Adds "Quest" to options and provides helper methods for
+    quest-related dialogue.
+    """
+
+    def __init__(self, x=-1, y=-1, render_tag=0, name="Quest Giver"):
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
+        self.options = ["Talk", "Quest"]
+
+    def _check_focus(self, loop):
+        """Auto-switch to quest mode if quest was given."""
+        if self.has_trait("quest_given") and not self.has_trait("quest_completed"):
+            self.purpose = "quest"
+
+    def _give_quest_action(self, npc, loop):
+        """Action callback to give quest from dialogue option."""
+        npc.give_quest(loop)
+        return None  # Don't override goto
+
+    def start_dialogue(self, loop):
+        """
+        Start dialogue, checking for quest completion first.
+
+        If quest is complete, starts at completion node.
+        """
+        # Check if quest is complete before starting dialogue
+        if self.quest and self.gave_quest and not self.has_trait("quest_completed"):
+            if self.quest.check_for_completion(loop):
+                self.traits["quest_completed"] = True
+                self.quest.give_reward(loop)
+                loop.add_message(f"Quest '{self.quest.name}' completed!", (255, 215, 0))
+
+        # Now start dialogue - tree conditions will check quest_completed trait
+        if self.has_trait("quest_completed") and "quest_complete" in self.dialogue_tree.nodes:
+            # Go directly to completion dialogue
+            self.dialogue_tree._ended = False
+            self.dialogue_tree.history = []
+            self.dialogue_tree.goto("quest_complete", self, loop)
+        else:
+            self.dialogue_tree.start(self, loop)
+
+        self._sync_to_queue(loop)
+
+
+# =============================================================================
+# EXAMPLE NPCs - Now using the cleaner tree-based dialogue system
+# =============================================================================
+
+class ForestHermit(QuestGiver):
+    """A hermit in the forest who gives an exploration quest."""
+
+    def __init__(self, x=-1, y=-1, render_tag=126, name="Forest Hermit"):
+        self._custom_quest = DungeonDelverQuest(target_depth=3)
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
+        self.quest = self._custom_quest
+
+    def build_dialogue_tree(self) -> DialogueTree:
+        tree = DialogueTree("greeting")
+
+        # Greeting node
+        tree.add_node("greeting", "Ah, a traveler! These woods hide many secrets.", [
+            Option("Who are you?", goto="introduce"),
+            Option("What secrets?", goto="secrets"),
+        ])
+
+        # Introduction branch
+        tree.add_node("introduce", "I am but a humble hermit, living off the land.", [
+            Option("Tell me about the secrets.", goto="secrets"),
+            Option("Farewell.", goto=END),
+        ])
+
+        # Secrets branch - leads to quest
+        tree.add_node("secrets", "The dungeon to the east... it goes deep. Very deep.", [
+            Option("Can you help me explore?", goto="quest_offer", action=self._give_quest_action),
+            Option("Interesting. Farewell.", goto=END),
+        ])
+
+        # Quest given
+        tree.add_node("quest_offer", "Brave soul! Descend to depth 3 and return. I shall reward you.", [
+            Option("I'll do it.", goto="quest_accepted"),
+            Option("I'll think about it.", goto=END),
+        ])
+
+        tree.add_node("quest_accepted", "May the spirits guide you.", [
+            Option("Farewell.", goto=END),
+        ])
+
+        # Quest completion (QuestGiver.start_dialogue handles routing here)
+        tree.add_node("quest_complete",
+            "You've done it! Here is your reward.",
+            [Option("Thank you.", goto=END)]
+        )
+
+        return tree
+
+
+class VillageElder(QuestGiver):
+    """A village elder who gives a goblin slaying quest."""
+
+    def __init__(self, x=-1, y=-1, render_tag=120, name="Village Elder"):
+        self._custom_quest = GoblinSlayerQuest(target_count=5)
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
+        self.quest = self._custom_quest
+
+    def build_dialogue_tree(self) -> DialogueTree:
+        tree = DialogueTree("greeting")
+
+        # Greeting
+        tree.add_node("greeting", "Welcome, adventurer. Our village is troubled.", [
+            Option("What troubles you?", goto="explain_problem"),
+            Option("I'm just passing through.", goto="passing_through"),
+        ])
+
+        # Passing through branch
+        tree.add_node("passing_through", "Safe travels then, stranger.", [
+            Option("Actually, tell me about your troubles.", goto="explain_problem"),
+            Option("Farewell.", goto=END),
+        ])
+
+        # Problem explanation
+        tree.add_node("explain_problem", "Goblins! They raid our farms and steal our livestock.", [
+            Option("I can help with that.", goto="accept_quest", action=self._give_quest_action),
+            Option("Not my problem.", goto="refuse_quest"),
+        ])
+
+        # Quest accepted
+        tree.add_node("accept_quest", "Bless you! Slay 5 of those wretched creatures.", [
+            Option("Consider it done.", goto=END),
+        ])
+
+        # Quest refused
+        tree.add_node("refuse_quest", "I understand. Perhaps another hero will come.", [
+            Option("Maybe I can help after all.", goto="accept_quest", action=self._give_quest_action),
+            Option("Farewell.", goto=END),
+        ])
+
+        # Quest completion (QuestGiver.start_dialogue handles routing here)
+        tree.add_node("quest_complete",
+            "The goblin menace is ended! You have our eternal gratitude.",
+            [Option("Happy to help.", goto=END)]
+        )
+
+        return tree
+
+
+class WanderingTrader(NPC):
+    """
+    A trader NPC. Trading functionality placeholder for future implementation.
+    """
+
+    def __init__(self, x=-1, y=-1, render_tag=121, name="Wandering Trader"):
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
+        self.options = ["Talk"]  # Trading disabled for now
+
+    def build_dialogue_tree(self) -> DialogueTree:
+        tree = DialogueTree("greeting")
+
+        tree.add_node("greeting", "Wares for sale! ...Well, soon anyway.", [
+            Option("What do you sell?", goto="no_wares"),
+            Option("Nevermind.", goto=END),
+        ])
+
+        tree.add_node("no_wares", "Many things! But my cart broke down. Come back later.", [
+            Option("I'll check back.", goto=END),
+        ])
+
+        return tree
+
+
+class MysteriousStranger(NPC):
+    """A mysterious NPC with cryptic dialogue."""
+
+    def __init__(self, x=-1, y=-1, render_tag=122, name="Mysterious Stranger"):
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
+
+    def build_dialogue_tree(self) -> DialogueTree:
+        tree = DialogueTree("silent")
+
+        tree.add_node("silent", "...", [
+            Option("Hello?", goto="warning"),
+            Option("(Leave them alone)", goto=END),
+        ])
+
+        tree.add_node("warning", "The shadows grow longer. Be wary.", [
+            Option("What do you mean?", goto="cryptic"),
+            Option("...Okay.", goto=END),
+        ])
+
+        tree.add_node("cryptic", "You will understand... in time.", [
+            Option("(Nod slowly)", goto=END),
+        ])
+
+        return tree

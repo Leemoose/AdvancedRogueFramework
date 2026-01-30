@@ -18,7 +18,7 @@ def create_quest_screen(display, loop):
     if display.quest_number < 1 or display.quest_number > len(loop.player.quests):
         logger.warning("The current quest number does not line up with something that can be displayed")
     else:
-        text = loop.player.quests[display.quest_number - 1].get_description()
+        text = loop.player.quests[display.quest_number - 1].get_description(loop)
 
     text_box = pygame_gui.elements.UITextBox(
         relative_rect=pygame.Rect((message_layout['message_x'], message_layout['message_y']),
