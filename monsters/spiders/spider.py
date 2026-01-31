@@ -1,6 +1,6 @@
 from monsters.monster import Monster
 from monster_implementation import MonsterAI, create_spider_behaviors
-from spell_implementation.effects.poison import Poison
+from spell_system.status_effects import Poison
 
 # Venom on hit, can spin web that slows people
 class Spider(Monster):

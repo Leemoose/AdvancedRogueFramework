@@ -83,6 +83,14 @@ class Loops:
 
         # Time tracking
         self.timer = 0
+        self.total_time = 0
+        self.daytime = True  # True = day, False = night
+
+        # Ocean tide system
+        # tide_level: 0 = low tide, 25 = medium tide, 50 = high tide
+        # tide_direction: 1 = rising, -1 = falling
+        self.tide_level = 25  # Start at medium tide
+        self.tide_direction = 1  # Start rising toward high tide
 
         # Quest state
         self.quest_recieved = False
@@ -377,7 +385,7 @@ class Loops:
         Process game time passage.
 
         Handles status effects, cooldowns, regeneration, quests,
-        and terrain effects for the player and all monsters.
+        terrain effects, day/night cycles, and ocean tides.
 
         Args:
             time: Amount of time (in energy units) that has passed
@@ -385,12 +393,24 @@ class Loops:
         self.timer += time
 
         for _ in range(int(self.timer // GameTime.ENERGY_PER_TURN)):
+            self.total_time += 1
             self.player.statistics.add_turn_details()
+
+            # Check for day/night transition (every 50 turns)
+            if self.total_time % 50 == 0:
+                self._toggle_daytime()
+
+            # Update tide gradually in Ocean (every turn)
+            if self.get_branch() == "Ocean":
+                self._update_tide()
 
             # Player updates
             self.player.character.tick_all_status_effects(self)
             self.player.mage.tick_cooldowns()
-            self.player.character.tick_regen()
+
+            # Disable regen in Forest (per old game behavior)
+            if self.get_branch() != "Forest":
+                self.player.character.tick_regen()
 
             # Quest updates
             for quest in self.player.quests:
@@ -417,6 +437,60 @@ class Loops:
 
         self.timer = self.timer % GameTime.ENERGY_PER_TURN
 
+    def _toggle_daytime(self):
+        """Toggle between day and night, affecting Forest monsters."""
+        self.daytime = not self.daytime
+        time_name = "day" if self.daytime else "night"
+        self.add_message(f"The {time_name} has come.")
+
+        if self.get_branch() == "Forest":
+            self._apply_daytime_to_monsters()
+
+    def _apply_daytime_to_monsters(self):
+        """Apply day/night effects to all monsters on current floor."""
+        for monster in self.generator.monster_map.get_all_entities():
+            if self.daytime:
+                monster.dayify()
+            else:
+                monster.nightify()
+
+    def _update_tide(self):
+        """
+        Update tide level in Ocean.
+
+        Tide oscillates between 0 (low) and 50 (high).
+        Water coverage is determined by comparing tide_level to tile elevations.
+        """
+        # Update tide level
+        self.tide_level += self.tide_direction
+
+        # Reverse direction at extremes
+        if self.tide_level >= 50:
+            self.tide_level = 50
+            self.tide_direction = -1
+        elif self.tide_level <= 0:
+            self.tide_level = 0
+            self.tide_direction = 1
+
+        # Apply water based on current tide level
+        self.generator.tile_map.apply_tide(self.tide_level)
+
+    def is_daytime(self):
+        """Return True if it's daytime, False if nighttime."""
+        return self.daytime
+
+    def is_high_tide(self):
+        """Return True if tide is high (level >= 40) in Ocean."""
+        return self.tide_level >= 40
+
+    def is_low_tide(self):
+        """Return True if tide is low (level <= 10) in Ocean."""
+        return self.tide_level <= 10
+
+    def get_tide_level(self):
+        """Return current tide level (0-50)."""
+        return self.tide_level
+
     # =========================================================================
     # FLOOR TRANSITIONS
     # =========================================================================
@@ -441,6 +515,12 @@ class Loops:
 
         # Calculate new level
         new_level = self.get_depth() + current_stairs.get_level_change()
+
+        # Block leaving the dungeon via up stairs on floor 1
+        if new_level < 1:
+            self.add_message("You can't leave the dungeon yet.")
+            return
+
         new_generator = self.memory.get_saved_floor(self.get_branch(), new_level)
 
         # Pair stairs if not already paired
@@ -456,6 +536,14 @@ class Loops:
         self.player.x, self.player.y = current_stairs.get_paired_stairs().get_location()
         self.player.visited_stairs = []
         self.generator = new_generator
+
+        # Apply day/night effects when changing floors in Forest
+        if self.get_branch() == "Forest":
+            self._apply_daytime_to_monsters()
+
+        # Apply tide when changing floors in Ocean
+        if self.get_branch() == "Ocean":
+            self.generator.tile_map.apply_tide(self.tide_level)
 
         logger.info("Changed to floor %d in branch %s", new_level, self.get_branch())
         logger.debug("Exiting change_floor")
@@ -504,6 +592,15 @@ class Loops:
         self.memory.branch = dest_branch
 
         self.add_message(f"You travel through the gateway to {dest_branch}.")
+
+        # Apply day/night effects when entering Forest
+        if dest_branch == "Forest":
+            self._apply_daytime_to_monsters()
+
+        # Apply tide when entering Ocean
+        if dest_branch == "Ocean":
+            self.generator.tile_map.apply_tide(self.tide_level)
+
         logger.info("Changed to branch %s floor %d", dest_branch, dest_depth)
         logger.debug("Exiting change_branch")
 

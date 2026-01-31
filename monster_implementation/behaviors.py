@@ -331,7 +331,7 @@ class BerserkBehavior(Behavior):
         return -1
 
     def execute(self, ai, loop):
-        from spell_implementation.effects.berserk import Berserk
+        from spell_system.status_effects import Berserk
         ai.parent.character.status.add_status_effect(Berserk(5))
         self.used = True
         loop.add_message(f"{ai.parent.name} goes berserk!")
@@ -545,4 +545,416 @@ def create_skeleton_behaviors():
         CombatBehavior(tendency=(80, 10)),
         MoveBehavior(tendency=(40, 25)),
         WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# SLIME BEHAVIOR (different from Ooze - picks up items instead of destroying)
+# =============================================================================
+
+class SlimeMoveBehavior(MoveBehavior):
+    """Move slowly and pick up items (like old Slime_AI)."""
+
+    def __init__(self, tendency=(30, 10)):
+        super().__init__(tendency)
+        self.name = "move"
+
+
+def create_slime_behaviors():
+    """Slime: slow movement + item hoarding."""
+    return [
+        CombatBehavior(tendency=(60, 10)),
+        SlimeMoveBehavior(),
+        FindItemBehavior(tendency=(70, 10)),
+        PickupBehavior(),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# GARGOYLE BEHAVIOR (petrify gaze)
+# =============================================================================
+
+class PetrifyGazeBehavior(Behavior):
+    """Cast petrify spell when in range and have mana."""
+
+    def __init__(self, tendency=(70, 10), activation_chance=0.3):
+        super().__init__("petrify_gaze", tendency)
+        self.activation_chance = activation_chance
+
+    def rank(self, ai, loop):
+        monster = ai.parent
+        player = loop.player
+        has_mana = monster.character.get_mana() >= 5
+        in_range = monster.get_distance(player.get_x(), player.get_y()) <= 4
+        visible = loop.generator.get_visible(monster.get_x(), monster.get_y())
+
+        # Random activation chance
+        if has_mana and in_range and visible and random.random() < self.activation_chance:
+            return self.randomize()
+        return -1
+
+    def execute(self, ai, loop):
+        monster = ai.parent
+        if monster.mage.known_spells:
+            monster.mage.cast_spell(0, loop.player, loop)
+            loop.add_message(f"{monster.name}'s eyes flash with a petrifying gaze!")
+
+
+def create_gargoyle_behaviors():
+    """Gargoyle: petrify gaze + combat."""
+    return [
+        PetrifyGazeBehavior(),
+        CombatBehavior(tendency=(70, 10)),
+        MoveBehavior(tendency=(40, 15)),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# MINOTAUR BEHAVIOR (shrug off CC)
+# =============================================================================
+
+class ShrugOffBehavior(Behavior):
+    """Attempt to shrug off status effects when stunned/rooted."""
+
+    def __init__(self, tendency=(90, 5), success_chance=0.75):
+        super().__init__("shrug_off", tendency)
+        self.success_chance = success_chance
+
+    def rank(self, ai, loop):
+        monster = ai.parent
+        # Check if monster has any disabling status effects
+        if not monster.character.can_take_action():
+            return self.randomize()
+        return -1
+
+    def execute(self, ai, loop):
+        monster = ai.parent
+        if random.random() < self.success_chance:
+            # Clear stun/root effects
+            monster.character.status.clear_disabling_effects()
+            loop.add_message(f"{monster.name} shrugs off the effect!")
+        else:
+            monster.character.energy -= monster.character.action_costs["move"]
+            loop.add_message(f"{monster.name} struggles against the effect.")
+
+
+def create_minotaur_behaviors():
+    """Minotaur: shrug off CC + aggressive combat."""
+    return [
+        ShrugOffBehavior(),
+        CombatBehavior(tendency=(85, 10)),
+        MoveBehavior(tendency=(50, 15)),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# HOBGOBLIN BEHAVIOR (blink strike)
+# =============================================================================
+
+class BlinkStrikeBehavior(Behavior):
+    """Use blink strike to teleport to and attack target."""
+
+    def __init__(self, tendency=(75, 10)):
+        super().__init__("blink_strike", tendency)
+
+    def rank(self, ai, loop):
+        monster = ai.parent
+        player = loop.player
+        has_mana = monster.character.get_mana() >= 3
+        dist = monster.get_distance(player.get_x(), player.get_y())
+        in_range = 1.5 < dist <= 5  # Not in melee, but within blink range
+        visible = loop.generator.get_visible(monster.get_x(), monster.get_y())
+        spell_ready = monster.mage.known_spells and monster.mage.known_spells[0].ready == 0
+
+        if has_mana and in_range and visible and spell_ready:
+            return self.randomize()
+        return -1
+
+    def execute(self, ai, loop):
+        monster = ai.parent
+        monster.mage.cast_spell(0, loop.player, loop)
+
+
+def create_hobgoblin_behaviors():
+    """Hobgoblin: blink strike + combat + flee."""
+    return [
+        BlinkStrikeBehavior(),
+        CombatBehavior(tendency=(75, 10)),
+        MoveBehavior(tendency=(45, 15)),
+        FleeBehavior(threshold=0.3),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# LOOTER BEHAVIOR (fast item grabbing)
+# =============================================================================
+
+def create_looter_behaviors():
+    """Looter: prioritizes items over combat, very fast grabbing."""
+    return [
+        FindItemBehavior(tendency=(90, 5)),
+        PickupBehavior(tendency=(100, 0)),
+        CombatBehavior(tendency=(50, 10)),
+        MoveBehavior(tendency=(40, 15)),
+        FleeBehavior(threshold=0.2),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# GOBLIN SHAMAN BEHAVIOR (summons goblins)
+# =============================================================================
+
+class SummonBehavior(Behavior):
+    """Summon creatures when conditions are met."""
+
+    def __init__(self, tendency=(60, 10), summon_type='goblin'):
+        super().__init__("summon", tendency)
+        self.summon_type = summon_type
+
+    def rank(self, ai, loop):
+        monster = ai.parent
+        has_mana = monster.character.get_mana() >= 5
+        spell_ready = monster.mage.known_spells and monster.mage.known_spells[0].ready == 0
+
+        if has_mana and spell_ready:
+            return self.randomize()
+        return -1
+
+    def execute(self, ai, loop):
+        monster = ai.parent
+        monster.mage.cast_spell(0, loop.player, loop)
+        loop.add_message(f"{monster.name} summons a {self.summon_type}!")
+
+
+def create_goblin_shaman_behaviors():
+    """Goblin Shaman: summons goblins + flee."""
+    return [
+        SummonBehavior(summon_type='goblin'),
+        CombatBehavior(tendency=(40, 10)),
+        MoveBehavior(tendency=(50, 15)),
+        FleeBehavior(threshold=0.4),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# TORMENTORB BEHAVIOR (torment spell)
+# =============================================================================
+
+class TormentBehavior(Behavior):
+    """Cast torment spell at range."""
+
+    def __init__(self, tendency=(80, 10)):
+        super().__init__("torment", tendency)
+
+    def rank(self, ai, loop):
+        monster = ai.parent
+        player = loop.player
+        has_mana = monster.character.get_mana() >= 5
+        in_range = monster.get_distance(player.get_x(), player.get_y()) <= 5
+        visible = loop.generator.get_visible(monster.get_x(), monster.get_y())
+        spell_ready = monster.mage.known_spells and monster.mage.known_spells[0].ready == 0
+
+        if has_mana and in_range and visible and spell_ready:
+            return self.randomize()
+        return -1
+
+    def execute(self, ai, loop):
+        monster = ai.parent
+        monster.mage.cast_spell(0, loop.player, loop)
+
+
+def create_tormentorb_behaviors():
+    """Tormentorb: torment spell + slow combat."""
+    return [
+        TormentBehavior(),
+        CombatBehavior(tendency=(60, 10)),
+        MoveBehavior(tendency=(30, 10)),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# DUMMY BEHAVIOR (does nothing)
+# =============================================================================
+
+class DummyBehavior(Behavior):
+    """Training dummy - doesn't attack or move."""
+
+    def __init__(self, tendency=(100, 0)):
+        super().__init__("dummy", tendency)
+
+    def rank(self, ai, loop):
+        return self.randomize()
+
+    def execute(self, ai, loop):
+        # Do nothing - just stand there
+        pass
+
+
+def create_dummy_behaviors():
+    """Dummy: does nothing."""
+    return [DummyBehavior()]
+
+
+# =============================================================================
+# FOREST MONSTER BEHAVIORS
+# =============================================================================
+
+class StumpyBehavior(Behavior):
+    """Stumpy waits until player is close, then attacks."""
+
+    def __init__(self, tendency=(70, 10)):
+        super().__init__("ambush", tendency)
+
+    def rank(self, ai, loop):
+        monster = ai.parent
+        player = loop.player
+        dist = monster.get_distance(player.get_x(), player.get_y())
+
+        # Only become aggressive when player is close
+        if dist <= 3:
+            return self.randomize()
+        return -1
+
+    def execute(self, ai, loop):
+        # Just sets up for combat on next turn
+        ai.target = loop.player
+
+
+def create_stumpy_behaviors():
+    """Stumpy: ambush predator, waits until close."""
+    return [
+        StumpyBehavior(),
+        CombatBehavior(tendency=(80, 10)),
+        MoveBehavior(tendency=(30, 10)),
+        WaitBehavior(tendency=(50, 10)),
+    ]
+
+
+def create_treant_behaviors():
+    """Treant: slow but powerful, root on hit handled by weapon."""
+    return [
+        CombatBehavior(tendency=(85, 10)),
+        MoveBehavior(tendency=(25, 10)),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# METALLIC BEAR BEHAVIOR (fury when low health)
+# =============================================================================
+
+class FuryBehavior(Behavior):
+    """Enter fury mode when health is low - massive damage boost."""
+
+    def __init__(self, tendency=(95, 5), threshold=0.25):
+        super().__init__("fury", tendency)
+        self.threshold = threshold
+        self.activated = False
+
+    def rank(self, ai, loop):
+        if self.activated:
+            return -1
+        char = ai.parent.character
+        if char.get_health() / char.get_max_health() < self.threshold:
+            return self.randomize()
+        return -1
+
+    def execute(self, ai, loop):
+        from spell_system.status_effects import Berserk, Haste
+        monster = ai.parent
+        # Apply both berserk and haste for fury mode
+        monster.character.status.add_status_effect(Berserk(10))
+        monster.character.status.add_status_effect(Haste(10, 50))
+        self.activated = True
+        loop.add_message(f"{monster.name} enters a terrifying fury!")
+
+
+def create_metallic_bear_behaviors():
+    """Metallic Bear: fury mode when low health."""
+    return [
+        FuryBehavior(),
+        CombatBehavior(tendency=(85, 10)),
+        MoveBehavior(tendency=(45, 15)),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# INSECT NEST BEHAVIOR (summon when damaged)
+# =============================================================================
+
+class NestDefenseBehavior(Behavior):
+    """Immobile nest that spawns hornets when damaged."""
+
+    def __init__(self, tendency=(100, 0)):
+        super().__init__("nest_defense", tendency)
+        self.last_health = None
+
+    def rank(self, ai, loop):
+        # Always returns this behavior since nest can't do anything else
+        return self.randomize()
+
+    def execute(self, ai, loop):
+        # Nest is immobile, just sits there
+        # Spawning is handled by on_damage effect
+        pass
+
+
+def create_insect_nest_behaviors():
+    """Insect Nest: immobile, spawns on damage."""
+    return [NestDefenseBehavior()]
+
+
+def create_hornet_behaviors():
+    """Hornet: aggressive fast attacker."""
+    return [
+        CombatBehavior(tendency=(90, 5)),
+        MoveBehavior(tendency=(60, 15)),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# WATER MONSTER BEHAVIORS
+# =============================================================================
+
+def create_water_monster_behaviors():
+    """Basic water monster: combat + movement."""
+    return [
+        CombatBehavior(tendency=(75, 10)),
+        MoveBehavior(tendency=(50, 15)),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# RAPTOR BEHAVIOR (fast aggressive hunter)
+# =============================================================================
+
+def create_raptor_behaviors():
+    """Raptor: very aggressive, fast movement."""
+    return [
+        CombatBehavior(tendency=(90, 5)),
+        MoveBehavior(tendency=(70, 15)),
+        WaitBehavior(),
+    ]
+
+
+# =============================================================================
+# GOLEM BEHAVIOR (very slow but tanky)
+# =============================================================================
+
+def create_golem_behaviors():
+    """Golem: slow but relentless."""
+    return [
+        CombatBehavior(tendency=(80, 10)),
+        MoveBehavior(tendency=(20, 5)),
+        WaitBehavior(tendency=(30, 10)),
     ]

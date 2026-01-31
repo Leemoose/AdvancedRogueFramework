@@ -1,0 +1,93 @@
+# Summon School Spells
+# Spells focused on summoning creatures to fight for you
+
+spells:
+  summon_goblin:
+    name: "Summon Goblin"
+    school: summon
+    level: 1
+    description: |
+      Summon a weak goblin to fight for you.
+
+      The goblin is fragile but can distract enemies
+      and deal minor damage.
+    cost: 3
+    cooldown: 10
+    range: 3
+    action_cost: 75
+    targeting: ground
+    icon: 9130
+    required_intelligence: 0
+    tags: [summon, minion]
+    effects:
+      - type: custom
+        handler: summon_creature
+        creature_type: goblin
+        duration: 20
+
+  summon_skeleton:
+    name: "Summon Skeleton"
+    school: summon
+    level: 2
+    description: |
+      Raise a skeleton warrior from the ground.
+
+      Skeletons are resilient and make excellent front-line fighters.
+    cost: 5
+    cooldown: 15
+    range: 3
+    action_cost: 75
+    targeting: ground
+    icon: 9131
+    required_intelligence: 5
+    tags: [summon, minion, undead]
+    effects:
+      - type: custom
+        handler: summon_creature
+        creature_type: skeleton
+        duration: 30
+
+  summon_wolf:
+    name: "Summon Wolf"
+    school: summon
+    level: 2
+    description: |
+      Call a wolf companion to your side.
+
+      Wolves are fast and deal good damage, but are fragile.
+    cost: 6
+    cooldown: 20
+    range: 3
+    action_cost: 75
+    targeting: ground
+    icon: 9132
+    required_intelligence: 5
+    tags: [summon, minion, beast]
+    effects:
+      - type: custom
+        handler: summon_creature
+        creature_type: wolf
+        duration: 25
+
+  summon_golem:
+    name: "Summon Golem"
+    school: summon
+    level: 4
+    description: |
+      Create a powerful stone golem.
+
+      Golems are slow but incredibly tough and deal
+      massive damage.
+    cost: 15
+    cooldown: 50
+    range: 3
+    action_cost: 100
+    targeting: ground
+    icon: 9133
+    required_intelligence: 15
+    tags: [summon, minion, construct, ultimate]
+    effects:
+      - type: custom
+        handler: summon_creature
+        creature_type: golem
+        duration: 40

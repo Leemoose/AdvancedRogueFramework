@@ -4,11 +4,12 @@ from character_implementation import character as C, statistics, Body, Fighter, 
 from navigation_utility import pathfinding
 from loop_workflow import LoopType
 from character_implementation import Inventory
-from spell_implementation.fire_school.burning_attack import BurningAttack
 from item_implementation.consumables.potions import MightPotion
 from src.core.player_config import PlayerConfig
 from src.core.directions import Directions
 from src.core.movement import MovementValidator
+# New spell system
+from spell_system import give_spell
 
 logger = get_logger(__name__)
 
@@ -39,25 +40,13 @@ class Player(Objects):
 
         self.character.status.invincible = PlayerConfig.DEBUG_MODE
 
-        if PlayerConfig.DEBUG_MODE:  # only get the gun if you're invincible at the start
-            bug_test_spells = [
-                BurningAttack(self, cooldown=10, cost=0, damage=3, burn_damage=1, burn_duration=10, range=10)
-                # S.Gun(self),  # 1
-                # S.BlinkStrike(self, cooldown=0, cost=10, damage=25, range=10, action_cost=1), # 3
-                #spell.SummonGargoyle(self), # 2
-                # S.BurningAttack(self, cooldown=10, cost=10, damage=20, burn_damage=10, burn_duration=10, range=10),  # 2
-                # S.Petrify(self, cooldown=0, cost=10, duration=3, activation_chance=1, range=10), #3
-                # S.ShrugOff(self, cooldown=0, cost=10, activation_chance=1.0, action_cost=1), #4
-                # S.Berserk(self, cooldown=0, cost=10, duration=-100, activation_threshold=50, strength_increase=10, action_cost=1), #5
-                # S.Terrify(self, cooldown=0, cost=0, duration=5, activation_chance=1, range=15), #6
-                # S.Escape(self, cooldown=0, cost=0, self_fear=False, dex_buff=5, str_debuff=5, int_debuff=5, haste_duration=5, activation_threshold=1.1, action_cost=1), #7
-                # S.MagicMissile(self, cooldown=0, cost=10, damage=20, range=10, action_cost=100),  # 8
-            ]
-            for spell in bug_test_spells:
-                self.mage.add_spell(spell)
-            self.stat_points = PlayerConfig.DEBUG_STARTING_STAT_POINTS  # free stat points for debugging
+        if PlayerConfig.DEBUG_MODE:
+            # Give debug spells using the new spell system
+            give_spell(self, 'burning_attack')
+            give_spell(self, 'sap_vitality')
+            give_spell(self, 'blink')
+            self.stat_points = PlayerConfig.DEBUG_STARTING_STAT_POINTS
             self.inventory.get_item(MightPotion())
-            # self.inventory.get_item(BlinkScrorb())
         logger.debug("Player initialization complete")
 
     def get_render_text(self):

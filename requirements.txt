@@ -11,6 +11,9 @@ pygame_gui>=0.6.9
 # Serialization for save/load functionality
 dill>=0.3.7
 
+# YAML parsing for spell data files
+pyyaml>=6.0
+
 # Development dependencies (optional)
 # ------------------------------------
 # Uncomment these for development/building:

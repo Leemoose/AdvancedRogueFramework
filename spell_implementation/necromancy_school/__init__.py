@@ -1,1 +1,0 @@
-from .sap_vitality import SapVitality

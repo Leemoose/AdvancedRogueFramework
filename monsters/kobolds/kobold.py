@@ -1,5 +1,5 @@
 from monsters.monster import Monster
-from spell_implementation.fire_school.fire_school import BurningAttack
+from spell_system import give_spell
 from monster_implementation import MonsterAI, create_kobold_behaviors
 from item_implementation.weapons import Spear
 
@@ -10,7 +10,10 @@ class Kobold(Monster):
     def __init__(self, x=-1, y=-1, render_tag=2200, name="Kobold"):  # TileID.KOBOLD from asset_registry.py
         super().__init__(x=x, y=y, render_tag=render_tag, name=name, experience_given=10, health=20, mana=10, gold=5)
         self.skills = []
-        self.mage.add_spell(BurningAttack(self, cooldown=10, cost=0, damage=10, burn_damage=4, burn_duration=5, range=1.5))
+        # Custom burning_attack with higher damage, no cost, melee range
+        give_spell(self, 'burning_attack',
+                   cooldown=10, cost=0, range=1.5,
+                   effects_overrides=[{'amount': 10}, {'damage': 4, 'duration': 5}])
         self.brain = MonsterAI(self, create_kobold_behaviors())
         self.inventory.get_item(Spear())
         self.body.equip(Spear(), self.character.get_attribute("Strength"))

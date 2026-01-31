@@ -1,6 +1,6 @@
 from monsters.monster import Monster
 from monster_implementation import MonsterAI, create_skeleton_behaviors
-from spell_implementation.necromancy_school import SapVitality
+from spell_system import give_spell
 
 """Lich - undead spellcaster king."""
 class Lich(Monster):
@@ -8,7 +8,8 @@ class Lich(Monster):
         super().__init__(x=x, y=y, render_tag=render_tag, name=name, experience_given=10, health=10, mana=10, gold=20)
         self.brain = MonsterAI(self, create_skeleton_behaviors())
         self.skills = []
-        self.mage.add_spell(SapVitality(self, cooldown=5, cost=3, damage=3, range=5))
+        give_spell(self, 'sap_vitality', cooldown=5, cost=3, range=5,
+                   effects_overrides=[{'amount': 3}])
         self.endurance = 0
         self.strength = 0
         self.dexterity = 0

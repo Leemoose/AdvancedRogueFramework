@@ -23,6 +23,7 @@ from .interactables import Interactable
 from .quest import Quest, GoblinSlayerQuest, DungeonDelverQuest
 from .dialogue import DialogueTree, DialogueNode, DialogueOption, Option, END, STAY
 from loop_workflow.looptype import LoopType
+from src.core.asset_registry import TileID
 
 logger = get_logger(__name__)
 
@@ -309,7 +310,7 @@ class QuestGiver(NPC):
 class ForestHermit(QuestGiver):
     """A hermit in the forest who gives an exploration quest."""
 
-    def __init__(self, x=-1, y=-1, render_tag=126, name="Forest Hermit"):
+    def __init__(self, x=-1, y=-1, render_tag=TileID.SENSEI, name="Forest Hermit"):
         self._custom_quest = DungeonDelverQuest(target_depth=3)
         super().__init__(x=x, y=y, render_tag=render_tag, name=name)
         self.quest = self._custom_quest

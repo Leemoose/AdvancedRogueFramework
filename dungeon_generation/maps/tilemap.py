@@ -388,3 +388,70 @@ class TileMap(Maps):
     def get_room_size(self) -> int:
         """Return the maximum room size setting."""
         return self.mapData.get_roomSize()
+
+    def apply_tide(self, tide_level: int) -> None:
+        """
+        Apply water terrain based on tide level.
+
+        Tiles flood when tide_level > tile.elevation.
+        - Deep water: tide is significantly above elevation
+        - Shallow water: tide is slightly above elevation
+        - Dry: tide is at or below elevation
+
+        Args:
+            tide_level: Current tide level (0-50)
+        """
+        from dungeon_generation.terrain import ShallowWaterTerrain, DeepWaterTerrain
+
+        # Water coverage design:
+        # - High elevation (scaled 42-50): always dry, never floods
+        # - Low elevation (scaled 0-16): always deep water
+        # - Mid elevation (scaled 17-41): transitions with tide
+        #
+        # Elevation is scaled to 0-50 range to match tide range
+
+        # First pass: find max elevation to scale properly
+        max_elevation = 0
+        for x in range(self.width):
+            for y in range(self.height):
+                tile = self.get_entity(x, y)
+                if hasattr(tile, 'elevation') and tile.elevation is not None:
+                    max_elevation = max(max_elevation, tile.elevation)
+
+        if max_elevation == 0:
+            return  # No ocean tiles
+
+        # Deep water requires tide to be this much above elevation
+        deep_water_margin = 15
+
+        for x in range(self.width):
+            for y in range(self.height):
+                tile = self.get_entity(x, y)
+
+                # Skip tiles that aren't part of the ocean system
+                if not hasattr(tile, 'elevation') or tile.elevation is None:
+                    continue
+
+                # Scale elevation to 0-50 range
+                scaled_elevation = (tile.elevation / max_elevation) * 50
+
+                # Clear existing water first
+                tile.clear_water_terrain()
+
+                # Always dry zone (elevation 42-50)
+                if scaled_elevation >= 42:
+                    continue
+
+                # Always deep zone (elevation 0-16)
+                if scaled_elevation <= 16:
+                    tile.set_water_terrain(DeepWaterTerrain(x, y))
+                    continue
+
+                # Transition zone (elevation 17-41): compare tide to elevation
+                water_level = tide_level - scaled_elevation
+
+                if water_level >= deep_water_margin:
+                    tile.set_water_terrain(DeepWaterTerrain(x, y))
+                elif water_level >= 0:
+                    tile.set_water_terrain(ShallowWaterTerrain(x, y))
+

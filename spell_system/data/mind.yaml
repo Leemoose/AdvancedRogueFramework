@@ -1,0 +1,121 @@
+# Mind School Spells
+# Spells focused on control, debuffs, and mental manipulation
+
+spells:
+  slow:
+    name: "Lethargy"
+    school: mind
+    level: 1
+    description: |
+      Slow a target's movements and reactions.
+
+      The affected creature takes longer to perform all actions.
+    cost: 4
+    cooldown: 8
+    range: 6
+    action_cost: 50
+    targeting: enemy
+    icon: 9120
+    required_intelligence: 0
+    tags: [mind, debuff, control]
+    effects:
+      - type: apply_status
+        status: slow
+        duration: 5
+        amount: 50
+        scales_with_intelligence: true
+
+  weaken:
+    name: "Weaken"
+    school: mind
+    level: 2
+    description: |
+      Sap the strength from a target.
+
+      The affected creature deals reduced physical damage.
+    cost: 5
+    cooldown: 10
+    range: 6
+    action_cost: 50
+    targeting: enemy
+    icon: 9121
+    required_intelligence: 5
+    tags: [mind, debuff]
+    effects:
+      - type: apply_status
+        status: weak
+        duration: 8
+        amount: 3
+
+  empower:
+    name: "Empower"
+    school: mind
+    level: 2
+    description: |
+      Enhance your physical strength through mental focus.
+
+      Temporarily increases your strength stat.
+    cost: 6
+    cooldown: 15
+    range: 0
+    action_cost: 50
+    targeting: self
+    icon: 9122
+    required_intelligence: 5
+    tags: [mind, buff]
+    effects:
+      - type: self_buff
+        status: might
+        duration: 10
+        amount: 5
+
+  petrify:
+    name: "Petrifying Gaze"
+    school: mind
+    level: 3
+    description: |
+      Turn a creature to stone temporarily.
+
+      The target is completely paralyzed and cannot take any
+      actions while petrified.
+    cost: 8
+    cooldown: 10
+    range: 4
+    action_cost: 75
+    targeting: enemy
+    icon: 9123
+    required_intelligence: 8
+    tags: [mind, control, stun]
+    effects:
+      - type: apply_status
+        status: stun
+        duration: 3
+      - type: message
+        message: "{target} is turned to stone!"
+
+  torment:
+    name: "Torment"
+    school: mind
+    level: 3
+    description: |
+      Inflict mental anguish that damages and slows the target.
+
+      The tormented creature suffers damage based on their
+      current health and becomes sluggish.
+    cost: 10
+    cooldown: 10
+    range: 5
+    action_cost: 100
+    targeting: enemy
+    icon: 9124
+    required_intelligence: 8
+    tags: [mind, damage, debuff]
+    effects:
+      - type: damage
+        amount: 10
+        damage_type: psychic
+        scales_with_intelligence: true
+      - type: apply_status
+        status: slow
+        duration: 3
+        amount: 50

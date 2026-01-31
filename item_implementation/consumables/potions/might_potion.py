@@ -1,5 +1,5 @@
 from .potion import Potion
-from spell_implementation.effects.might import Might
+from spell_system.status_effects import Might
 
 class MightPotion(Potion):
     def __init__(self, render_tag=6003):

@@ -11,6 +11,12 @@ class Tile(Objects):
 
         self.terrain = []
 
+        # Ocean tide system: elevation determines when tile floods
+        # None means not part of ocean (protected or non-ocean tile)
+        # 0 = lowest point (center of large spaces), floods first
+        # Higher values = closer to shore, floods later
+        self.elevation = None
+
     def get_visible(self):
         return self.visible
 
@@ -31,7 +37,13 @@ class Tile(Objects):
         return message
 
     def is_passable(self):
-        return self.passable
+        """Check if tile is passable, including deep water check."""
+        if not self.passable:
+            return False
+        # Check if deep water terrain blocks passage
+        if self.has_deep_water():
+            return False
+        return True
 
     def is_blocking_vision(self):
         return self.blocks_vision
@@ -45,6 +57,50 @@ class Tile(Objects):
     def apply_terrain_effects(self, entity):
         for terrain_mod in self.terrain:
             terrain_mod.apply_effects(entity)
+
+    def has_water_terrain(self):
+        """Check if tile has any water terrain."""
+        for terrain in self.terrain:
+            if terrain.traits.get("water", False):
+                return True
+        return False
+
+    def has_deep_water(self):
+        """Check if tile has deep water terrain."""
+        for terrain in self.terrain:
+            if terrain.traits.get("deep_water", False):
+                return True
+        return False
+
+    def has_shallow_water(self):
+        """Check if tile has shallow water terrain."""
+        for terrain in self.terrain:
+            if terrain.traits.get("shallow_water", False):
+                return True
+        return False
+
+    def clear_water_terrain(self):
+        """Remove all water terrain from this tile."""
+        self.terrain = [t for t in self.terrain if not t.traits.get("water", False)]
+
+    def set_water_terrain(self, water_terrain):
+        """Set water terrain, replacing any existing water terrain."""
+        self.clear_water_terrain()
+        if water_terrain is not None:
+            self.terrain.append(water_terrain)
+
+    def is_passable_for(self, entity=None):
+        """
+        Check if tile is passable for a specific entity.
+        Considers deep water blocking for non-flying entities.
+        """
+        if not self.passable:
+            return False
+        # Check if deep water blocks this entity
+        for terrain in self.terrain:
+            if hasattr(terrain, 'blocks_movement') and terrain.blocks_movement(entity):
+                return False
+        return True
 
     def __str__(self):
         if self.passable:
@@ -130,29 +186,3 @@ class Gateway(Tile):
 
     def has_incoming(self):
         return self.incoming is not None
-
-
-# class Water(Floor):
-#     def __init__(self, x, y, render_tag = 8, passable = True, blocks_vision = False, id_tag = 0, type = "Floor"):
-#         super().__init__(x, y,  render_tag = render_tag, passable = passable, id_tag = id_tag, blocks_vision=blocks_vision, type = type)
-#         self.effect = [Slow(self, duration = 1)]
-#         self.traits["water"]= True
-#
-#     def check_if_status_applies(self, entity):
-#         #If entity can fly, do not let it happen
-#         return True
-
-# class DeepWater(Floor):
-#     def __init__(self, x, y, render_tag = 10, passable = False, blocks_vision = False, id_tag = 0, type = "Floor"):
-#         super().__init__(x, y,  render_tag = render_tag, passable = passable, id_tag = id_tag, blocks_vision=blocks_vision, type = type)
-#         self.effect = [Slow(self, duration = 1)]
-#         self.traits["deep_water"] = True
-#         #Make it so it is passable with flying
-#
-#     def check_if_status_applies(self, entity):
-#         #If entity can fly, do not let it happen
-#         return True
-
-
-
-

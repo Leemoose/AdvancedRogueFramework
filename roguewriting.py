@@ -3,7 +3,7 @@ from display_generation import *
 from loop_workflow import keyboard as K
 import loops as L
 import static_configs
-
+from spell_system import initialize_spell_system
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module = "PIL.PNGImagePlugin")
@@ -11,6 +11,9 @@ warnings.filterwarnings("ignore", category=UserWarning, module = "PIL.PNGImagePl
 #..random.seed(420)
 pygame.init()
 pygame.font.init()
+
+# Initialize the spell system (loads all spell data from YAML files)
+initialize_spell_system()
 
 
 #Size of tiles

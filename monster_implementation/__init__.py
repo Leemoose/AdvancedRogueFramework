@@ -7,4 +7,14 @@ from .behaviors import (
     create_base_behaviors, create_ooze_behaviors, create_goblin_behaviors,
     create_orc_behaviors, create_spider_behaviors, create_kobold_behaviors,
     create_skeleton_behaviors,
+    # New monster behaviors
+    SlimeMoveBehavior, PetrifyGazeBehavior, ShrugOffBehavior,
+    BlinkStrikeBehavior, SummonBehavior, TormentBehavior,
+    DummyBehavior, StumpyBehavior, FuryBehavior, NestDefenseBehavior,
+    create_slime_behaviors, create_gargoyle_behaviors, create_minotaur_behaviors,
+    create_hobgoblin_behaviors, create_looter_behaviors, create_goblin_shaman_behaviors,
+    create_tormentorb_behaviors, create_dummy_behaviors,
+    create_stumpy_behaviors, create_treant_behaviors,
+    create_metallic_bear_behaviors, create_insect_nest_behaviors, create_hornet_behaviors,
+    create_water_monster_behaviors, create_raptor_behaviors, create_golem_behaviors,
 )

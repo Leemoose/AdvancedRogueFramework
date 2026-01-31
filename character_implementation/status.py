@@ -95,3 +95,15 @@ class Status():
         for effect in self.get_status_effects():
             if not effect.active:
                 self.remove_status_effect(effect)
+
+    def clear_disabling_effects(self):
+        """Remove all effects that prevent actions (stun, root, etc.)."""
+        effects_to_remove = []
+        for effect in self.status_effects:
+            # Check if this effect disables actions
+            if hasattr(effect, 'name') and effect.name.lower() in ['stun', 'root', 'paralyze', 'petrify', 'sleep']:
+                effects_to_remove.append(effect)
+        for effect in effects_to_remove:
+            effect.active = False
+            self.remove_status_effect(effect)
+            logger.debug(f"Cleared disabling effect {effect.name} from {self.parent.parent.name}")

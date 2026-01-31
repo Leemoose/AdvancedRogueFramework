@@ -266,6 +266,7 @@ def render_to_map(tilemap) -> None:
     floor_count = 0
     edge_override_count = 0
 
+    # First pass: create basic tiles
     for x in range(tilemap.width):
         temp = []
         for y in range(tilemap.height):
@@ -291,5 +292,144 @@ def render_to_map(tilemap) -> None:
 
         tilemap.entity_map.append(temp)
 
+    # Second pass: add water for Ocean branch
+    if tilemap.get_branch() == "Ocean":
+        _add_ocean_water(tilemap)
+
     logger.info("Render complete: %d walls, %d floors, %d edge overrides",
                wall_count, floor_count, edge_override_count)
+
+
+def _add_ocean_water(tilemap) -> None:
+    """
+    Calculate elevation for Ocean branch maps.
+
+    Sets elevation on floor tiles based on distance from shore (walls/stairs).
+    Lower elevation = center of large spaces (floods first).
+    Higher elevation = closer to shore (floods later).
+    Tiles near stairs have elevation=None and never flood.
+    The actual water terrain is applied by the tide system.
+    """
+    logger.info("Calculating elevations for Ocean branch")
+
+    # First pass: mark tiles near stairs as protected (elevation=None)
+    _mark_protected_tiles(tilemap)
+
+    # Second pass: calculate distance from shore for all floor tiles
+    max_depth = 0
+    depths = {}
+
+    for x in range(1, tilemap.width - 1):
+        for y in range(1, tilemap.height - 1):
+            tile = tilemap.entity_map[x][y]
+            if not tile.has_trait("floor"):
+                continue
+            if tile.elevation == -1:
+                continue  # Protected tile, skip
+
+            # Calculate distance to shore
+            depth = _calculate_distance_to_shore(tilemap, x, y)
+            depths[(x, y)] = depth
+            max_depth = max(max_depth, depth)
+
+    # Third pass: invert depths to get elevation (high at shore, low in center)
+    # Also reset protected tiles from -1 to None
+    for x in range(tilemap.width):
+        for y in range(tilemap.height):
+            tile = tilemap.entity_map[x][y]
+            if tile.elevation == -1:
+                tile.elevation = None  # Protected: never floods
+            elif (x, y) in depths:
+                # Invert: shoreline (depth=0) gets high elevation, center gets low
+                tile.elevation = max_depth - depths[(x, y)]
+
+    # Log statistics
+    elevation_counts = {}
+    for x in range(tilemap.width):
+        for y in range(tilemap.height):
+            tile = tilemap.entity_map[x][y]
+            if hasattr(tile, 'elevation') and tile.elevation is not None:
+                elev = tile.elevation
+                elevation_counts[elev] = elevation_counts.get(elev, 0) + 1
+
+    logger.info("Ocean elevations calculated (0=center, %d=shore): %s", max_depth, elevation_counts)
+
+
+def _mark_protected_tiles(tilemap) -> None:
+    """
+    Mark tiles near stairs as protected from flooding (elevation=None).
+
+    Tiles within 2 spaces of any stairs will never have water.
+    We set elevation to a sentinel value temporarily, then keep it as None.
+    """
+    protected_radius = 2
+
+    for x in range(tilemap.width):
+        for y in range(tilemap.height):
+            tile = tilemap.entity_map[x][y]
+            if tile.has_trait("stairs") or tile.has_trait("gateway"):
+                # Mark all tiles within radius as protected
+                for dx in range(-protected_radius, protected_radius + 1):
+                    for dy in range(-protected_radius, protected_radius + 1):
+                        nx, ny = x + dx, y + dy
+                        if 0 <= nx < tilemap.width and 0 <= ny < tilemap.height:
+                            neighbor = tilemap.entity_map[nx][ny]
+                            if hasattr(neighbor, 'elevation'):
+                                # Use a special marker; will remain None after processing
+                                neighbor.elevation = -1  # Temporary marker
+
+
+def _calculate_distance_to_shore(tilemap, x: int, y: int) -> int:
+    """
+    Calculate distance to shore (walls or protected tiles).
+
+    Returns:
+        Distance value (0 = adjacent to wall/protected, higher = further from shore)
+    """
+    # Check if adjacent to wall or protected tile
+    for dx in range(-1, 2):
+        for dy in range(-1, 2):
+            if dx == 0 and dy == 0:
+                continue
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < tilemap.width and 0 <= ny < tilemap.height:
+                neighbor = tilemap.entity_map[nx][ny]
+                if neighbor.has_trait("wall"):
+                    return 0  # Adjacent to wall = shoreline
+                if hasattr(neighbor, 'elevation') and neighbor.elevation == -1:
+                    return 0  # Adjacent to protected area = shoreline
+
+    # Use minimum cardinal distance to wall/protected as depth
+    return _min_distance_to_shore(tilemap, x, y)
+
+
+def _min_distance_to_shore(tilemap, x: int, y: int) -> int:
+    """
+    Find minimum distance to shore (wall or protected tile) in any cardinal direction.
+
+    Args:
+        tilemap: The tilemap to check
+        x: X coordinate
+        y: Y coordinate
+
+    Returns:
+        Minimum distance to shore in any cardinal direction
+    """
+    directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # N, S, W, E
+    min_dist = float('inf')
+
+    for dx, dy in directions:
+        dist = 0
+        cx, cy = x + dx, y + dy
+        while 0 < cx < tilemap.width - 1 and 0 < cy < tilemap.height - 1:
+            tile = tilemap.entity_map[cx][cy]
+            if tile.has_trait("wall"):
+                break
+            if hasattr(tile, 'elevation') and tile.elevation == -1:
+                break
+            dist += 1
+            cx += dx
+            cy += dy
+        min_dist = min(min_dist, dist)
+
+    return min_dist if min_dist != float('inf') else 0

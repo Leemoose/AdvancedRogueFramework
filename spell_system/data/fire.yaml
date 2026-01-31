@@ -1,0 +1,108 @@
+# Fire School Spells
+# Spells focused on direct damage and damage-over-time effects
+
+spells:
+  burning_attack:
+    name: "Burning Attack"
+    school: fire
+    level: 1
+    description: |
+      Throw a small bolt of fire at a target that sets the target ablaze.
+
+      Deals direct fire damage and applies a burn effect that deals
+      additional damage each turn.
+    cost: 5
+    cooldown: 10
+    range: 5
+    action_cost: 50
+    targeting: enemy
+    icon: 9102
+    required_intelligence: 0
+    tags: [fire, damage, dot]
+    effects:
+      - type: damage
+        amount: 3
+        damage_type: fire
+        scales_with_intelligence: true
+      - type: apply_status
+        status: burn
+        duration: 5
+        damage: 3
+        scales_with_intelligence: true
+
+  fireball:
+    name: "Fireball"
+    school: fire
+    level: 2
+    description: |
+      Hurl an explosive ball of fire at a location.
+
+      Explodes on impact, dealing fire damage to all creatures
+      in the blast radius.
+    cost: 10
+    cooldown: 15
+    range: 8
+    action_cost: 75
+    targeting: ground
+    icon: 9103
+    required_intelligence: 5
+    tags: [fire, damage, aoe]
+    effects:
+      - type: custom
+        handler: aoe_damage
+        amount: 15
+        radius: 2
+        center: target
+        scales_with_intelligence: true
+
+  burning_circle:
+    name: "Burning Circle"
+    school: fire
+    level: 3
+    description: |
+      Create a ring of fire around yourself.
+
+      Damages and burns all adjacent enemies. Does not affect the caster.
+    cost: 8
+    cooldown: 12
+    range: 0
+    action_cost: 50
+    targeting: self
+    icon: 9104
+    required_intelligence: 8
+    tags: [fire, damage, aoe, defensive]
+    effects:
+      - type: custom
+        handler: aoe_damage
+        amount: 10
+        radius: 1
+        center: caster
+        include_caster: false
+        scales_with_intelligence: true
+      - type: message
+        message: "A ring of fire erupts around {caster}!"
+
+  inferno:
+    name: "Inferno"
+    school: fire
+    level: 4
+    description: |
+      Unleash a massive firestorm at a location.
+
+      Deals heavy fire damage in a large area and sets all
+      targets ablaze with an intense burn.
+    cost: 20
+    cooldown: 25
+    range: 10
+    action_cost: 100
+    targeting: ground
+    icon: 9105
+    required_intelligence: 15
+    tags: [fire, damage, aoe, ultimate]
+    effects:
+      - type: custom
+        handler: aoe_damage
+        amount: 25
+        radius: 3
+        center: target
+        scales_with_intelligence: true

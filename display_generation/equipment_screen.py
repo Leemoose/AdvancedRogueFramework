@@ -1,6 +1,7 @@
 import pygame_gui, pygame
 from .ui_constants import UILayout
 from .ui_utils import setup_panel_screen
+from src.core.asset_registry import TileID
 
 
 def create_equipment(display, loop):
@@ -45,10 +46,10 @@ def create_equipment(display, loop):
                 break
         if available_slot:
             pre_text = "change "
-            img = pygame.transform.scale(tileMap.tiles[816], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_SHIELD_OPEN], (medium_w, medium_h))
         else:
             pre_text = "no options "
-            img = pygame.transform.scale(tileMap.tiles[806], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_SHIELD], (medium_w, medium_h))
 
     button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect((first_col_x, outer_cols_y), (medium_w, medium_h)),
@@ -74,9 +75,9 @@ def create_equipment(display, loop):
                     available_slot = True
                     break
             if available_slot:
-                img = pygame.transform.scale(tileMap.tiles[817], (small_w, small_h))
+                img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_RING_OPEN], (small_w, small_h))
             else:
-                img = pygame.transform.scale(tileMap.tiles[807], (small_w, small_h))
+                img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_RING], (small_w, small_h))
         button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect(
                 (first_col_x + (small_w + small_margin_w) * i, outer_cols_y + (medium_h + margin_h)),
@@ -96,10 +97,10 @@ def create_equipment(display, loop):
                 break
         if available_slot:
             pre_text = "change "
-            img = pygame.transform.scale(tileMap.tiles[820], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_AMULET_OPEN], (medium_w, medium_h))
         else:
             pre_text = "no options "
-            img = pygame.transform.scale(tileMap.tiles[821], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_AMULET], (medium_w, medium_h))
     else:
         pre_text = "change "
         img = pygame.transform.scale(
@@ -124,10 +125,10 @@ def create_equipment(display, loop):
                 break
         if available_slot:
             pre_text = "change "
-            img = pygame.transform.scale(tileMap.tiles[814], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_HELMET_OPEN], (medium_w, medium_h))
         else:
             pre_text = "no options "
-            img = pygame.transform.scale(tileMap.tiles[804], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_HELMET], (medium_w, medium_h))
     else:
         pre_text = "change "
         img = pygame.transform.scale(
@@ -152,10 +153,10 @@ def create_equipment(display, loop):
                 break
         if available_slot:
             pre_text = "change "
-            img = pygame.transform.scale(tileMap.tiles[811], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_ARMOR_OPEN], (medium_w, medium_h))
         else:
             pre_text = "no options "
-            img = pygame.transform.scale(tileMap.tiles[801], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_ARMOR], (medium_w, medium_h))
     else:
         pre_text = "change "
         img = pygame.transform.scale(
@@ -180,10 +181,10 @@ def create_equipment(display, loop):
                 break
         if available_slot:
             pre_text = "change "
-            img = pygame.transform.scale(tileMap.tiles[812], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_BOOTS_OPEN], (medium_w, medium_h))
         else:
             pre_text = "no options "
-            img = pygame.transform.scale(tileMap.tiles[802], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_BOOTS], (medium_w, medium_h))
     else:
         pre_text = "change "
         img = pygame.transform.scale(
@@ -213,10 +214,10 @@ def create_equipment(display, loop):
                 break
         if available_slot:
             pre_text = "change "
-            img = pygame.transform.scale(tileMap.tiles[815], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_WEAPON_OPEN], (medium_w, medium_h))
         else:
             pre_text = "no options "
-            img = pygame.transform.scale(tileMap.tiles[805], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_WEAPON], (medium_w, medium_h))
     else:
         pre_text = "change "
         img = pygame.transform.scale(tileMap.tiles[player.body.get_weapon().render_tag], (medium_w, medium_h))
@@ -239,10 +240,10 @@ def create_equipment(display, loop):
                 break
         if available_slot:
             pre_text = "change "
-            img = pygame.transform.scale(tileMap.tiles[813], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_GLOVES_OPEN], (medium_w, medium_h))
         else:
             pre_text = "no options "
-            img = pygame.transform.scale(tileMap.tiles[803], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_GLOVES], (medium_w, medium_h))
     else:
         pre_text = "change "
         img = pygame.transform.scale(
@@ -267,10 +268,10 @@ def create_equipment(display, loop):
                 break
         if available_slot:
             pre_text = "change "
-            img = pygame.transform.scale(tileMap.tiles[818], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_PANTS_OPEN], (medium_w, medium_h))
         else:
             pre_text = "no options "
-            img = pygame.transform.scale(tileMap.tiles[819], (medium_w, medium_h))
+            img = pygame.transform.scale(tileMap.tiles[TileID.EMPTY_PANTS], (medium_w, medium_h))
     else:
         pre_text = "change "
         img = pygame.transform.scale(
