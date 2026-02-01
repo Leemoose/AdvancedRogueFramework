@@ -18,7 +18,7 @@ Design principles:
 
 from abc import ABC, abstractmethod
 from logging_config import get_logger
-from .looptype import LoopType
+from src.core.enums import LoopType
 
 logger = get_logger(__name__)
 

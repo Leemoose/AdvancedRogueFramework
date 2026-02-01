@@ -1,7 +1,7 @@
 import pygame, pygame_gui
 import random
 from copy import deepcopy
-from loop_workflow.loop_utility import get_closest_monster
+from navigation_utility import get_closest_monster  # Moved from loop_workflow to break circular import
 from .ui_constants import UIColors, UILayout
 from .ui_utils import draw_on_button, draw_simple_image_on_button, draw_box_over_button, draw_text_on_button, get_status_text
 

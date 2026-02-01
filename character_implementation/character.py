@@ -2,7 +2,7 @@ import random
 from logging_config import get_logger, log_high_priority
 from .attributes import Attributes
 from .status import Status
-from loop_workflow.looptype import LoopType
+from src.core.enums import LoopType
 
 logger = get_logger(__name__)
 

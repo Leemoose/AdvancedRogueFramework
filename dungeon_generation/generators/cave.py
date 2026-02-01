@@ -13,7 +13,7 @@ The algorithm works by:
 Example usage:
     generator = CaveGenerator(80, 50)
     generator.generate()
-    track_map = generator.get_track_map_render()
+    entity_map = generator.get_entity_map()
     rooms = generator.get_rooms()
 """
 
@@ -92,12 +92,13 @@ class CaveGenerator(MapGenerator):
         """
         Generate the cave map.
 
-        Populates track_map_render with '.' for floors and 'x' for walls.
+        Uses a temporary boolean grid for cellular automata processing,
+        then converts to entity_map with Tile objects at the end.
         Also populates rooms list with Room objects for large floor areas.
         """
         logger.info("Starting cave generation")
 
-        # Step 1: Initialize with random noise
+        # Step 1: Initialize with random noise (using bool grid for efficiency)
         self._initialize_noise()
         logger.debug("Noise initialization complete")
 
@@ -121,6 +122,10 @@ class CaveGenerator(MapGenerator):
 
         # Step 5: Create Room objects from large floor areas
         self._create_rooms()
+
+        # Step 6: Convert bool grid to entity_map with Tile objects
+        self._convert_to_entity_map()
+
         logger.info(
             "Cave generation complete: %d rooms created",
             len(self.rooms)
@@ -132,20 +137,22 @@ class CaveGenerator(MapGenerator):
 
         Each tile has fill_probability chance of being a wall.
         Border tiles are always walls.
+        Uses a boolean grid (True = wall, False = floor) for efficiency.
         """
-        self.track_map_render = []
+        # Use bool grid: True = wall, False = floor
+        self._wall_grid: List[List[bool]] = []
 
         for x in range(self.width):
             column = []
             for y in range(self.height):
                 # Border tiles are always walls
                 if x == 0 or y == 0 or x == self.width - 1 or y == self.height - 1:
-                    column.append("x")
+                    column.append(True)
                 elif random.random() < self.fill_probability:
-                    column.append("x")
+                    column.append(True)
                 else:
-                    column.append(".")
-            self.track_map_render.append(column)
+                    column.append(False)
+            self._wall_grid.append(column)
 
     def _smooth_map(self) -> None:
         """
@@ -156,7 +163,7 @@ class CaveGenerator(MapGenerator):
         - If a tile has >= (9 - wall_threshold) floor neighbors, it becomes floor
         - Otherwise, it stays the same
         """
-        new_map = []
+        new_grid: List[List[bool]] = []
 
         for x in range(self.width):
             column = []
@@ -164,16 +171,16 @@ class CaveGenerator(MapGenerator):
                 wall_count = self._count_wall_neighbors(x, y)
 
                 if wall_count >= self.wall_threshold:
-                    column.append("x")
+                    column.append(True)
                 elif wall_count <= 9 - self.wall_threshold - 1:
                     # More floors than threshold, becomes floor
-                    column.append(".")
+                    column.append(False)
                 else:
                     # Keep current state
-                    column.append(self.track_map_render[x][y])
-            new_map.append(column)
+                    column.append(self._wall_grid[x][y])
+            new_grid.append(column)
 
-        self.track_map_render = new_map
+        self._wall_grid = new_grid
 
     def _count_wall_neighbors(self, x: int, y: int) -> int:
         """
@@ -197,7 +204,7 @@ class CaveGenerator(MapGenerator):
                 if not self._in_bounds(nx, ny):
                     # Out of bounds counts as wall
                     count += 1
-                elif self.track_map_render[nx][ny] == "x":
+                elif self._wall_grid[nx][ny]:
                     count += 1
 
         return count
@@ -209,12 +216,12 @@ class CaveGenerator(MapGenerator):
     def _enforce_borders(self) -> None:
         """Ensure all border tiles are walls."""
         for x in range(self.width):
-            self.track_map_render[x][0] = "x"
-            self.track_map_render[x][self.height - 1] = "x"
+            self._wall_grid[x][0] = True
+            self._wall_grid[x][self.height - 1] = True
 
         for y in range(self.height):
-            self.track_map_render[0][y] = "x"
-            self.track_map_render[self.width - 1][y] = "x"
+            self._wall_grid[0][y] = True
+            self._wall_grid[self.width - 1][y] = True
 
     def _find_regions(self) -> List[Set[Tuple[int, int]]]:
         """
@@ -228,7 +235,7 @@ class CaveGenerator(MapGenerator):
 
         for x in range(self.width):
             for y in range(self.height):
-                if (x, y) not in visited and self.track_map_render[x][y] == ".":
+                if (x, y) not in visited and not self._wall_grid[x][y]:
                     region = self._flood_fill(x, y, visited)
                     if region:
                         regions.append(region)
@@ -264,7 +271,7 @@ class CaveGenerator(MapGenerator):
                 continue
             if not self._in_bounds(x, y):
                 continue
-            if self.track_map_render[x][y] != ".":
+            if self._wall_grid[x][y]:
                 continue
 
             visited.add((x, y))
@@ -377,13 +384,13 @@ class CaveGenerator(MapGenerator):
         """Carve a horizontal tunnel at y from x1 to x2."""
         for x in range(min(x1, x2), max(x1, x2) + 1):
             if self._in_bounds(x, y) and not self._is_border(x, y):
-                self.track_map_render[x][y] = "."
+                self._wall_grid[x][y] = False
 
     def _carve_vertical_tunnel(self, y1: int, y2: int, x: int) -> None:
         """Carve a vertical tunnel at x from y1 to y2."""
         for y in range(min(y1, y2), max(y1, y2) + 1):
             if self._in_bounds(x, y) and not self._is_border(x, y):
-                self.track_map_render[x][y] = "."
+                self._wall_grid[x][y] = False
 
     def _is_border(self, x: int, y: int) -> bool:
         """Check if a tile is on the map border."""
@@ -402,7 +409,7 @@ class CaveGenerator(MapGenerator):
 
         for x in range(self.width):
             for y in range(self.height):
-                if (x, y) not in visited and self.track_map_render[x][y] == ".":
+                if (x, y) not in visited and not self._wall_grid[x][y]:
                     region = self._flood_fill(x, y, visited)
 
                     if len(region) >= self.min_room_size:
@@ -432,15 +439,46 @@ class CaveGenerator(MapGenerator):
 
         return Room(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
 
+    def _convert_to_entity_map(self) -> None:
+        """
+        Convert the boolean wall grid to entity_map with Tile objects.
+
+        Called after all generation is complete to create the final
+        entity_map that TileMap expects.
+        """
+        logger.debug("Converting wall grid to entity map")
+        self.entity_map = []
+        wall_count = 0
+        floor_count = 0
+
+        for x in range(self.width):
+            column = []
+            for y in range(self.height):
+                if self._wall_grid[x][y]:
+                    column.append(self.create_wall(x, y))
+                    wall_count += 1
+                else:
+                    column.append(self.create_floor(x, y))
+                    floor_count += 1
+            self.entity_map.append(column)
+
+        # Clean up temporary grid
+        del self._wall_grid
+
+        logger.debug("Entity map created: %d walls, %d floors", wall_count, floor_count)
+
     def __str__(self) -> str:
         """Return ASCII representation of the cave map."""
-        if not self.track_map_render:
+        if not self.entity_map:
             return "<CaveGenerator: not generated>"
 
         lines = []
         for y in range(self.height):
             row = ""
             for x in range(self.width):
-                row += self.track_map_render[x][y]
+                if self.entity_map[x][y].is_passable():
+                    row += "."
+                else:
+                    row += "x"
             lines.append(row)
         return "\n".join(lines)

@@ -45,7 +45,7 @@ class RoomsAndCorridorsGenerator(MapGenerator):
         )
         generator.generate()
         rooms = generator.get_rooms()
-        render_map = generator.get_track_map_render()
+        entity_map = generator.get_entity_map()
     """
 
     def __init__(
@@ -83,11 +83,10 @@ class RoomsAndCorridorsGenerator(MapGenerator):
         Generate a dungeon with rooms connected by corridors.
 
         Creates a map by:
-        1. Creating an empty render map (all walls)
+        1. Creating an empty entity map (all walls)
         2. Placing rooms at random non-overlapping positions
-        3. Carving squircle-shaped rooms into the render map
+        3. Carving squircle-shaped rooms into the entity map
         4. Connecting adjacent rooms with L-shaped corridors
-        5. Optionally converting the render map to tile entities
         """
         logger.info(
             "Generating rooms and corridors map: %dx%d, target rooms=%d",
@@ -111,7 +110,7 @@ class RoomsAndCorridorsGenerator(MapGenerator):
     def _initialize_map(self) -> None:
         """Initialize the map with all wall tiles."""
         logger.debug("Initializing map with walls")
-        self.track_map_render = self.create_empty_render_map()
+        self.create_empty_entity_map()
 
     def _construct_rooms(self) -> None:
         """
@@ -251,7 +250,7 @@ class RoomsAndCorridorsGenerator(MapGenerator):
 
     def _carve_room(self, room: Room) -> None:
         """
-        Carve a squircle-shaped room into the render map.
+        Carve a squircle-shaped room into the entity map.
 
         Uses squircle geometry to create rooms that blend between
         square and circular shapes based on the circularity parameter.
@@ -283,7 +282,7 @@ class RoomsAndCorridorsGenerator(MapGenerator):
                 squircle_val = x_sqrd + y_sqrd - squirc_const * x_sqrd * y_sqrd
 
                 if squircle_val < radius_sqrd:
-                    self.track_map_render[x + room.x][y + room.y] = "."
+                    self.set_floor(x + room.x, y + room.y)
                     tiles_carved += 1
 
         logger.debug("Carved %d tiles for room", tiles_carved)
@@ -337,8 +336,8 @@ class RoomsAndCorridorsGenerator(MapGenerator):
         tiles_carved_1 = 0
         for x in range(lower1_x, upper1_x):
             for y in range(lower1_y, upper1_y):
-                if self.track_map_render[x][y] == "x":
-                    self.track_map_render[x][y] = "."
+                if self.is_wall(x, y):
+                    self.set_floor(x, y)
                     tiles_carved_1 += 1
 
         # Second corridor segment (corner to room2 center)
@@ -350,8 +349,8 @@ class RoomsAndCorridorsGenerator(MapGenerator):
         tiles_carved_2 = 0
         for x in range(lower2_x, upper2_x):
             for y in range(lower2_y, upper2_y):
-                if self.track_map_render[x][y] == "x":
-                    self.track_map_render[x][y] = "."
+                if self.is_wall(x, y):
+                    self.set_floor(x, y)
                     tiles_carved_2 += 1
 
         logger.debug(
@@ -361,13 +360,16 @@ class RoomsAndCorridorsGenerator(MapGenerator):
 
     def __str__(self) -> str:
         """Return ASCII representation of the generated map."""
-        if not self.track_map_render:
+        if not self.entity_map:
             return "<Map not generated>"
 
         lines = []
         for y in range(self.height):
             row = ""
             for x in range(self.width):
-                row += self.track_map_render[x][y]
+                if self.entity_map[x][y].is_passable():
+                    row += "."
+                else:
+                    row += "x"
             lines.append(row)
         return "\n".join(lines)

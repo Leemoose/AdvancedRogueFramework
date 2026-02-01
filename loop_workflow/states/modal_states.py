@@ -6,7 +6,7 @@ These states handle overlay screens and dialogs.
 
 from logging_config import get_logger
 from ..game_states import GameState
-from ..looptype import LoopType
+from src.core.enums import LoopType
 from ..input_actions import key_to_index, is_quest_number_key
 from display_generation import (
     create_death_screen,

@@ -6,7 +6,7 @@ Uses input_actions module for key mappings to reduce repetition.
 """
 
 from logging_config import get_logger
-from .looptype import LoopType
+from src.core.enums import LoopType
 from .input_actions import (
     is_direction_key,
     get_direction,

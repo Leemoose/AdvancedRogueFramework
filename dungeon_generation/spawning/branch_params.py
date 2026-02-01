@@ -248,14 +248,14 @@ class OceanParams(BranchParams):
         """
         # Check if monster has a water restriction
         if hasattr(monster, 'restriction') and monster.restriction == "deep_water":
-            # Check if tile is deep water (when water tiles are implemented)
-            # For now, just check passability
+            # Check if tile has deep water terrain
             x, y = location
-            if hasattr(tile_map, 'track_map_render'):
-                tile_char = tile_map.track_map_render[x][y]
-                if tile_char != "dw":  # "dw" = deep water (future tile type)
-                    return False
-            return generator.get_passable(location)
+            tile = tile_map.get_entity(x, y)
+            if tile and hasattr(tile, 'terrain'):
+                for terrain in tile.terrain:
+                    if terrain.has_trait("deep_water"):
+                        return True
+            return False  # No deep water terrain found
 
         # Default: just check passability
         return generator.get_passable(location)

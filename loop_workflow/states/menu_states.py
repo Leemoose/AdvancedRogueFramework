@@ -6,7 +6,7 @@ These states handle navigation menus and information screens.
 
 from logging_config import get_logger
 from ..game_states import GameState
-from ..looptype import LoopType
+from src.core.enums import LoopType
 from ..input_actions import get_main_screen_action, get_paused_action
 from display_generation import (
     create_main_screen,

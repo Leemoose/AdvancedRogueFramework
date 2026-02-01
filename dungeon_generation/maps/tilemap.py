@@ -6,13 +6,12 @@ This map is responsible for all the tiles in the game.
 Supports multiple generation strategies via the generators package.
 """
 
-import copy
 import random
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from logging_config import get_logger
 
 from .maps import Maps
-from .map_utility import construct_rooms, render_to_map, place_stairs, place_gateways
+from .map_utility import place_stairs, place_gateways, add_ocean_water
 
 # Import generators - use lazy loading to avoid circular imports
 if TYPE_CHECKING:
@@ -84,8 +83,7 @@ class TileMap(Maps):
     The generator type is determined by mapData.generator_type.
     """
 
-    def __init__(self, mapData, depth: int, branch: str, use_legacy_generation: bool = False,
-                 gateway_data=None):
+    def __init__(self, mapData, depth: int, branch: str, gateway_data=None):
         """
         Initialize the TileMap.
 
@@ -93,8 +91,7 @@ class TileMap(Maps):
             mapData: MapData configuration object
             depth: Floor depth (1-indexed)
             branch: Dungeon branch name
-            use_legacy_generation: If True, use the old generation code path
-                                  (for backwards compatibility during transition)
+            gateway_data: Optional GatewayData for inter-branch connections
         """
         logger.info("Initializing TileMap: depth=%d, branch=%s", depth, branch)
         super().__init__(mapData.width, mapData.height)
@@ -105,34 +102,21 @@ class TileMap(Maps):
         self.depth = depth
         self.branch = branch
 
-        if use_legacy_generation:
-            # Legacy path: use old generation functions
-            logger.debug("Using legacy generation path")
-            logger.debug("Creating track_map_render: %dx%d", self.width, self.height)
-            self.track_map_render = [x[:] for x in [["x"] * self.height] * self.width]
+        # Use generator strategy to create map
+        generator_type = getattr(mapData, 'generator_type', 'rooms_corridors')
+        logger.debug("Using generator: %s", generator_type)
 
-            logger.debug("Constructing rooms...")
-            construct_rooms(self)
+        generator = _get_generator(mapData)
+        generator.generate()
 
-            logger.debug("Rendering to map...")
-            render_to_map(self)
-        else:
-            # New path: use generator strategy
-            generator_type = getattr(mapData, 'generator_type', 'rooms_corridors')
-            logger.debug("Using new generator: %s", generator_type)
+        # Copy results from generator
+        self.rooms = generator.get_rooms()
+        self.entity_map = generator.get_entity_map()
 
-            generator = _get_generator(mapData)
-            generator.generate()
-
-            # Copy results from generator
-            self.track_map_render = generator.get_track_map_render()
-            self.rooms = generator.get_rooms()
-            self.entity_map = generator.get_entity_map()
-
-            # If entity_map wasn't created by generator, create it now
-            if not self.entity_map:
-                logger.debug("Rendering to map...")
-                render_to_map(self)
+        # Apply ocean water for Ocean branch
+        if branch == "Ocean":
+            logger.debug("Adding ocean water...")
+            add_ocean_water(self)
 
         logger.debug("Placing stairs...")
         place_stairs(self)
@@ -334,29 +318,6 @@ class TileMap(Maps):
                 self.get_point_in_squircle(room.x + room.width - 1,
                                           room.y + room.width - 1,
                                           circularity))
-
-    def get_random_location_ascaii(self, stairs_block: bool = True) -> tuple:
-        """
-        Get a random passable location from the ASCII render map.
-
-        Args:
-            stairs_block: Whether stairs block placement (unused currently)
-
-        Returns:
-            Tuple (x, y) of a random floor location
-        """
-        logger.debug("Finding random location from ASCII map")
-        startx = random.randint(0, self.width - 1)
-        starty = random.randint(0, self.height - 1)
-
-        attempts = 0
-        while not self.track_map_render[startx][starty] == ".":
-            startx = random.randint(0, self.width - 1)
-            starty = random.randint(0, self.height - 1)
-            attempts += 1
-
-        logger.debug("Found ASCII location (%d, %d) after %d attempts", startx, starty, attempts)
-        return startx, starty
 
     def get_random_location(self, stairs_block: bool = True) -> tuple:
         """

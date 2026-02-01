@@ -4,7 +4,7 @@ Key binding state for rebinding controls.
 
 from logging_config import get_logger
 from ..game_states import GameState
-from ..looptype import LoopType
+from src.core.enums import LoopType
 from display_generation import create_binding_screen
 
 logger = get_logger(__name__)

@@ -1,28 +1,11 @@
-from enum import Enum, auto
+"""
+DEPRECATED: LoopType has moved to src.core.enums
 
-class LoopType(Enum):
-    none = -1
-    action = auto()
-    spell = auto()
-    inventory = auto()
-    equipment = auto()
-    main = auto()
-    classes = auto()
-    items = auto()
-    examine = auto()
-    trade = auto()
-    paused = auto()
-    targeting = auto()
-    specific_examine = auto()
-    enchant = auto()
-    quest = auto()
-    level_up = auto()
-    victory = auto()
-    help = auto()
-    death = auto()
-    story = auto()
-    resting = auto()
-    pathing = auto()
-    binding = auto()
-    spell_individual = auto()
-    quickcast = auto()
+This file re-exports LoopType for backwards compatibility.
+New code should import from src.core.enums directly:
+    from src.core.enums import LoopType
+"""
+
+from src.core.enums import LoopType
+
+__all__ = ['LoopType']

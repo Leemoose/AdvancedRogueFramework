@@ -4,7 +4,7 @@ from .key_screens import key_targeting_screen, key_action, key_explore
 from .bindings import Bindings
 from .keyboard_utility import *
 from navigation_utility import pathfinding
-from loop_workflow import LoopType
+from src.core.enums import LoopType
 from logging_config import get_logger, log_high_priority
 from src.core.directions import Directions
 import time

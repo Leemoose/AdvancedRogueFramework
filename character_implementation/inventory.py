@@ -1,4 +1,4 @@
-from loop_workflow.looptype import LoopType
+from src.core.enums import LoopType
 
 class Inventory():
     def __init__(self, parent, gold = 0):

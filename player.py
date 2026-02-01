@@ -2,7 +2,7 @@ from logging_config import get_logger
 from objects import Objects
 from character_implementation import character as C, statistics, Body, Fighter, Mage
 from navigation_utility import pathfinding
-from loop_workflow import LoopType
+from src.core.enums import LoopType
 from character_implementation import Inventory
 from item_implementation.consumables.potions import MightPotion
 from src.core.player_config import PlayerConfig

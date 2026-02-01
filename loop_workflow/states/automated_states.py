@@ -7,7 +7,7 @@ runs without player input until interrupted or completed.
 
 from logging_config import get_logger
 from ..game_states import GameState
-from ..looptype import LoopType
+from src.core.enums import LoopType
 
 logger = get_logger(__name__)
 

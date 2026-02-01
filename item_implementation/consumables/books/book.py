@@ -1,5 +1,5 @@
 from item_implementation.items import Item
-from loop_workflow.looptype import LoopType
+from src.core.enums import LoopType
 
 class Book(Item):
     def __init__(self, render_tag, skill, name = "Book"):

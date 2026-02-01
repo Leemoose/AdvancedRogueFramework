@@ -1,16 +1,11 @@
-from loop_workflow import *
+"""
+DEPRECATED: get_closest_monster has moved to navigation_utility.spatial_queries
 
-def get_closest_monster(loop):
-    player = loop.player
-    monsterID = loop.generator.monster_map.dict
-    tile_map = loop.generator.tile_map
-    closest_dist = 100000
-    closest_monster = player
-    for monster_key in monsterID.subjects:
-        monster = monsterID.get_subject(monster_key)
-        dist = player.get_distance(monster.x, monster.y)
+This file re-exports for backwards compatibility.
+New code should import from navigation_utility directly:
+    from navigation_utility import get_closest_monster
+"""
 
-        if dist < closest_dist and tile_map.get_entity(monster.x, monster.y).get_visible():
-            closest_dist = dist
-            closest_monster = monster
-    return closest_monster
+from navigation_utility.spatial_queries import get_closest_monster
+
+__all__ = ['get_closest_monster']

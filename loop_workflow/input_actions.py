@@ -7,7 +7,7 @@ This module provides:
 - Helper functions to reduce elif chains in key_screens.py
 """
 
-from .looptype import LoopType
+from src.core.enums import LoopType
 
 
 # =============================================================================

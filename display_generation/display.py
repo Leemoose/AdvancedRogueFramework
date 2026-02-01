@@ -3,7 +3,7 @@ from .ui_constants import UIColors, UILayout, HelpText, EquipmentTileIDs, UITile
 from .ui_utils import draw_on_button, get_status_text, draw_help_bar
 import pygame
 import pygame_gui
-from loop_workflow.loop_utility import LoopType
+from src.core.enums import LoopType  # Moved from loop_workflow to break circular import
 from src.core.asset_cache import AssetCache
 from src.core.constants import NO_ENTITY
 import warnings

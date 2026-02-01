@@ -6,7 +6,7 @@ These states handle the magic system UI.
 
 from logging_config import get_logger
 from ..game_states import GameState
-from ..looptype import LoopType
+from src.core.enums import LoopType
 from ..input_actions import key_to_index, is_quick_cast_key, get_skill_index
 from display_generation import (
     create_spellcasting,

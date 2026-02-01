@@ -22,7 +22,7 @@ from logging_config import get_logger
 from .interactables import Interactable
 from .quest import Quest, GoblinSlayerQuest, DungeonDelverQuest
 from .dialogue import DialogueTree, DialogueNode, DialogueOption, Option, END, STAY
-from loop_workflow.looptype import LoopType
+from src.core.enums import LoopType
 from src.core.asset_registry import TileID
 
 logger = get_logger(__name__)

@@ -103,10 +103,7 @@ class PillarHallGenerator(MapGenerator):
     def _initialize_map(self) -> None:
         """Initialize the map with all wall tiles."""
         logger.debug("Initializing map with walls")
-        self.track_map_render = [
-            ["x" for _ in range(self.height)]
-            for _ in range(self.width)
-        ]
+        self.create_empty_entity_map()
 
     def _carve_floor_area(self) -> None:
         """
@@ -124,7 +121,7 @@ class PillarHallGenerator(MapGenerator):
         floor_tiles = 0
         for x in range(floor_start_x, floor_end_x):
             for y in range(floor_start_y, floor_end_y):
-                self.track_map_render[x][y] = "."
+                self.set_floor(x, y)
                 floor_tiles += 1
 
         logger.debug("Carved %d floor tiles", floor_tiles)
@@ -213,7 +210,7 @@ class PillarHallGenerator(MapGenerator):
                 # Verify we're within bounds and not overwriting border
                 if (self.border_width <= px < self.width - self.border_width and
                         self.border_width <= py < self.height - self.border_width):
-                    self.track_map_render[px][py] = "x"
+                    self.set_wall(px, py)
                     logger.debug("Placed pillar tile at (%d, %d)", px, py)
 
     def _create_room(self) -> None:
@@ -250,19 +247,22 @@ class PillarHallGenerator(MapGenerator):
         pillars = []
         for x in range(self.border_width, self.width - self.border_width):
             for y in range(self.border_width, self.height - self.border_width):
-                if self.track_map_render[x][y] == "x":
+                if self.is_wall(x, y):
                     pillars.append((x, y))
         return pillars
 
     def __str__(self) -> str:
         """Return ASCII representation of the generated map."""
-        if not self.track_map_render:
+        if not self.entity_map:
             return "<Map not generated>"
 
         lines = []
         for y in range(self.height):
             row = ""
             for x in range(self.width):
-                row += self.track_map_render[x][y]
+                if self.entity_map[x][y].is_passable():
+                    row += "."
+                else:
+                    row += "x"
             lines.append(row)
         return "\n".join(lines)

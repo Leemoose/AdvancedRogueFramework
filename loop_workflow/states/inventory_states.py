@@ -6,7 +6,7 @@ These states handle item management, equipment, and item interactions.
 
 from logging_config import get_logger
 from ..game_states import GameState
-from ..looptype import LoopType
+from src.core.enums import LoopType
 from ..input_actions import (
     get_equipment_slot,
     get_inventory_filter,

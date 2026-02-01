@@ -22,7 +22,7 @@ from dungeon_generation.configuration_data.gateway_data import GatewayData
 import player
 from navigation_utility import shadowcasting
 from loop_workflow import MessageHandler, targets as T
-from loop_workflow.looptype import LoopType
+from src.core.enums import LoopType  # Moved from loop_workflow to break circular imports
 from loop_workflow.memory import Memory
 from loop_workflow.game_states import StateManager
 from loop_workflow.states import create_all_states

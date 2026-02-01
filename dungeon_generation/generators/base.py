@@ -32,8 +32,6 @@ class MapGenerator(ABC):
         width: Map width in tiles
         height: Map height in tiles
         rooms: List of Room objects created during generation
-        track_map_render: 2D list of characters representing the map
-                         ('.' for floor, 'x' for wall)
         entity_map: 2D list of tile entities (Floor, Wall, etc.)
 
     Subclasses must implement:
@@ -42,8 +40,11 @@ class MapGenerator(ABC):
     Helper methods provided:
         - create_floor(): Create a Floor tile at given coordinates
         - create_wall(): Create a Wall tile at given coordinates
-        - create_empty_render_map(): Create an empty ASCII render map
-        - create_entity_map_from_render(): Convert ASCII map to tile entities
+        - create_empty_entity_map(): Create a map filled with Wall tiles
+        - set_floor(): Replace a tile with a Floor at given coordinates
+        - set_wall(): Replace a tile with a Wall at given coordinates
+        - is_wall(): Check if tile at coordinates is a Wall
+        - is_floor(): Check if tile at coordinates is a Floor
     """
 
     def __init__(self, width: int, height: int):
@@ -58,7 +59,6 @@ class MapGenerator(ABC):
         self.width = width
         self.height = height
         self.rooms: List['Room'] = []
-        self.track_map_render: List[List[str]] = []
         self.entity_map: List[List[Any]] = []
 
     @abstractmethod
@@ -67,15 +67,10 @@ class MapGenerator(ABC):
         Generate the map layout.
 
         This method must be implemented by subclasses to create their
-        specific map layout by populating track_map_render, rooms, and
-        optionally entity_map.
+        specific map layout by populating entity_map and rooms.
 
-        The track_map_render should be a width x height 2D list where:
-        - '.' represents floor tiles
-        - 'x' represents wall tiles
-
-        After generation, entity_map can be populated by calling
-        create_entity_map_from_render() or by custom logic.
+        The entity_map should be a width x height 2D list of Tile objects
+        (Floor, Wall, etc.).
         """
         pass
 
@@ -90,10 +85,6 @@ class MapGenerator(ABC):
     def get_rooms(self) -> List['Room']:
         """Return the list of rooms in the map."""
         return self.rooms
-
-    def get_track_map_render(self) -> List[List[str]]:
-        """Return the ASCII render map."""
-        return self.track_map_render
 
     def get_entity_map(self) -> List[List[Any]]:
         """Return the 2D list of tile entities."""
@@ -125,61 +116,62 @@ class MapGenerator(ABC):
         """
         return Wall(x, y)
 
-    def create_empty_render_map(self) -> List[List[str]]:
+    def create_empty_entity_map(self) -> List[List[Any]]:
         """
-        Create an empty ASCII render map filled with wall characters.
-
-        The render map uses 'x' for walls and '.' for floors. This is an
-        intermediate representation used during generation before converting
-        to actual tile entities.
+        Create an entity map filled with Wall tiles.
 
         Returns:
-            A 2D list of 'x' characters representing an all-wall map
+            A 2D list of Wall tile objects
         """
-        return [['x' for _ in range(self.height)] for _ in range(self.width)]
+        logger.debug("Creating empty entity map with walls")
+        self.entity_map = [
+            [self.create_wall(x, y) for y in range(self.height)]
+            for x in range(self.width)
+        ]
+        return self.entity_map
 
-    def create_entity_map_from_render(self) -> List[List[Any]]:
+    def set_floor(self, x: int, y: int) -> None:
         """
-        Convert the ASCII render map to a 2D list of tile entities.
+        Set the tile at (x, y) to a Floor.
 
-        Interprets the track_map_render characters and creates appropriate tile
-        objects. Edge tiles are always converted to walls for safety.
+        Args:
+            x: X coordinate
+            y: Y coordinate
+        """
+        self.entity_map[x][y] = self.create_floor(x, y)
+
+    def set_wall(self, x: int, y: int) -> None:
+        """
+        Set the tile at (x, y) to a Wall.
+
+        Args:
+            x: X coordinate
+            y: Y coordinate
+        """
+        self.entity_map[x][y] = self.create_wall(x, y)
+
+    def is_wall(self, x: int, y: int) -> bool:
+        """
+        Check if the tile at (x, y) is a Wall.
+
+        Args:
+            x: X coordinate
+            y: Y coordinate
 
         Returns:
-            A 2D list of tile entities (Floor or Wall objects)
-
-        Note:
-            - Edge tiles (x=0, y=0, x=width-1, y=height-1) are always walls
-            - Unknown characters default to walls
+            True if the tile is a Wall
         """
-        logger.debug("Converting render map to entity map")
-        entity_map: List[List[Any]] = []
-        wall_count = 0
-        floor_count = 0
+        return self.entity_map[x][y].has_trait("wall")
 
-        for x in range(self.width):
-            column: List[Any] = []
-            for y in range(self.height):
-                text = self.track_map_render[x][y]
+    def is_floor(self, x: int, y: int) -> bool:
+        """
+        Check if the tile at (x, y) is a Floor (passable).
 
-                # Edge tiles must be walls for map boundaries
-                if x == 0 or y == 0 or x == self.width - 1 or y == self.height - 1:
-                    column.append(self.create_wall(x, y))
-                    wall_count += 1
-                elif text == "x":
-                    column.append(self.create_wall(x, y))
-                    wall_count += 1
-                elif text == ".":
-                    column.append(self.create_floor(x, y))
-                    floor_count += 1
-                else:
-                    # Unknown character, default to wall
-                    logger.warning("Unknown tile '%s' at (%d, %d), defaulting to wall", text, x, y)
-                    column.append(self.create_wall(x, y))
-                    wall_count += 1
+        Args:
+            x: X coordinate
+            y: Y coordinate
 
-            entity_map.append(column)
-
-        logger.debug("Entity map created: %d walls, %d floors", wall_count, floor_count)
-        self.entity_map = entity_map
-        return entity_map
+        Returns:
+            True if the tile is passable
+        """
+        return self.entity_map[x][y].is_passable()

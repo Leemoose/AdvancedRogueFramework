@@ -7,7 +7,7 @@ attacks, and interacts with the world.
 
 from logging_config import get_logger
 from ..game_states import GameState
-from ..looptype import LoopType
+from src.core.enums import LoopType
 from ..input_actions import (
     get_direction,
     get_action_screen_change,
