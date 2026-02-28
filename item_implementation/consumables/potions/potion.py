@@ -8,8 +8,10 @@ class Potion(Item):
         super().__init__(-1, -1, 0, render_tag, name)
         self.equipment_type = "Potion"
         self.consumeable = True
+        self.throwable = True
         self.stackable = True
         self.stacks = 1
+        self.range = 5
         self.equipable = False
         self.can_be_levelled = False
         self.attached_skill_exists = False
@@ -24,11 +26,22 @@ class Potion(Item):
     def can_be_unequipped(self, entity):
         return False
 
-    def activate_once(self, entity):
+    def throw(self, x, y, loop):
+        pass
+
+    def quaff(self, entity):
+        pass
+
+    def apply_to_equipment(self, entity):
+        pass
+
+    def apply_to_environment(self, entity):
+        pass
+
+    def apply_to_skin(self, entity):
         pass
 
     def activate(self, entity):
-        self.activate_once(entity)
         self.stacks -= 1
         if self.stacks == 0:
             self.destroy = True

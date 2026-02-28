@@ -10,6 +10,7 @@ class Status():
         self.can_grab = True
         self.can_spellcast = True
         self.can_take_actions = True
+        self.can_throw = True
         self.flee = False
         self.can_teleport = True
         self.safe_rest = True

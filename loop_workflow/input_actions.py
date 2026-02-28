@@ -170,6 +170,7 @@ ITEM_ACTIONS = {
     "q": "quaff",
     "r": "read",
     "a": "activate",
+    "t": "throw"
 }
 
 

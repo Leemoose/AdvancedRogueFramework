@@ -1,6 +1,6 @@
 from .ui import *
 from .ui_constants import UIColors, UILayout, HelpText, EquipmentTileIDs, UITileIDs
-from .ui_utils import draw_on_button, get_status_text, draw_help_bar
+from .ui_utils import draw_on_button, get_status_text, draw_help_bar, calculate_button_grid_offsets
 import pygame
 import pygame_gui
 from src.core.enums import LoopType  # Moved from loop_workflow to break circular import
@@ -475,7 +475,6 @@ class Display:
         entity_button_height = layout['button_height']
         entity_button_offset_from_left = layout['button_x']
         entity_button_offset_from_top = layout['button_y']
-        entity_button_offset_from_each_other = layout['button_spacing']
 
         entity_text_offset_from_left = layout['text_x']
         entity_text_offset_from_top = layout['text_y']
@@ -503,9 +502,9 @@ class Display:
                 manager=self.uiManager,
                 object_id='#title_small')
 
-        if item_screen:
+        if item_screen and entity.has_trait("item"):
             item = entity
-            show = False
+            item_buttons = []
             if item.can_be_levelled:
                 item_level = item.level
                 if item_level > 1:
@@ -518,50 +517,36 @@ class Display:
                         text=addition,
                         manager=self.uiManager,
                         object_id='#title_addition')
-            pretext = ""
-            action = ""
             if item.equipable:
                 if item.equipped:
-                    pretext = "Unequip"
-                    action = "u"
-                    show = True
-                    if item.cursed:
-                        show = False
+                    item_buttons.append(("Unequip", "u"))
                 else:
-                    pretext = "Equip"
-                    action = "e"
-                    show = True
-            elif item.consumeable and item.equipment_type == "Potiorb":
-                pretext = "Quaff"
-                action = "q"
-                show = True
-            elif item.consumeable and item.equipment_type == "Scrorb" or item.equipment_type == "Book":
-                pretext = "Read"
-                action = "r"
-                show = True
-            elif item.consumeable and item.has_trait("consumeable"):
-                pretext = "Activate"
-                action = "a"
-                show = True
-            if create == True:
-                if show:
-                    button = pygame_gui.elements.UIButton(
-                        relative_rect=pygame.Rect((entity_button_offset_from_left, entity_button_offset_from_top),
-                                                  (entity_button_width, entity_button_height)),
-                        text=pretext,
-                        manager=self.uiManager)
-                    button.action = action
+                    item_buttons.append(("Equip", "e"))
+            if item.consumeable:
+                if item.equipment_type == "Potion":
+                    item_buttons.append(("Quaff", "q"))
+                elif item.equipment_type == "Scroll" or item.equipment_type == "Book":
+                    item_buttons.append(("Read", "r"))
+                elif item.has_trait("consumeable"):
+                    item_buttons.append(("Activate", "a"))
+            if item.throwable:
+                item_buttons.append(("Throw", "t"))
+            if item.dropable:
+                item_buttons.append(("Drop", "d"))
 
-                buttons_drawn += 1
-
-                button = pygame_gui.elements.UIButton(
-                    relative_rect=pygame.Rect((entity_button_offset_from_left + (entity_button_width + entity_button_offset_from_each_other) * buttons_drawn, entity_button_offset_from_top),
-                                              (entity_button_width, entity_button_height)),
-                    text='Drop',
-                    manager=self.uiManager)
-                button.action = "d"
-
-                buttons_drawn += 1
+            if create:
+                num_buttons = len(item_buttons)
+                if num_buttons > 0:
+                    x_gap, _ = calculate_button_grid_offsets(num_buttons, 1, entity_button_width, entity_button_height, entity_screen_width, entity_button_height)
+                    for i, (text, action) in enumerate(item_buttons):
+                        btn_x = entity_offset_from_left + x_gap + i * (entity_button_width + x_gap)
+                        btn = pygame_gui.elements.UIButton(
+                            relative_rect=pygame.Rect((btn_x, entity_button_offset_from_top),
+                                                      (entity_button_width, entity_button_height)),
+                            text=text,
+                            manager=self.uiManager)
+                        btn.action = action
+                        buttons_drawn += 1
 
 
         entity_text = ""

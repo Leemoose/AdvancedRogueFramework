@@ -17,6 +17,36 @@ import pygame_gui
 from typing import Tuple, Optional, List, Dict, Any
 
 
+def calculate_button_grid_offsets(
+    num_columns: int,
+    num_rows: int,
+    button_width: int,
+    button_height: int,
+    total_x: int,
+    total_y: int
+) -> Tuple[float, float]:
+    """
+    Calculate even-margin offsets for a grid of buttons.
+
+    Distributes buttons with equal spacing on all sides — N+1 gaps
+    for N buttons along each axis.
+
+    Args:
+        num_columns: Number of buttons per row
+        num_rows: Number of buttons per column
+        button_width: Width of each button
+        button_height: Height of each button
+        total_x: Total available width
+        total_y: Total available height
+
+    Returns:
+        (x_offset, y_offset) gap sizes for spacing buttons evenly
+    """
+    x_offset = (total_x - num_columns * button_width) / (num_columns + 1)
+    y_offset = (total_y - num_rows * button_height) / (num_rows + 1)
+    return (x_offset, y_offset)
+
+
 def draw_image_on_button_states(
     button,
     img: Optional[pygame.Surface],
