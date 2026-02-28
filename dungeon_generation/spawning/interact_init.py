@@ -14,5 +14,5 @@ InteractableSpawns.append(InteractableSpawnParams(MysteriousStranger(), minFloor
 # Uncomment these for branch-specific content
 # InteractableSpawns.append(InteractableSpawnParams(Campfire(), minFloor=1, maxFloor=5, branch="Forest"))
 # InteractableSpawns.append(InteractableSpawnParams(ForestOrbPedastool(), minFloor=5, maxFloor=5, branch="Forest"))
-# InteractableSpawns.append(InteractableSpawnParams(YellowPlant(), minFloor=1, maxFloor=5, branch="Forest"))
+InteractableSpawns.append(InteractableSpawnParams(YellowPlant(), minFloor=1, maxFloor=5, branch="Dungeon"))
 # InteractableSpawns.append(InteractableSpawnParams(OceanOrbPedastool(), minFloor=5, maxFloor=5, branch="Ocean"))

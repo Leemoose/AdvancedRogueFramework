@@ -72,7 +72,7 @@ class Tile(Objects):
 
 
 class Floor(Tile):
-    def __init__(self, x, y, render_tag = 195, passable = True, blocks_vision = False, id_tag = 0):  # 195 = NEW_FANTASY_FLOOR (see asset_registry.py)
+    def __init__(self, x, y, render_tag = 100, passable = True, blocks_vision = False, id_tag = 0):  # 195 = NEW_FANTASY_FLOOR (see asset_registry.py)
         super().__init__(x, y,  render_tag = render_tag, passable = passable, id_tag = id_tag, blocks_vision=blocks_vision)
         self.traits["floor"] = True
 
@@ -85,7 +85,7 @@ class Door(Floor):
         self.blocks_vision = False
 
 class Wall(Tile):
-    def __init__(self, x, y, render_tag = 250, passable = False, blocks_vision = True, id_tag = 0):  # 250 = NEW_FANTASY_WALL (see asset_registry.py)
+    def __init__(self, x, y, render_tag = 200, passable = False, blocks_vision = True, id_tag = 0):  # 250 = NEW_FANTASY_WALL (see asset_registry.py)
         super().__init__(x, y,  render_tag = render_tag, passable = passable, blocks_vision = blocks_vision, id_tag = id_tag)
         self.traits["wall"] = True
 
@@ -112,18 +112,18 @@ class Stairs(Tile):
 
 
 class DownStairs(Stairs):
-    def __init__(self, x, y, render_tag = 431, passable = True, id_tag = 0):  # 431 = NEW_FANTASY_STAIRS_DOWN (see asset_registry.py)
+    def __init__(self, x, y, render_tag = 400, passable = True, id_tag = 0):  # 431 = NEW_FANTASY_STAIRS_DOWN (see asset_registry.py)
         super().__init__(x, y, render_tag = render_tag, passable = passable, id_tag = id_tag)
         self.level_change = 1
 
 class UpStairs(Stairs):
-    def __init__(self, x, y, render_tag = 430, passable = True, id_tag = 0):  # 430 = NEW_FANTASY_STAIRS_UP (see asset_registry.py)
+    def __init__(self, x, y, render_tag = 410, passable = True, id_tag = 0):  # 430 = NEW_FANTASY_STAIRS_UP (see asset_registry.py)
         super().__init__(x, y, render_tag = render_tag, passable = passable, id_tag = id_tag)
         self.level_change = -1
 
 class Gateway(Tile):
     #Bug: for some reason this tile is blocking vision
-    def __init__(self, x, y, level = 1, branch = "Dungeon", render_tag = 432, passable = True, blocks_vision = False, id_tag = 0):  # 432 = NEW_FANTASY_PORTAL (see asset_registry.py)
+    def __init__(self, x, y, level = 1, branch = "Dungeon", render_tag = 420, passable = True, blocks_vision = False, id_tag = 0):  # 432 = NEW_FANTASY_PORTAL (see asset_registry.py)
         super().__init__(x, y, render_tag = render_tag, passable = passable, id_tag = id_tag)
         self.branch = branch
         self.level = level

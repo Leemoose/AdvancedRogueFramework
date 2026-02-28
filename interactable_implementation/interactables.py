@@ -18,7 +18,7 @@ class Interactable(Objects):
 
 class Campfire(Interactable):
     def __init__(self, render_tag = 720, x=-1, y = -1, name="Campfire"):  # TileID.CAMPFIRE from asset_registry.py
-        super().__init__(render_tag, x, y, name=name)
+        super().__init__(x=x, y=y, render_tag=render_tag, name=name)
         self.description = "It is a cozy fireplace"
 
     def interact(self, loop):
@@ -73,20 +73,7 @@ class OceanOrbPedastool(OrbPedastool):
         self.traits["ocean_orb_pedastool"] = True
         self.orb_type = "ocean_orb"
 
-class YellowPlant(Interactable):
-    def __init__(self, render_tag = 730, x=-1, y = -1, name="Yellow Plant"):  # TileID.YELLOW_PLANT
-        super().__init__(render_tag, x, y, name=name)
-        self.used = False
-        self.description = "Beautiful yellow plant. I wonder if I can pluck it?"
-        self.charges = 3
-        self.item = YellowFlowerPetal
 
-    def interact(self, loop):
-        if self.charges > 0:
-            loop.player.inventory.get_item(self.item(), loop)
-            self.charges -= 1
-        if self.charges <= 0:
-            loop.generator.interact_map.remove_thing(self)
 
 
 

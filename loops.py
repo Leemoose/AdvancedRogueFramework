@@ -624,27 +624,26 @@ class Loops:
         self._pair_all_gateways()
 
         # Set initial memory state (player starts in Hub floor 1 for testing)
-        self.memory.set_memory(1, "Hub", self.player, self.keyboard)
+        self.memory.set_memory(1, "Dungeon", self.player, self.keyboard)
         self.generator = self.memory.get_current_saved_floor()
+        #
+        # # Position player at a gateway in Hub (or fallback to stairs)
+        # placed = False
+        # for gateway in self.generator.tile_map.get_gateway():
+        #     x, y = gateway.get_location()
+        #     self.player.x = x
+        #     self.player.y = y
+        #     self.targets.set_target((x, y))
+        #     placed = True
+        #     break
 
-        # Position player at a gateway in Hub (or fallback to stairs)
-        placed = False
-        for gateway in self.generator.tile_map.get_gateway():
-            x, y = gateway.get_location()
-            self.player.x = x
-            self.player.y = y
-            self.targets.set_target((x, y))
-            placed = True
-            break
-
-        if not placed:
-            for stairs in self.generator.tile_map.get_stairs():
-                if stairs.get_level_change() == -1:
-                    x, y = stairs.get_location()
-                    self.player.x = x
-                    self.player.y = y
-                    self.targets.set_target((x, y))
-                    break
+        for stairs in self.generator.tile_map.get_stairs():
+            if stairs.get_level_change() == 1:
+                x, y = stairs.get_location()
+                self.player.x = x
+                self.player.y = y
+                self.targets.set_target((x, y))
+                break
 
         logger.info("Game initialization complete")
 

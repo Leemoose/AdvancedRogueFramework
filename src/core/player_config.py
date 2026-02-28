@@ -18,5 +18,5 @@ class PlayerConfig:
     MAX_LEVEL = 20
 
     # Debug mode
-    DEBUG_MODE = False        # Disabled - player is no longer invincible
+    DEBUG_MODE = True       # Disabled - player is no longer invincible
     DEBUG_STARTING_STAT_POINTS = 2  # Normal starting points
