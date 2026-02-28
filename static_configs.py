@@ -413,11 +413,11 @@ class TileDict():
         # ----------------------------------------------------------------------
         # System UI (9000-9099)
         # ----------------------------------------------------------------------
-        tiles[9000] = image.load("assets/ui/target.png")
-        tiles[9001] = image.load("assets/ui/stat_up.png")
-        tiles[-9001] = image.load("assets/ui/stat_up_dark.png")
-        tiles[9002] = image.load("assets/ui/stat_down.png")
-        tiles[-9002] = image.load("assets/ui/stat_down_dark.png")
+        tiles[9000] = image.load("assets/UI/target.png")
+        tiles[9001] = image.load("assets/UI/stat_up.png")
+        tiles[-9001] = image.load("assets/UI/stat_up_dark.png")
+        tiles[9002] = image.load("assets/UI/stat_down.png")
+        tiles[-9002] = image.load("assets/UI/stat_down_dark.png")
 
         # ----------------------------------------------------------------------
         # Attack Skills (9100-9199)
@@ -458,8 +458,8 @@ class TileDict():
         # ----------------------------------------------------------------------
         # Heal Skills (9500-9599)
         # ----------------------------------------------------------------------
-        tiles[9500] = image.load("assets/skills/Heal_skill_icon.png")
-        tiles[-9500] = image.load("assets/skills/Heal_skill_icon_dark.png")
+        tiles[9500] = image.load("assets/skills/heal_skill_icon.png")
+        tiles[-9500] = image.load("assets/skills/heal_skill_icon_dark.png")
 
         # ----------------------------------------------------------------------
         # Debuff Skills (9600-9699)
