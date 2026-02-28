@@ -4,6 +4,7 @@ from loop_workflow import keyboard as K
 import loops as L
 import static_configs
 from spell_system import initialize_spell_system
+from tag_system import tag_manager as tags
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module = "PIL.PNGImagePlugin")
@@ -14,6 +15,14 @@ pygame.font.init()
 
 # Initialize the spell system (loads all spell data from YAML files)
 initialize_spell_system()
+
+# Initialize Tag system - adds default tag combos to test
+tags.InitPotionTags()
+
+# Quick test of the tag updates! Adding Fire, Water, and Stone - Fire + Water is higher prio so it should result in Steam, Stone
+tagTest = [tags.PotionTag.Fire, tags.PotionTag.Water, tags.PotionTag.Stone]
+tags.potionManager.ApplyCombos(tagTest);
+print(tagTest)
 
 
 #Size of tiles
