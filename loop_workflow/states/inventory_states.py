@@ -130,9 +130,8 @@ class ItemScreenState(GameState):
 
         action = get_item_action(key)
         self._perform_item_action(action, player, item, item_map)
-
         # Refresh the current screen
-        self._change_state(LoopType.items)
+     #       self._change_state(LoopType.items)
         return True
 
     def _perform_item_action(self, action, player, item, item_map):
@@ -152,6 +151,13 @@ class ItemScreenState(GameState):
         elif action == "activate":
             if player.character.activate(item, self.loop):
                 self._change_state(LoopType.inventory)
+        elif action == "throw":
+            self.loop.targets.set_target_range(player.get_location(), item.range)
+            self.loop.targets.set_queued_action(player.do_throw)
+            player.inventory.hotkey_item = item
+            self._change_state(LoopType.action)
+            self.loop.start_targetting()
+
 
     def _exit_item_screen(self, item):
         """Handle exiting the item detail screen."""

@@ -790,7 +790,7 @@ class Loops:
         if start_on_player:
             target = self.player
         else:
-            from loop_workflow.loop_utility import get_closest_monster
+            from navigation_utility.spatial_queries import get_closest_monster
             closest = get_closest_monster(self)
             origin = self.targets.get_origin_range_coordinates()
             max_range = self.targets.get_range()

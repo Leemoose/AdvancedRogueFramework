@@ -10,6 +10,7 @@ class Item(Objects):
         self.equipable = False
         self.dropable = True
         self.consumeable = False
+        self.throwable = True
         self.equipped = False
         self.indestructible = False
         self.destroy = False
@@ -18,6 +19,7 @@ class Item(Objects):
         self.yendorb = False
         self.can_be_levelled = True
         self.level = 1
+        self.range = 3
         self.attached_skill_exists = False
         self.equipment_type = None
         self.traits["item"] = True
@@ -35,6 +37,10 @@ class Item(Objects):
 
     def get_can_be_destroyed(self):
         return not self.indestructible
+    def throw(self, x, y, loop):
+        self.x = x
+        self.y = y
+        loop.generator.item_map.place_thing(self)
 
 
 

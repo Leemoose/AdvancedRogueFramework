@@ -9,6 +9,7 @@ class Inventory():
         self.gold = gold
         self.ready_scroll = None # index of actively used scroll
         self.limit_inventory = "item"
+        self.hotkey_item = None
         self.active_inventory = self.inventory
 
     def get_orb_inventory(self):

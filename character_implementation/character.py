@@ -27,7 +27,8 @@ class Character():
                              "quaff": 10,
                              "read": 20,
                              "drop": 10,
-                             "activate": 25
+                             "activate": 25,
+                             "throw": 20
                             }
 
         self.skills = []
@@ -55,6 +56,11 @@ class Character():
 
     def can_drop(self, item):
         return True
+
+    def can_throw(self, item):
+        if item.throwable and self.status.can_throw and self.status.can_take_actions:
+            return True
+
 
     def is_alive(self):
         if self.attributes.get_health() <= 0 and not self.status.get_invincible():

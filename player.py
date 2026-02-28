@@ -427,6 +427,20 @@ class Player(Objects):
     def do_defend(self, attacker, loop):
         return self.fighter.do_defend()
 
+    def do_throw(self, target, loop):
+        item = self.inventory.hotkey_item
+        if self.character.can_throw(item):
+            self.spend_energy("throw")
+            x, y = loop.targets.get_target_coordinates()
+            item.throw(x, y, loop)
+            if item.stackable:
+                item.stacks -= 1
+                if item.stacks <= 0:
+                    item.destroy = True
+                    self.inventory.remove_item(item)
+            else:
+                self.inventory.remove_item(item)
+
     def get_level(self):
         return self.level
 

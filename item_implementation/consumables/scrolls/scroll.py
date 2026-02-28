@@ -10,6 +10,7 @@ class Scroll(Item):
         self.consumeable = True
         self.stackable = True
         self.equipable = False
+        self.throwable = False
         self.can_be_levelled = False
         self.stacks = 1
         self.attached_skill_exists = False
