@@ -16,7 +16,7 @@ class Golem(Monster):
             render_tag=2220,  # Golem sprite
             name="Golem",
             experience_given=35,
-            health=35,
+            health=50,        # Increased from 35 for late-game challenge
             min_damage=5,
             max_damage=15,
             gold=20
@@ -33,8 +33,8 @@ class Golem(Monster):
         self.endurance = 8
         self.intelligence = 2
 
-        # Stone construct - armored
-        self.character.attributes.change_armor(5)
+        # Stone construct - heavily armored (increased from 5)
+        self.character.attributes.change_armor(8)
 
         self.traits["golem"] = True
         self.traits["stone"] = True

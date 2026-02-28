@@ -16,7 +16,7 @@ class Slime(Monster):
             render_tag=1100,  # Same as old framework
             name="Slime",
             experience_given=5,
-            health=5,
+            health=8,         # Increased from 5 for better floor 1-4 balance
             min_damage=1,
             max_damage=3,
             gold=0

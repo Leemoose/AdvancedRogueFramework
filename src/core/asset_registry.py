@@ -141,7 +141,8 @@ class TileID:
     # --------------------------------------------------------------------------
     # Floors (100-199)
     # Subcategories: 100=colorful, 110=dirty, 120=carpet, 130=wood, 140=stone,
-    #                150=forest, 160=sand, 170=ocean, 180=blood, 190=rounded
+    #                150=forest, 160=sand, 170=ocean, 180=blood, 190=rounded,
+    #                195=new_fantasy
     # --------------------------------------------------------------------------
     COLORFUL_FLOOR = 100
     FLOOR_DIRTY = 110
@@ -150,36 +151,51 @@ class TileID:
     WOODEN_FLOOR = 130
     STONE_FLOOR = 140
     FOREST_FLOOR = 150
+    DENSE_FOREST_FLOOR = 151  # Dense forest theme floor
     SAND_FLOOR = 160
     OCEAN_FLOOR = 170
     DEEP_OCEAN = 171
     CRAWL_FLOOR_BLOOD = 180
     FLOOR_ROUNDED = 190
+    NEW_FANTASY_FLOOR = 195  # Dark fantasy stone floor
 
     # --------------------------------------------------------------------------
     # Walls (200-299)
-    # Subcategories: 200=colorful, 210=rounded, 220=forest, 230=ocean, 240=stone
+    # Subcategories: 200=colorful, 210=rounded, 220=forest, 230=ocean, 240=stone,
+    #                250=new_fantasy
     # --------------------------------------------------------------------------
     COLORFUL_WALL = 200
     WALL_ROUNDED = 210
     FOREST_WALL = 220
+    DENSE_FOREST_WALL = 221  # Dense forest theme wall
     OCEAN_WALL = 230
     CRAWL_WALL_STONE = 240
+    NEW_FANTASY_WALL = 250  # Dark fantasy brick wall
 
     # --------------------------------------------------------------------------
     # Doors (300-399)
-    # Subcategories: 300=basic (closed/open), 310=locked, etc.
+    # Subcategories: 300=basic (closed/open), 310=locked, 320=new_fantasy
     # --------------------------------------------------------------------------
     DOOR_CLOSED = 300
     DOOR_OPEN = 301
+    NEW_FANTASY_DOOR_CLOSED = 320  # Dark fantasy wooden door
+    NEW_FANTASY_DOOR_OPEN = 321    # Dark fantasy door (open)
+    DENSE_FOREST_DOOR_CLOSED = 322  # Dense forest theme door (closed)
+    DENSE_FOREST_DOOR_OPEN = 323    # Dense forest theme door (open)
 
     # --------------------------------------------------------------------------
     # Stairs and Transitions (400-499)
-    # Subcategories: 400=up, 410=down, 420=gateway
+    # Subcategories: 400=up, 410=down, 420=gateway, 430=new_fantasy
     # --------------------------------------------------------------------------
     STAIRS_UP = 400
     STAIRS_DOWN = 410
     GATEWAY = 420
+    NEW_FANTASY_STAIRS_UP = 430    # Dark fantasy stairs ascending
+    NEW_FANTASY_STAIRS_DOWN = 431  # Dark fantasy stairs descending
+    NEW_FANTASY_PORTAL = 432       # Dark fantasy magical portal
+    DENSE_FOREST_STAIRS_UP = 433   # Dense forest theme stairs up
+    DENSE_FOREST_STAIRS_DOWN = 434 # Dense forest theme stairs down
+    DENSE_FOREST_PORTAL = 435      # Dense forest theme portal
 
     # --------------------------------------------------------------------------
     # Effects (500-599)

@@ -3,6 +3,8 @@ from .ui_constants import UILayout
 
 def create_pause_screen(display, loop):
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated
+    display.menu_buttons = None
     layout = UILayout.get_pause_screen_layout(display.screen_width, display.screen_height, num_buttons=5)
 
     buttons_config = [

@@ -7,10 +7,14 @@ class Interactable(Objects):
         super().__init__(x=x, y=y,id_tag=-1, render_tag= render_tag, name = name)
         self.name = name
         self.active = True
+        self.blocks_vision = False
         self.traits["interactable"] = True
 
     def interact(self, loop):
         pass
+
+    def is_blocking_vision(self, origin = False):
+        return self.blocks_vision
 
 class Campfire(Interactable):
     def __init__(self, render_tag = 720, x=-1, y = -1, name="Campfire"):  # TileID.CAMPFIRE from asset_registry.py

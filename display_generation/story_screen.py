@@ -5,6 +5,8 @@ def create_story_screen(display, loop):
     layout = UILayout.get_info_screen_layout(display.screen_width, display.screen_height)
 
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated
+    display.menu_buttons = None
 
     button = pygame_gui.elements.UIButton(
         relative_rect=pygame.Rect((layout['button_x'], layout['button_y']),

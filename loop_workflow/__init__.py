@@ -7,31 +7,6 @@ from .targets import Target
 from .messages import MessageHandler
 from .game_states import GameState, StateManager
 
-# Explicit imports from key_screens (no more star imports)
-from .key_screens import (
-    key_targeting_screen,
-    key_examine_screen,
-    key_specific_examine,
-    key_help,
-    key_quest,
-    key_death,
-    key_victory,
-    key_rest,
-    key_explore,
-    key_action,
-    key_inventory,
-    key_equipment,
-    key_item_screen,
-    key_enchant,
-    key_level_up,
-    key_trade,
-    key_main_screen,
-    key_paused,
-    key_spell,
-    key_spell_individual,
-    key_quickselect,
-    key_binding,
-)
 
 # Explicit imports from input_actions (no more star imports)
 from .input_actions import (

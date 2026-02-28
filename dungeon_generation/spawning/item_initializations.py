@@ -24,32 +24,31 @@ from .spawn_params import ItemSpawnParams
 
 # Item spawn configuration: (ItemClass, constructor_args, min_floor, max_floor)
 # Use None for constructor_args if no args needed
+# Floor restrictions per GAME_BALANCE_PLAN.md
 SPAWN_CONFIG = [
-    # Weapons - available throughout dungeon
-    (Bow,        None,   1, 10),
-    (Spear,      None,   1, 10),
-    (Axe,        None,   1, 10),
-    (Hammer,     None,   1, 10),
-    (Dagger,     None,   1, 10),
-    (Sword,      None,   1, 10),
-    (BroadSword, None,   2, 10),  # Slightly better, appears from floor 2
+    # WEAPONS - tiered by floor availability
+    (Dagger,     None,   1, 10),  # Basic, available early
+    (Sword,      None,   1, 10),  # Balanced weapon
+    (Bow,        None,   1, 10),  # Ranged option
+    (Spear,      None,   2, 10),  # Slightly better, floor 2+
+    (Axe,        None,   3, 10),  # High damage, floor 3+
+    (Hammer,     None,   4, 10),  # Very high damage, floor 4+
+    (BroadSword, None,   5, 10),  # Superior sword, floor 5+
 
-    # Shields
-    (Shield,     (3400,), 1, 10),
+    # ARMOR
+    (LeatherArmor, None, 1, 10),  # Basic protection
+    (Gloves,       None, 1, 10),  # Basic slot filler
+    (Pants,        None, 1, 10),  # Basic slot filler
+    (Helmet,       None, 2, 10),  # Head protection, floor 2+
+    (Shield,     (3400,), 3, 10), # Off-hand defense, floor 3+
 
-    # Armor
-    (LeatherArmor, None, 1, 10),
-    (Helmet,       None, 1, 10),
-    (Gloves,       None, 1, 10),
-    (Pants,        None, 1, 10),
+    # ACCESSORIES - appear on deeper floors
+    (Ring,   None, 4, 10),  # Stat boosts, floor 4+
+    (Amulet, None, 5, 10),  # Stat boosts, floor 5+
 
-    # Accessories
-    (Ring,   None, 1, 10),
-    (Amulet, None, 1, 10),
-
-    # Consumables
-    (HealthPotion, None,   1, 10),
-    (MightPotion,  (404,), 1, 10),
+    # CONSUMABLES
+    (HealthPotion, None,   1, 10),  # Common healing
+    (MightPotion,  (404,), 3, 10),  # Damage boost, floor 3+
 ]
 
 

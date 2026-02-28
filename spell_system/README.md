@@ -1,14 +1,30 @@
-# Spell System v2
+# Spell System v3
 
-A data-driven spell system that replaces the old class-based spell implementation.
+A Python-based spell system using composable effect building blocks.
 
 ## Overview
 
-The new system separates spell definitions (data) from spell behavior (code):
+Spells are defined as Python objects using simple, composable building blocks:
 
-- **Spell Data** (YAML files): Define what spells exist, their costs, effects, etc.
-- **Effect System** (Python): Implements reusable effect types (damage, heal, apply_status, etc.)
-- **Custom Handlers** (Python): Escape hatch for complex effects that can't be expressed in data
+```python
+from spell_system import spell, Schools, damage, apply_status
+
+burning_attack = spell(
+    "burning_attack", "Burning Attack",
+    school=Schools.FIRE, level=1, cost=5, cooldown=10, range=5,
+    effects=[
+        damage(3, "fire", scales=True),
+        apply_status("burn", duration=5, damage=3, scales=True),
+    ],
+    description="Throw a bolt of fire that burns the target."
+)
+```
+
+**Key benefits:**
+- Pure Python - IDE support, type hints, debugging
+- Composable effects - spells are built from small, reusable pieces
+- Less code - 5-10 lines per spell
+- Consistent with rest of codebase
 
 ## Directory Structure
 
@@ -17,22 +33,24 @@ spell_system/
 ├── __init__.py           # Main exports
 ├── spell.py              # Spell class (runtime instance)
 ├── spell_data.py         # SpellData class (immutable definition)
+├── spell_builder.py      # spell() function and Schools enum
 ├── spell_registry.py     # Central registry for all spells
-├── game_integration.py   # Convenience functions for game integration
+├── game_integration.py   # Convenience functions (give_spell, etc.)
 ├── effects/
 │   ├── __init__.py
 │   ├── base_effect.py    # BaseEffect abstract class
 │   ├── effect_factory.py # Effect creation + built-in effects
-│   └── custom_handlers.py# Custom Python handlers for complex effects
+│   ├── builders.py       # Effect building blocks (damage, heal, etc.)
+│   └── custom_handlers.py# Custom handlers for complex effects
 ├── status_effects/
-│   ├── __init__.py
-│   └── status_factory.py # Creates status effects by type
-└── data/
-    ├── fire.yaml         # Fire school spells
-    ├── necromancy.yaml   # Necromancy school spells
-    ├── space.yaml        # Space/teleport school spells
-    ├── mind.yaml         # Mind/control school spells
-    └── summon.yaml       # Summoning school spells
+│   └── ...               # Status effect implementations
+└── spells/               # Spell definitions by school
+    ├── __init__.py
+    ├── fire.py           # Fire school (burning_attack, fireball, etc.)
+    ├── mind.py           # Mind school (lethargy, weaken, etc.)
+    ├── necromancy.py     # Necromancy (sap_vitality, poison_touch, etc.)
+    ├── space.py          # Space school (blink, teleport, etc.)
+    └── summon.py         # Summon school (summon_goblin, etc.)
 ```
 
 ## Usage
@@ -42,7 +60,7 @@ spell_system/
 ```python
 from spell_system import initialize_spell_system
 
-# Load all spell definitions from YAML files
+# Load all spell definitions
 initialize_spell_system()
 ```
 
@@ -56,91 +74,148 @@ give_spell(player, 'burning_attack')
 
 # Give all spells from a school up to level 2
 give_school_spells(player, 'fire', max_level=2)
-```
 
-### Creating Spells Directly
-
-```python
-from spell_system import get_registry
-
-registry = get_registry()
-spell = registry.create_spell('fireball', caster)
-caster.mage.add_spell(spell)
+# Give with overrides (for monsters, items, etc.)
+give_spell(lich, 'sap_vitality', cooldown=5, cost=3)
 ```
 
 ## Adding New Spells
 
-### Simple Spells (Data Only)
+### 1. Find the right school file
 
-Add to the appropriate YAML file in `spell_system/data/`:
+Spells are organized by school in `spell_system/spells/`:
+- `fire.py` - damage and DoT
+- `mind.py` - control and debuffs
+- `necromancy.py` - lifesteal and dark magic
+- `space.py` - teleportation
+- `summon.py` - summoning creatures
 
-```yaml
-spells:
-  ice_bolt:
-    name: "Ice Bolt"
-    school: ice
-    level: 1
-    description: |
-      Hurl a bolt of ice at an enemy.
-      Deals cold damage and may slow the target.
-    cost: 4
-    cooldown: 6
-    range: 6
-    action_cost: 50
-    targeting: enemy
-    icon: 9200
-    tags: [ice, damage, control]
-    effects:
-      - type: damage
-        amount: 8
-        damage_type: cold
-        scales_with_intelligence: true
-      - type: apply_status
-        status: slow
-        duration: 3
-```
-
-### Complex Spells (Custom Handler)
-
-1. Add the handler in `effects/custom_handlers.py`:
+### 2. Define your spell
 
 ```python
-def freeze_time(context, params) -> bool:
-    """Stop all enemies for one turn."""
-    duration = params.get('duration', 1)
-    # ... implementation ...
-    return True
+from ..spell_builder import spell, Schools
+from ..effects.builders import damage, apply_status, heal
+
+my_spell = spell(
+    "spell_id", "Display Name",
+    school=Schools.FIRE,  # or MIND, NECROMANCY, SPACE, SUMMON
+    level=1,              # 1-4, determines unlock order
+    cost=5,               # mana cost
+    cooldown=10,          # turns before recast
+    range=5,              # -1=unlimited, 0=self, positive=distance
+    action_cost=50,       # energy cost (25-100)
+    targeting="enemy",    # "self", "enemy", "ally", "ground"
+    icon=9100,            # render tag for UI
+    required_intelligence=0,
+    tags=["fire", "damage"],
+    effects=[
+        damage(5, "fire", scales=True),
+        apply_status("burn", duration=3, damage=2),
+    ],
+    description="Spell description text."
+)
 ```
 
-2. Reference it in YAML:
+### 3. Add to `__all__`
 
-```yaml
-time_stop:
-  name: "Time Stop"
-  effects:
-    - type: custom
-      handler: freeze_time
-      duration: 2
+```python
+__all__ = ['existing_spell', 'my_spell']
 ```
 
-## Available Effect Types
+## Effect Building Blocks
 
-| Type | Description | Key Params |
-|------|-------------|------------|
-| `damage` | Deal damage to target | `amount`, `damage_type`, `scales_with_intelligence` |
-| `heal` | Heal caster or target | `amount`, `target` ("self"/"target") |
-| `lifesteal` | Damage + heal for same amount | `amount` |
-| `apply_status` | Apply status effect to target | `status`, `duration`, `damage` |
-| `self_buff` | Apply status effect to caster | `status`, `duration`, `amount` |
-| `message` | Display message | `message` (can use {caster}, {target}) |
-| `custom` | Run custom Python handler | `handler`, + handler-specific params |
+### Basic Effects
 
-## Migration from Old System
+| Builder | Description | Example |
+|---------|-------------|---------|
+| `damage(amount, type, scales)` | Deal damage | `damage(5, "fire", scales=True)` |
+| `heal(amount, target, scales)` | Heal self or target | `heal(10, target="self")` |
+| `lifesteal(amount, scales)` | Damage + heal | `lifesteal(5, scales=True)` |
+| `apply_status(status, ...)` | Apply debuff to target | `apply_status("burn", duration=5, damage=3)` |
+| `self_buff(status, ...)` | Apply buff to caster | `self_buff("might", duration=10, amount=5)` |
+| `message(text)` | Display message | `message("{target} is frozen!")` |
 
-The old system in `spell_implementation/` is still present for backward compatibility.
-Status effects are shared between systems (imported from `spell_implementation/effects/`).
+### Custom Effects
 
-To fully migrate:
-1. Remove old spell class files (fire_school/, necromancy_school/, etc.)
-2. Update any monster spell usage to use the new system
-3. Update any scroll/item spell granting to use `give_spell()`
+| Builder | Description | Example |
+|---------|-------------|---------|
+| `aoe_damage(amount, radius, center)` | Area damage | `aoe_damage(15, radius=2, center="target")` |
+| `blink(distance)` | Short teleport | `blink(distance=5)` |
+| `teleport(target)` | Random teleport | `teleport(target="self")` |
+| `swap_positions()` | Swap with target | `swap_positions()` |
+| `blink_to_target()` | Teleport to target | `blink_to_target()` |
+| `summon(creature, duration)` | Summon creature | `summon("skeleton", duration=30)` |
+| `restore_mana(amount)` | Restore mana | `restore_mana(15)` |
+| `self_damage(amount)` | Damage self | `self_damage(10)` |
+
+### Status Types
+
+For `apply_status()` and `self_buff()`:
+
+| Status | Effect | Key Params |
+|--------|--------|------------|
+| `burn` | Fire DoT | `damage` |
+| `poison` | Poison DoT (stacks) | `damage` |
+| `bleed` | Physical DoT | `damage` |
+| `slow` | Reduced action speed | `amount` (%) |
+| `stun` | Cannot act | - |
+| `weak` | Reduced damage | `amount` |
+| `fear` | Flee from caster | - |
+| `charm` | Fight for caster | - |
+| `root` | Cannot move | - |
+| `sleep` | Cannot act, breaks on damage | - |
+| `might` | Increased strength | `amount` |
+| `haste` | Increased speed | - |
+| `berserk` | Increased stats, can't cast | - |
+| `invincible` | Take no damage | - |
+
+## Adding Custom Effect Handlers
+
+For effects too complex for building blocks, add a handler in `effects/custom_handlers.py`:
+
+```python
+def my_custom_effect(context, params) -> bool:
+    """Description of what this does."""
+    amount = params.get('amount', 10)
+
+    # Access game state
+    caster = context.caster
+    target = context.target
+    loop = context.loop
+
+    # Do something
+    target.character.take_damage(caster, amount)
+    context.add_message(f"{caster.name} does something to {target.name}!")
+
+    return True  # Success
+```
+
+Then use it in a spell:
+
+```python
+from ..effects.builders import custom
+
+effects=[
+    custom("my_custom_effect", amount=15, other_param="value"),
+]
+```
+
+## API Reference
+
+### spell_system module
+
+```python
+# Core
+from spell_system import Spell, SpellData, EffectData
+
+# Building
+from spell_system import spell, Schools
+from spell_system import damage, heal, lifesteal, apply_status, self_buff
+from spell_system import aoe_damage, blink, teleport, summon
+
+# Registry
+from spell_system import get_registry, initialize_spell_system
+
+# Game integration
+from spell_system import give_spell, give_school_spells, give_starter_spells
+```

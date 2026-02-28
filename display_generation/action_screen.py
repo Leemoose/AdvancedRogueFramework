@@ -53,6 +53,8 @@ def create_skill_bar(display, loop, display_empty=False):
 
 def create_display(display, loop):
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated
+    display.menu_buttons = None
     fps_counter = FPSCounter(
         pygame.Rect((0, 0), (400, 40)),
         display.uiManager

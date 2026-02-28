@@ -109,31 +109,18 @@ def add_ocean_water(tilemap) -> None:
 
     # Second pass: calculate distance from shore for all floor tiles
     max_depth = 0
-    depths = {}
 
     for x in range(1, tilemap.width - 1):
         for y in range(1, tilemap.height - 1):
             tile = tilemap.entity_map[x][y]
             if not tile.has_trait("floor"):
                 continue
-            if tile.elevation == -1:
+            if tile.elevation == 0:
                 continue  # Protected tile, skip
 
             # Calculate distance to shore
             depth = _calculate_distance_to_shore(tilemap, x, y)
-            depths[(x, y)] = depth
-            max_depth = max(max_depth, depth)
-
-    # Third pass: invert depths to get elevation (high at shore, low in center)
-    # Also reset protected tiles from -1 to None
-    for x in range(tilemap.width):
-        for y in range(tilemap.height):
-            tile = tilemap.entity_map[x][y]
-            if tile.elevation == -1:
-                tile.elevation = None  # Protected: never floods
-            elif (x, y) in depths:
-                # Invert: shoreline (depth=0) gets high elevation, center gets low
-                tile.elevation = max_depth - depths[(x, y)]
+            tile.elevation = - (depth * 10 + random.randint(0,10))
 
     # Log statistics
     elevation_counts = {}
@@ -168,34 +155,10 @@ def _mark_protected_tiles(tilemap) -> None:
                             neighbor = tilemap.entity_map[nx][ny]
                             if hasattr(neighbor, 'elevation'):
                                 # Use a special marker; will remain None after processing
-                                neighbor.elevation = -1  # Temporary marker
+                                neighbor.elevation = 0  # Temporary marker
 
 
 def _calculate_distance_to_shore(tilemap, x: int, y: int) -> int:
-    """
-    Calculate distance to shore (walls or protected tiles).
-
-    Returns:
-        Distance value (0 = adjacent to wall/protected, higher = further from shore)
-    """
-    # Check if adjacent to wall or protected tile
-    for dx in range(-1, 2):
-        for dy in range(-1, 2):
-            if dx == 0 and dy == 0:
-                continue
-            nx, ny = x + dx, y + dy
-            if 0 <= nx < tilemap.width and 0 <= ny < tilemap.height:
-                neighbor = tilemap.entity_map[nx][ny]
-                if neighbor.has_trait("wall"):
-                    return 0  # Adjacent to wall = shoreline
-                if hasattr(neighbor, 'elevation') and neighbor.elevation == -1:
-                    return 0  # Adjacent to protected area = shoreline
-
-    # Use minimum cardinal distance to wall/protected as depth
-    return _min_distance_to_shore(tilemap, x, y)
-
-
-def _min_distance_to_shore(tilemap, x: int, y: int) -> int:
     """
     Find minimum distance to shore (wall or protected tile) in any cardinal direction.
 
@@ -217,7 +180,7 @@ def _min_distance_to_shore(tilemap, x: int, y: int) -> int:
             tile = tilemap.entity_map[cx][cy]
             if tile.has_trait("wall"):
                 break
-            if hasattr(tile, 'elevation') and tile.elevation == -1:
+            if hasattr(tile, 'elevation') and tile.elevation == 0:
                 break
             dist += 1
             cx += dx
@@ -225,3 +188,46 @@ def _min_distance_to_shore(tilemap, x: int, y: int) -> int:
         min_dist = min(min_dist, dist)
 
     return min_dist if min_dist != float('inf') else 0
+
+
+def apply_forest_theme(tilemap) -> None:
+    """
+    Apply forest-themed tiles to the tilemap for the Forest branch.
+
+    Swaps default tiles to dense forest variants:
+    - Floor: 195 (NEW_FANTASY_FLOOR) -> 151 (DENSE_FOREST_FLOOR)
+    - Wall: 250 (NEW_FANTASY_WALL) -> 221 (DENSE_FOREST_WALL)
+    - Door closed: 320 -> 322 (DENSE_FOREST_DOOR_CLOSED)
+    - Door open: 321 -> 323 (DENSE_FOREST_DOOR_OPEN)
+    - Stairs up: 430 -> 433 (DENSE_FOREST_STAIRS_UP)
+    - Stairs down: 431 -> 434 (DENSE_FOREST_STAIRS_DOWN)
+    - Portal: 432 -> 435 (DENSE_FOREST_PORTAL)
+
+    Args:
+        tilemap: The tilemap to apply forest theme to
+    """
+    logger.info("Applying forest theme to tilemap")
+
+    # Define render tag mappings (default -> forest theme)
+    tile_mappings = {
+        195: 151,  # Floor: NEW_FANTASY_FLOOR -> DENSE_FOREST_FLOOR
+        250: 221,  # Wall: NEW_FANTASY_WALL -> DENSE_FOREST_WALL
+        320: 322,  # Door closed: NEW_FANTASY_DOOR_CLOSED -> DENSE_FOREST_DOOR_CLOSED
+        321: 323,  # Door open: NEW_FANTASY_DOOR_OPEN -> DENSE_FOREST_DOOR_OPEN
+        430: 433,  # Stairs up: NEW_FANTASY_STAIRS_UP -> DENSE_FOREST_STAIRS_UP
+        431: 434,  # Stairs down: NEW_FANTASY_STAIRS_DOWN -> DENSE_FOREST_STAIRS_DOWN
+        432: 435,  # Portal: NEW_FANTASY_PORTAL -> DENSE_FOREST_PORTAL
+    }
+
+    tiles_changed = 0
+
+    for x in range(tilemap.width):
+        for y in range(tilemap.height):
+            tile = tilemap.entity_map[x][y]
+            current_tag = tile.get_render_tag()
+
+            if current_tag in tile_mappings:
+                tile.render_tag = tile_mappings[current_tag]
+                tiles_changed += 1
+
+    logger.info("Forest theme applied: %d tiles changed", tiles_changed)

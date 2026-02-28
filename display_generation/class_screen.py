@@ -3,6 +3,8 @@ from .ui_constants import UIColors, UILayout
 
 def create_class_screen(display, loop):
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated
+    display.menu_buttons = None
 
     num_options = 3
     popup_layout = UILayout.get_centered_popup_layout(display.screen_width, display.screen_height)

@@ -4,6 +4,7 @@ from fractions import Fraction
 def compute_fov(loop):
     origin = loop.player.get_location()
     tile_map = loop.generator.tile_map.get_map()
+    interact_map = loop.generator.interact_map.get_map()
     for x in range(len(tile_map)): #Maybe need a better place to put this and more effective way to do
         for y in range(len(tile_map[0])):
             tile_map[x][y].visible = False
@@ -25,35 +26,35 @@ def compute_fov(loop):
                 tile_map[x][y].seen = True
                 tile_map[x][y].visible = True
 
-        def is_wall(tile):
+        def is_wall(tile, origin = None):
             if tile is None:
                 return False
             x, y = quadrant.transform(tile)
-            return tile_map[x][y].is_blocking_vision()
+            return tile_map[x][y].is_blocking_vision(origin) #or if (interact_map.get
 
-        def is_floor(tile):
+        def is_floor(tile, origin = None):
             if tile is None:
                 return False
             x, y = quadrant.transform(tile)
-            return not tile_map[x][y].is_blocking_vision()
+            return not tile_map[x][y].is_blocking_vision(origin)
 
-        def scan(row):
+        def scan(row, origin = None):
             prev_tile = None
             for tile in row.tiles():
                 if is_wall(tile) or is_symmetric(row, tile):
                     reveal(tile)
-                if is_wall(prev_tile) and is_floor(tile):
+                if is_wall(prev_tile) and is_floor(tile, origin):
                     row.start_slope = slope(tile)
-                if is_floor(prev_tile) and is_wall(tile):
+                if is_floor(prev_tile) and is_wall(tile, origin):
                     next_row = row.next()
                     next_row.end_slope = slope(tile)
                     scan(next_row)
                 prev_tile = tile
             if is_floor(prev_tile):
-                scan(row.next())
+                scan(row.next(), origin)
 
         first_row = Row(1, Fraction(-1), Fraction(1))
-        scan(first_row)
+        scan(first_row, origin)
 
 class Quadrant:
 

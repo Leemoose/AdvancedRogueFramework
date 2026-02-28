@@ -274,6 +274,8 @@ def setup_panel_screen(
 
     # Clear and fill - only need to do once, not twice
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated when returning to action screen
+    display.menu_buttons = None
     display.win.fill(UIColors.BLACK)
 
     # Get layout based on type
@@ -333,6 +335,8 @@ def setup_popup_screen(
     from .ui_constants import UIColors, UILayout
 
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated
+    display.menu_buttons = None
 
     popup_layout = UILayout.get_centered_popup_layout(display.screen_width, display.screen_height)
 

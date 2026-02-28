@@ -16,7 +16,7 @@ class Raptor(Monster):
             render_tag=2230,  # Raptor sprite
             name="Velociraptor",
             experience_given=30,
-            health=20,
+            health=35,        # Increased from 20 for late-game challenge
             min_damage=5,
             max_damage=10,
             gold=12

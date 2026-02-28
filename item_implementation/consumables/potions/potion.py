@@ -6,14 +6,14 @@ from item_implementation.items import Item
 class Potion(Item):
     def __init__(self, render_tag, name):
         super().__init__(-1, -1, 0, render_tag, name)
-        self.equipment_type = "Potiorb"
+        self.equipment_type = "Potion"
         self.consumeable = True
         self.stackable = True
         self.stacks = 1
         self.equipable = False
         self.can_be_levelled = False
         self.attached_skill_exists = False
-        self.description = "A potior that does something."
+        self.description = "A potion that does something."
         self.action_description = "Something flows through your body"
         self.rarity = "Common"
         self.traits["potion"] = True

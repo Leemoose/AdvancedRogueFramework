@@ -11,8 +11,8 @@ from monsters import (
     Slime, GoblinShaman, Hobgoblin, Looter,
     Gargoyle, Minotaur, Golem, Raptor, Tormentorb, Dummy,
     Stumpy, Treant, MetallicBear, InsectNest, Hornet,
-    # Water monsters (not spawned yet - water branch not implemented)
-    # Squid, Leviathan, ChasmCrawler,
+    # Water monsters (Ocean branch)
+    Squid, Leviathan, ChasmCrawler,
 )
 
 from .spawn_params import MonsterSpawnParams
@@ -75,14 +75,13 @@ MonsterSpawns.append(MonsterSpawnParams(MetallicBear(), minFloor=4, maxFloor=7, 
 MonsterSpawns.append(MonsterSpawnParams(InsectNest(), minFloor=2, maxFloor=5, branch="Forest"))
 
 # =============================================================================
-# WATER BRANCH (not yet implemented)
-# Water monsters have the water attribute but are not spawned until
-# the water/ocean branch is implemented.
+# OCEAN BRANCH
+# Water monsters spawn in the Ocean branch.
 # =============================================================================
 
-# MonsterSpawns.append(MonsterSpawnParams(Squid(), minFloor=1, maxFloor=3, branch="Ocean"))
-# MonsterSpawns.append(MonsterSpawnParams(ChasmCrawler(), minFloor=2, maxFloor=5, branch="Ocean"))
-# MonsterSpawns.append(MonsterSpawnParams(Leviathan(), minFloor=4, maxFloor=7, branch="Ocean", rarity="Rare"))
+MonsterSpawns.append(MonsterSpawnParams(Squid(), minFloor=1, maxFloor=3, branch="Ocean"))
+MonsterSpawns.append(MonsterSpawnParams(ChasmCrawler(), minFloor=2, maxFloor=5, branch="Ocean"))
+MonsterSpawns.append(MonsterSpawnParams(Leviathan(), minFloor=4, maxFloor=7, branch="Ocean", rarity="Rare"))
 
 # =============================================================================
 # SPECIAL / TESTING

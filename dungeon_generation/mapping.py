@@ -261,33 +261,6 @@ class DungeonGenerator:
                 count += 1
         return count
 
-    # def get_nearest_exit (self, entity):
-    #     # find the nearest exit to some entity, exit is adjacent to a tile with only tiles adjacent to it that are passable
-    #     # if no such tile exists, return None
-    #     list_of_exits = []
-    #     for x in range(self.get_width()):
-    #         for y in range(self.get_height()):
-    #             if self.tile_map.get_entity(x,y).passable:
-    #                 if self.count_passable_neighbors(x, y) == 2:
-    #                     list_of_exits.append((x, y))
-    #     entityx, entityy = entity.get_location()
-    #     closest_exit = None
-    #     closest_distance = 100000
-    #     for exit in list_of_exits:
-    #         distance = ((entityx - exit[0]) ** 2 + (entityy - exit[1]) ** 2) ** 0.5
-    #         if distance < closest_distance:
-    #             closest_distance = distance
-    #             closest_exit = exit
-    #     adjacent_to_exit = None
-    #     for direction in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
-    #         # check all directions to find tile adjacent to exit that isnt an exit
-    #         if self.tile_map.get_has_no_entity(closest_exit[0] + direction[0], closest_exit[1] + direction[1]):
-    #             if self.count_passable_neighbors(closest_exit[0] + direction[0], closest_exit[1] + direction[1]) > 2:
-    #                 # if tile has a character on it already
-    #                 adjacent_to_exit = (closest_exit[0] + direction[0], closest_exit[1] + direction[1])
-    #                 break
-    #     return adjacent_to_exit
-
     def get_not_on_player(self, x, y):
         if self.player is None:
             return True
@@ -376,29 +349,6 @@ class DungeonGenerator:
                     new_row.append(-1)
             tile_map.append(new_row)
         return tile_map
-
-    # def get_nearest_item(self, x, y):
-    #     if self.item_map.get_has_entity(x, y):
-    #         return (self.item_map.get_entity(x,y), x, y)
-    #     else:
-    #         queue = [(1,0),(-1,0),(0,1),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]
-    #         flood_map = self.get_passible_map_copy()
-    #         return self.get_nearest_item_helper_function(x, y, queue, flood_map)
-
-
-    # def get_nearest_item_helper_function(self, x, y, queue, flood_map):
-    #     for direction in queue:
-    #         xdelta, ydelta = direction
-    #         if self.in_map(x + xdelta, y + ydelta) and flood_map[x + xdelta][y + ydelta] == 0:
-    #             if self.item_map.get_has_entity(x + xdelta, y + ydelta):
-    #                 return (self.item_map.get_entity(x + xdelta, y + ydelta), x, y)
-    #             else:
-    #                 flood_map[x + xdelta][y + ydelta] = -1
-    #                 queue_additions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
-    #                 for direction in queue_additions:
-    #                     if self.in_map(x + xdelta, y + ydelta) and flood_map[x + xdelta][y + ydelta] == 0:
-    #                         queue.append(direction)
-    #     return (None, -1, -1)
 
 
 

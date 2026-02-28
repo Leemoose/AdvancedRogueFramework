@@ -79,3 +79,4 @@ class PathingState(GameState):
         self.loop.player.autopath(self.loop)
         self.loop.pathing_count += 1
         self.loop.time_passes(100)
+

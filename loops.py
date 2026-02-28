@@ -69,7 +69,9 @@ class Loops:
         self.memory = Memory()
         self.generator = None
         self.messages = MessageHandler()
-        self.player = player.Player(0, 0)
+        # Use config values for initial position (-1,-1 means spawn at valid location later)
+        from src.core.player_config import PlayerConfig
+        self.player = player.Player(PlayerConfig.STARTING_X, PlayerConfig.STARTING_Y)
         self.targets = T.Target(self)
 
         # State management
@@ -86,10 +88,7 @@ class Loops:
         self.total_time = 0
         self.daytime = True  # True = day, False = night
 
-        # Ocean tide system
-        # tide_level: 0 = low tide, 25 = medium tide, 50 = high tide
-        # tide_direction: 1 = rising, -1 = falling
-        self.tide_level = 25  # Start at medium tide
+        self.tide_level = -50  # Start at medium tide
         self.tide_direction = 1  # Start rising toward high tide
 
         # Quest state
@@ -465,11 +464,11 @@ class Loops:
         self.tide_level += self.tide_direction
 
         # Reverse direction at extremes
-        if self.tide_level >= 50:
-            self.tide_level = 50
+        if self.tide_level >= -5:
+            self.tide_level = -5
             self.tide_direction = -1
-        elif self.tide_level <= 0:
-            self.tide_level = 0
+        elif self.tide_level <= -35:
+            self.tide_level = -35
             self.tide_direction = 1
 
         # Apply water based on current tide level
@@ -479,14 +478,6 @@ class Loops:
         """Return True if it's daytime, False if nighttime."""
         return self.daytime
 
-    def is_high_tide(self):
-        """Return True if tide is high (level >= 40) in Ocean."""
-        return self.tide_level >= 40
-
-    def is_low_tide(self):
-        """Return True if tide is low (level <= 10) in Ocean."""
-        return self.tide_level <= 10
-
     def get_tide_level(self):
         """Return current tide level (0-50)."""
         return self.tide_level
@@ -495,7 +486,7 @@ class Loops:
     # FLOOR TRANSITIONS
     # =========================================================================
 
-    def change_floor(self):
+    def change_floor(self, level_change = -1, random_location = False):
         """Handle player moving between dungeon floors via stairs."""
         logger.debug("Entering change_floor")
 
@@ -509,12 +500,14 @@ class Loops:
         playerx, playery = self.player.get_location()
         logger.debug("Player at stairs position (%d, %d)", playerx, playery)
 
-        current_stairs = self.generator.tile_map.get_entity(playerx, playery)
-        if not current_stairs.has_trait("stairs"):
-            return
+        if not random_location:
+            current_stairs = self.generator.tile_map.get_entity(playerx, playery)
+            level_change = current_stairs.get_level_change()
+            if not current_stairs.has_trait("stairs"):
+                return
 
         # Calculate new level
-        new_level = self.get_depth() + current_stairs.get_level_change()
+        new_level = self.get_depth() + level_change
 
         # Block leaving the dungeon via up stairs on floor 1
         if new_level < 1:
@@ -523,17 +516,20 @@ class Loops:
 
         new_generator = self.memory.get_saved_floor(self.get_branch(), new_level)
 
+        if random_location:
+            self.player.x, self.player.y = new_generator.get_tile_map().get_random_location()
+        else:
         # Pair stairs if not already paired
-        if not current_stairs.get_has_paired_stairs():
-            for other_stairs in new_generator.tile_map.get_stairs():
-                is_unpaired = not other_stairs.get_has_paired_stairs()
-                is_opposite = other_stairs.get_level_change() != current_stairs.get_level_change()
-                if is_unpaired and is_opposite:
-                    current_stairs.pair_stairs(other_stairs)
-                    break
+            if not current_stairs.get_has_paired_stairs():
+                for other_stairs in new_generator.tile_map.get_stairs():
+                    is_unpaired = not other_stairs.get_has_paired_stairs()
+                    is_opposite = other_stairs.get_level_change() != current_stairs.get_level_change()
+                    if is_unpaired and is_opposite:
+                        current_stairs.pair_stairs(other_stairs)
+                        break
 
-        # Move player to new floor
-        self.player.x, self.player.y = current_stairs.get_paired_stairs().get_location()
+            # Move player to new floor
+            self.player.x, self.player.y = current_stairs.get_paired_stairs().get_location()
         self.player.visited_stairs = []
         self.generator = new_generator
 

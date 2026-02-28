@@ -11,6 +11,7 @@ from .fear import Fear
 from .charm import Charm
 from .root import Root
 from .bleed import Bleed
+from .suffocate import Suffocate
 from .stun import Stun, Paralyze
 from .invincible import Invincible
 from .sleep import Sleep

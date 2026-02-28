@@ -7,7 +7,7 @@ they do will steal gold.
 """
 
 class Goblin(Monster):
-    def __init__(self, x=-1, y=-1, render_tag=2100, name="Goblin", experience_given=10, health=10, min_damage=1, max_damage=3, rarity="Common"):  # TileID.GOBLIN from asset_registry.py
+    def __init__(self, x=-1, y=-1, render_tag=2100, name="Goblin", experience_given=10, health=15, min_damage=1, max_damage=3, rarity="Common"):  # TileID.GOBLIN from asset_registry.py - HP increased from 10
         super().__init__(x=x, y=y, render_tag=render_tag, name=name, experience_given=experience_given, health=health, min_damage=min_damage, max_damage=max_damage, rarity=rarity, gold=5)
         self.brain = MonsterAI(self, create_goblin_behaviors())
         self.character.action_costs["move"] = 80

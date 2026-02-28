@@ -15,8 +15,17 @@ A comprehensive guide for developers contributing to this Python roguelike built
 7. [Game States & UI](#game-states--ui)
 8. [Monster AI (Behavior System)](#monster-ai-behavior-system)
 9. [NPC & Dialogue System](#npc--dialogue-system)
-10. [File Structure Reference](#file-structure-reference)
-11. [Common Patterns](#common-patterns)
+10. [Status Effect System](#status-effect-system)
+11. [Combat System](#combat-system)
+12. [Experience & Leveling](#experience--leveling)
+13. [Save/Load System](#saveload-system)
+14. [Event System](#event-system)
+15. [Game Time & Turns](#game-time--turns)
+16. [Configuration & Constants](#configuration--constants)
+17. [File Structure Reference](#file-structure-reference)
+18. [Common Patterns](#common-patterns)
+19. [Testing](#testing)
+20. [Debugging Tips](#debugging-tips)
 
 ---
 
@@ -738,6 +747,645 @@ InteractableSpawns.append(
 
 ---
 
+## Status Effect System
+
+### Overview
+
+Status effects modify entity behavior and stats temporarily. Located in `spell_system/status_effects/`.
+
+### Architecture
+
+All effects inherit from `StatusEffect` base class with these core methods:
+
+```python
+class StatusEffect:
+    def apply_effect(self, target):
+        """Called when effect is first added. Setup code here."""
+        pass
+
+    def tick(self, target):
+        """Called each turn. Decrements duration, triggers per-turn effects."""
+        self.duration -= 1
+        if self.duration <= 0:
+            self.active = False
+
+    def remove(self, target):
+        """Called when effect expires. Cleanup code here."""
+        pass
+
+    def change_duration(self, change):
+        """Modifies duration by change amount."""
+        self.duration += change
+```
+
+### Creating a Custom Status Effect
+
+```python
+# spell_system/status_effects/regeneration.py
+from spell_system.status_effects.base import StatusEffect
+
+class Regeneration(StatusEffect):
+    def __init__(self, duration=10, heal_per_tick=2):
+        super().__init__(name="Regeneration", duration=duration)
+        self.heal_per_tick = heal_per_tick
+        self.cumulative = False  # Duration resets on reapply
+
+    def apply_effect(self, target):
+        # Optional: Visual or message on apply
+        pass
+
+    def tick(self, target):
+        # Heal each turn
+        target.character.change_health(self.heal_per_tick)
+        super().tick(target)  # Handles duration decrement
+
+    def remove(self, target):
+        # Cleanup if needed
+        pass
+```
+
+### Stacking & Duration Behavior
+
+Effects have two stacking modes controlled by the `cumulative` property:
+
+**Non-cumulative (default):** When applied again, duration **resets** to new effect's duration.
+```python
+# Example: Burn for 3 turns, apply again → still 3 turns total
+self.cumulative = False
+```
+
+**Cumulative:** Duration is **extended** by the new effect's duration.
+```python
+# Example: Slow for 3 turns, apply again → now 6 turns
+self.cumulative = True
+```
+
+The stacking logic in `status.py`:
+```python
+if existing_effect.is_cumulative():
+    existing_effect.change_duration(new_effect.get_duration())  # Extend
+else:
+    existing_effect.change_duration(new_effect.get_duration() - existing_effect.get_duration())  # Reset
+```
+
+### Immunity System
+
+Entities can be immune to specific effects:
+
+```python
+# Make entity immune to poison
+entity.character.status.status_effects_immunity.append("Poison")
+
+# Check immunity before applying
+if effect.name not in self.status_effects_immunity:
+    self.add_status_effect(effect)
+```
+
+### Effect Factory
+
+Use `StatusEffectFactory` to create effects by name:
+
+```python
+from spell_system.status_effects.status_factory import StatusEffectFactory
+
+# Create effect by name
+burn = StatusEffectFactory.create("burn", duration=3, damage=2)
+slow = StatusEffectFactory.create("slow", duration=5)
+
+# Returns None if unknown
+unknown = StatusEffectFactory.create("nonexistent")  # None
+```
+
+### Built-in Effect Types
+
+| Effect | Type | Mechanics |
+|--------|------|-----------|
+| `Burn` | DoT | Per-tick fire damage |
+| `Poison` | DoT | Per-tick poison damage |
+| `Slow` | Debuff | +50% action costs; restores on removal |
+| `Haste` | Buff | -50% action costs |
+| `Weak` | Debuff | Reduces damage multiplier |
+| `Berserk` | Buff | +20% max HP, +33% STR, +base damage; applies Slow on removal |
+| `Charm` | Control | Swaps AI to friendly; restores on removal |
+| `Root` | Control | Disables movement |
+| `Stun` | Control | Disables all actions |
+| `Sleep` | Control | Disables actions; breaks on damage |
+| `Fear` | Control | Reverses movement direction |
+| `Invincible` | Special | Sets invincible flag true |
+
+### Special Duration
+
+Use `INFINITE_DURATION` for permanent effects:
+
+```python
+from src.core.constants import INFINITE_DURATION
+
+permanent_buff = MyEffect(duration=INFINITE_DURATION)
+# Effect never expires naturally
+```
+
+---
+
+## Combat System
+
+### Overview
+
+Combat calculations are handled in `character_implementation/fighter.py`. The system uses accuracy vs evasion for hit chance and flat armor reduction for defense.
+
+### Damage Formula
+
+```python
+# Step 1: Calculate hit chance
+dodge_percentage = defender.get_dodge_chance() - attacker.get_physical_hit_chance()
+damage_shave = 1 - (max(min(dodge_percentage, 100), 0) / 100)
+
+if damage_shave == 0:
+    return 0  # Miss!
+
+# Step 2: Calculate base damage
+weapon_damage = random.randint(weapon.min_damage, weapon.max_damage)
+damage = weapon_damage * attacker.physical_damage_multiplier
+
+# Step 3: Apply defense
+defense = defender_armor - attacker.armor_piercing
+final_damage = max(0, int(damage * damage_shave) - defense)
+```
+
+### Hit Chance System
+
+Based on Dexterity stat:
+
+```python
+# Attacker
+accuracy = attacker.dexterity
+physical_hit_chance = accuracy  # Can be modified by equipment
+
+# Defender
+evasion = defender.dexterity
+dodge_chance = evasion  # Can be modified by equipment
+
+# Effective hit rate
+hit_modifier = accuracy - evasion
+# Clamped to 0-100%, affects damage_shave multiplier
+```
+
+### Physical Damage Multiplier
+
+Scales with Strength:
+
+```python
+physical_damage_multiplier = 1 + (strength * 0.01)
+# STR 10 → 1.10x damage (10% bonus)
+# STR 25 → 1.25x damage (25% bonus)
+# STR 50 → 1.50x damage (50% bonus)
+```
+
+### Armor System
+
+Flat damage reduction:
+
+```python
+effective_armor = defender.armor - attacker.armor_piercing
+damage_after_armor = max(0, damage - effective_armor)
+```
+
+### Weapon On-Hit Effects
+
+Weapons can trigger effects on hit:
+
+```python
+class VampiricSword(Weapon):
+    def __init__(self):
+        super().__init__(name="Vampiric Sword", min_damage=4, max_damage=8)
+        self.on_hit_effects = [self.lifesteal]
+
+    def lifesteal(self, target, attacker, damage, loop):
+        """Triggered via do_on_damage_effect() when damage > 0"""
+        heal = damage // 4
+        attacker.character.change_health(heal)
+        loop.add_message(f"The sword drains {heal} life!")
+```
+
+Two hook points:
+
+| Method | When Called |
+|--------|-------------|
+| `do_on_hit_effect()` | Any attack that connects (even if blocked) |
+| `do_on_damage_effect()` | Only if damage > 0 dealt |
+
+---
+
+## Experience & Leveling
+
+### Overview
+
+Located in `character_implementation/attributes.py` and `player.py`.
+
+### Experience Requirements
+
+Experience to next level uses a scaling formula:
+
+```python
+# Initial
+experience_to_next_level = 20
+
+# After each level up
+experience_to_next_level += 20 + (experience_to_next_level // 4)
+```
+
+Resulting progression:
+| Level | XP Required | Cumulative |
+|-------|-------------|------------|
+| 2 | 20 | 20 |
+| 3 | 25 | 45 |
+| 4 | 31 | 76 |
+| 5 | 39 | 115 |
+| 6 | 49 | 164 |
+
+### Level Up Rewards
+
+Automatic bonuses per level:
+- **+5 Max Health**
+- **+3 Max Mana**
+- **+2 Stat Points** (player allocates)
+
+### Stat Point Allocation
+
+Players distribute points in the levelup screen:
+
+```python
+# In levelup state
+stat_decisions = [str_points, dex_points, end_points, int_points]
+
+# Applied via
+player.character.level_up_stats(str_inc, dex_inc, end_inc, int_inc)
+```
+
+### Attribute Scaling
+
+Each stat provides specific bonuses:
+
+**Strength:**
+- Physical damage multiplier: `1 + (STR * 0.01)`
+
+**Dexterity:**
+- Accuracy (hit chance): `DEX`
+- Evasion (dodge chance): `DEX`
+
+**Endurance:**
+- Max health: `END * 3 + level * 5`
+- Health regen: `END * 0.01 + 0.2` per turn
+
+**Intelligence:**
+- Max mana: `INT * 2 + level * 3`
+- Mana regen: `INT * 0.01 + 0.2` per turn
+- Magical resistance: `INT`
+- Magical power: `INT`
+- Spell damage bonus: `(INT * 1.5) // 2`
+- Spell duration bonus: `INT // 3`
+
+### Spell Scaling
+
+Spells can scale with Intelligence:
+
+```python
+class Fireball(Spell):
+    def activate(self, target, loop):
+        base_damage = 10
+        bonus = self.parent.character.skill_damage_increase()
+        total_damage = base_damage + bonus
+
+        duration_bonus = self.parent.character.skill_duration_increase()
+        burn_duration = 3 + duration_bonus
+```
+
+---
+
+## Save/Load System
+
+### Overview
+
+Located in `loop_workflow/memory.py`. Uses **dill** library for serialization.
+
+### What Gets Saved
+
+```python
+save_data = [
+    floor_level,    # Current depth (int)
+    generators,     # Dict[branch][depth] → DungeonGenerator
+    player,         # Full player state
+    branch,         # Current branch name (str)
+    keyboard        # Input state
+]
+```
+
+The `DungeonGenerator` contains:
+- `tile_map` - Terrain data
+- `monster_map` - All monsters and positions
+- `item_map` - All items and positions
+- `interact_map` - NPCs, stairs, etc.
+
+### Save/Load API
+
+```python
+from loop_workflow.memory import Memory
+
+# Save game
+memory = Memory()
+memory.update_memory(floor_level, generators, player, branch, keyboard)
+memory.save_objects()  # Writes to data.dill
+
+# Load game
+memory.load_objects()  # Reads from data.dill
+generator = memory.get_current_saved_floor()
+player = memory.player
+```
+
+### Save Triggers
+
+Saves occur automatically:
+- Before floor transitions (stairs up/down)
+- Manual save via keybind (if implemented)
+
+### Load Process in Loops
+
+```python
+def load_game(self):
+    self.memory.load_objects()
+    self.generator = self.memory.get_current_saved_floor()
+    self.player = self.memory.player
+    self.player.character.energy = 0  # Reset energy
+    self.change_loop(LoopType.action)
+```
+
+---
+
+## Event System
+
+### Overview
+
+A pub/sub event system located in `src/core/events.py`. Enables decoupled communication between game systems.
+
+### Available Events
+
+```python
+class GameEvent(Enum):
+    # Combat
+    DAMAGE_DEALT = "damage_dealt"
+    MONSTER_DEATH = "monster_death"
+    PLAYER_DEATH = "player_death"
+
+    # Items
+    ITEM_PICKED_UP = "item_picked_up"
+    ITEM_DROPPED = "item_dropped"
+    ITEM_USED = "item_used"
+    ITEM_EQUIPPED = "item_equipped"
+    ITEM_UNEQUIPPED = "item_unequipped"
+
+    # Player
+    LEVEL_UP = "level_up"
+    EXPERIENCE_GAINED = "experience_gained"
+    HEALTH_CHANGED = "health_changed"
+    MANA_CHANGED = "mana_changed"
+
+    # Spells
+    SPELL_CAST = "spell_cast"
+    SPELL_LEARNED = "spell_learned"
+
+    # World
+    FLOOR_CHANGED = "floor_changed"
+    DOOR_OPENED = "door_opened"
+    TRAP_TRIGGERED = "trap_triggered"
+
+    # Status
+    STATUS_APPLIED = "status_applied"
+    STATUS_REMOVED = "status_removed"
+    STATUS_TICK = "status_tick"
+
+    # Quests
+    QUEST_RECEIVED = "quest_received"
+    QUEST_UPDATED = "quest_updated"
+    QUEST_COMPLETED = "quest_completed"
+
+    # UI
+    MESSAGE_ADDED = "message_added"
+    TARGET_CHANGED = "target_changed"
+```
+
+### Usage
+
+**Subscribe to events:**
+```python
+from src.core.events import EventBus, GameEvent
+
+def on_monster_death(data):
+    monster = data['monster']
+    killer = data['killer']
+    print(f"{monster.name} was slain by {killer.name}!")
+
+EventBus.subscribe(GameEvent.MONSTER_DEATH, on_monster_death)
+```
+
+**Emit events:**
+```python
+EventBus.emit(GameEvent.MONSTER_DEATH, {
+    'monster': dead_monster,
+    'killer': player,
+    'damage': final_blow_damage
+})
+```
+
+**Using decorators:**
+```python
+from src.core.events import on_level_up
+
+@on_level_up
+def handle_level_up(data):
+    player = data['player']
+    new_level = data['level']
+    # Trigger achievement check, etc.
+```
+
+**Unsubscribe:**
+```python
+EventBus.unsubscribe(GameEvent.MONSTER_DEATH, on_monster_death)
+```
+
+### Example: Achievement System
+
+```python
+class AchievementTracker:
+    def __init__(self):
+        self.kills = 0
+        EventBus.subscribe(GameEvent.MONSTER_DEATH, self.on_kill)
+
+    def on_kill(self, data):
+        self.kills += 1
+        if self.kills == 100:
+            self.unlock_achievement("Century Slayer")
+```
+
+---
+
+## Game Time & Turns
+
+### Overview
+
+The game uses an energy-based turn system. Actions cost energy; when energy goes negative, time passes.
+
+### Energy System Flow
+
+```
+1. Player takes action (move, attack, etc.)
+2. Action deducts energy (typically 100)
+3. If player.energy < 0:
+   a. time_passes() is called
+   b. Status effects tick
+   c. Cooldowns decrement
+   d. Regeneration applies
+   e. monster_loop() gives monsters energy
+   f. Monsters with energy >= 0 take actions
+4. Loop continues
+```
+
+### Action Costs
+
+Default costs defined in `character.py`:
+
+```python
+action_costs = {
+    "attack": 100,
+    "move": 100,
+    "grab": 30,      # Pick up item
+    "equip": 100,
+    "unequip": 50,
+    "quaff": 10,     # Drink potion
+    "read": 20,      # Read scroll
+    "drop": 10,
+    "activate": 25   # Use item ability
+}
+```
+
+Entities can have modified costs:
+```python
+# Fast monster
+self.character.action_costs["move"] = 50  # Moves twice as often
+```
+
+### Time Passage Effects
+
+Each "turn" (100 energy worth):
+
+1. **Status effect ticks** - Duration decrements, DoT applies
+2. **Spell cooldowns** - All cooldowns decrement by 1
+3. **Regeneration** - Health and mana regen based on stats
+4. **Terrain effects** - Standing in fire, water, etc.
+
+### Regeneration System
+
+Per-turn regeneration based on stats:
+
+```python
+# In character.tick_regen()
+health_regen = endurance * 0.01 + 0.2
+mana_regen = intelligence * 0.01 + 0.2
+```
+
+| Stat Value | Regen Per Turn |
+|------------|----------------|
+| 10 | 0.30 |
+| 20 | 0.40 |
+| 30 | 0.50 |
+| 50 | 0.70 |
+
+**Note:** Some branches (e.g., Forest) disable natural regeneration.
+
+### Special Branch Mechanics
+
+**Day/Night Cycle (Forest):**
+```python
+# Every 50 turns
+if turn_count % 50 == 0:
+    is_night = not is_night
+    for monster in monsters:
+        monster.nightify() if is_night else monster.dayify()
+```
+
+**Ocean Tides:**
+```python
+# Each turn, tide_level oscillates 0-50
+# Affects which tiles are underwater vs dry
+```
+
+---
+
+## Configuration & Constants
+
+### Player Configuration
+
+Located in `src/core/player_config.py`:
+
+```python
+# Starting stats
+STARTING_HEALTH = 25
+STARTING_MANA = 10
+
+# Progression
+MAX_LEVEL = 20
+DEBUG_STARTING_STAT_POINTS = 2
+
+# Debug mode
+DEBUG_MODE = False  # Enables invincibility, debug spells
+```
+
+### Game Constants
+
+Located in `src/core/constants.py`:
+
+```python
+# Render tag ranges
+TILE_RANGE = (0, 99)
+ITEM_RANGE = (100, 999)
+MONSTER_RANGE = (1000, 1999)
+NPC_RANGE = (2000, 2999)
+
+# Special values
+INFINITE_DURATION = -100
+
+# Game timing
+class GameTime:
+    ENERGY_PER_TURN = 100
+
+# Dungeon generation
+MIN_ROOM_SIZE = 4
+MAX_ROOM_SIZE = 12
+MIN_ROOMS = 5
+MAX_ROOMS = 15
+
+# Colors (RGB tuples)
+COLOR_WHITE = (255, 255, 255)
+COLOR_RED = (220, 20, 60)
+COLOR_GREEN = (50, 205, 50)
+COLOR_BLUE = (30, 144, 255)
+COLOR_GOLD = (255, 215, 0)
+```
+
+### Modifying Action Costs
+
+Per-entity customization:
+
+```python
+class QuickMonster(Monster):
+    def __init__(self):
+        super().__init__()
+        # This monster moves 50% faster
+        self.character.action_costs["move"] = 50
+        # But attacks slower
+        self.character.action_costs["attack"] = 150
+```
+
+---
+
 ## Common Patterns
 
 ### Getting Player Reference
@@ -799,6 +1447,87 @@ effects = entity.character.get_status_effects()
 
 # Remove effect
 entity.character.status.remove_status_effect(effect)
+
+# Check specific effect
+has_burn = any(e.name == "Burn" for e in effects)
+```
+
+### Movement Validation
+
+```python
+from src.core.movement import MovementValidator
+
+result = MovementValidator.can_move_to(entity, target_x, target_y)
+if result.valid:
+    entity.move_to(target_x, target_y)
+else:
+    loop.add_message(f"Cannot move: {result.reason}")
+```
+
+### Learning Spells
+
+```python
+from spell_system import give_spell
+
+# Give player a spell by ID
+give_spell(player, 'fireball')
+
+# Or directly
+from spell_system.fire_school.fireball import Fireball
+player.mage.known_spells.append(Fireball(player))
+```
+
+---
+
+## Testing
+
+### Test Infrastructure
+
+Located in `test_refactoring.py`. Uses unittest framework.
+
+### Running Tests
+
+```bash
+# Run all tests
+python test_refactoring.py
+
+# With pytest (verbose)
+pytest test_refactoring.py -v
+
+# Run specific test
+pytest test_refactoring.py::TestLogging -v
+```
+
+### Test Coverage
+
+Current test modules:
+- Logging configuration
+- Map/entity tracking
+- Room generation algorithms
+
+### Writing New Tests
+
+```python
+import unittest
+
+class TestMyFeature(unittest.TestCase):
+    def setUp(self):
+        """Called before each test"""
+        self.loop = create_test_loop()
+        self.player = self.loop.player
+
+    def test_damage_calculation(self):
+        """Test basic damage formula"""
+        monster = create_test_monster(health=100)
+        damage = self.player.fighter.do_attack(monster, self.loop)
+        self.assertGreater(damage, 0)
+
+    def tearDown(self):
+        """Called after each test"""
+        pass
+
+if __name__ == '__main__':
+    unittest.main()
 ```
 
 ---
@@ -806,9 +1535,25 @@ entity.character.status.remove_status_effect(effect)
 ## Debugging Tips
 
 1. **Enable logging**: Check `logging_config.py` for log levels
-2. **Invincibility mode**: Player starts invincible if `character.status.invincible = True` in `player.py`
+2. **Invincibility mode**: Set `DEBUG_MODE = True` in `src/core/player_config.py`
 3. **Force spawn monsters**: Set `forceSpawn` in `monster_spawner.py`
-4. **Debug spells**: Add test spells in `Player.__init__()` when invincible
+4. **Debug spells**: Debug spells auto-added when `DEBUG_MODE = True`
+5. **Skip to floor**: Use debug commands or modify `floor_level` on load
+
+### Common Debug Techniques
+
+```python
+# Add debug message with color
+loop.add_message(f"DEBUG: {variable}", (255, 255, 0))
+
+# Print monster positions
+for monster in loop.generator.monster_map.get_all():
+    print(f"{monster.name} at ({monster.x}, {monster.y})")
+
+# Check player status
+print(f"HP: {player.character.get_health()}/{player.character.get_max_health()}")
+print(f"Effects: {[e.name for e in player.character.get_status_effects()]}")
+```
 
 ---
 

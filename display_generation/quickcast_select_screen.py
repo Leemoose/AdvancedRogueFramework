@@ -9,6 +9,8 @@ def create_quickcast_select(display, loop):
     spell = entity
 
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated
+    display.menu_buttons = None
     display.win.fill(UIColors.BLACK)
 
     layout = UILayout.get_entity_popup_layout(display.screen_width, display.screen_height)

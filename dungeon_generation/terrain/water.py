@@ -17,7 +17,7 @@ class ShallowWaterTerrain(Terrain):
     """Shallow water terrain - slows movement."""
 
     def __init__(self, x=-1, y=-1, render_tag=TileID.OCEAN_FLOOR):
-        super().__init__(x=x, y=y, effect=Slow, duration=1,
+        super().__init__(x=x, y=y, effects=[Slow], duration=1,
                          render_tag=render_tag, name="Shallow Water")
         self.traits["shallow_water"] = True
         self.traits["water"] = True
@@ -35,21 +35,12 @@ class DeepWaterTerrain(Terrain):
     """
 
     def __init__(self, x=-1, y=-1, render_tag=TileID.DEEP_OCEAN):
-        # No effect - blocking is handled via tile passability
-        super().__init__(x=x, y=y, effect=None, duration=0,
+        super().__init__(x=x, y=y, effects=[], duration=0,
                          render_tag=render_tag, name="Deep Water")
         self.traits["deep_water"] = True
         self.traits["water"] = True
+        self.passable = False
 
     def get_terrain_message(self):
         return "Deep water blocks your path."
 
-    def blocks_movement(self, entity):
-        """Check if this terrain blocks the given entity."""
-        # Flying entities can pass over deep water
-        if hasattr(entity, 'traits') and entity.traits.get("flying", False):
-            return False
-        if hasattr(entity, 'character') and hasattr(entity.character, 'traits'):
-            if entity.character.traits.get("flying", False):
-                return False
-        return True

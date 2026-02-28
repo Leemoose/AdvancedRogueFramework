@@ -5,6 +5,8 @@ def create_main_screen(display, loop):
     layout = UILayout.get_main_screen_layout(display.screen_width, display.screen_height)
 
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated
+    display.menu_buttons = None
 
     imp = pygame.image.load('assets/title_screen.jpg')
     display.win.blit(imp, (0, 0))

@@ -7,7 +7,7 @@ To add a new effect type, add it to the EFFECT_TYPES dictionary.
 
 from typing import Dict, Type, Optional
 from .base_effect import BaseEffect
-from ..spell_data import EffectData
+from old.spell_data import EffectData
 from logging_config import get_logger
 
 logger = get_logger(__name__)

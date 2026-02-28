@@ -196,46 +196,70 @@ class Display:
         health_orb_x, health_orb_y = UILayout.get_health_orb_position(self.screen_width, self.screen_height)
         mana_orb_x, mana_orb_y = UILayout.get_mana_orb_position(self.screen_width, self.screen_height)
 
-        # Determine health orb image
-        if loop.player.character.status.has_effect("Poison"):
-            prefix = "poison"
-        else:
-            prefix = "health"
-        health_percentage = loop.player.character.get_health() / loop.player.character.get_max_health()
-        health_percentage = int(min(round(health_percentage, 1) * 100, 100))
-
-        if health_percentage >= 5:
-            health_orb_path = f"assets/status_orbs/{prefix}_{health_percentage}.png"
-        else:
-            health_orb_path = "assets/status_orbs/itsmars_orb_border.png"
-
-        # Determine mana orb image
-        mana_percentage = loop.player.character.get_mana() / loop.player.character.get_max_mana()
-        mana_percentage = int(min(round(mana_percentage, 1) * 100, 100))
-
-        if mana_percentage >= 5:
-            mana_orb_path = f"assets/status_orbs/mana_{mana_percentage}.png"
-        else:
-            mana_orb_path = "assets/status_orbs/itsmars_orb_border.png"
-
-        # Load all orb images via cache (loads once, reuses thereafter)
-        health_orb = AssetCache.load(health_orb_path, orb_full_size)
-        mana_orb = AssetCache.load(mana_orb_path, orb_full_size)
+        # Load overlay images (cached)
+        orb_border = AssetCache.load("assets/status_orbs/itsmars_orb_border.png", orb_full_size)
         orb_highlight = AssetCache.load("assets/status_orbs/itsmars_orb_highlight.png", orb_full_size)
         orb_shadow = AssetCache.load("assets/status_orbs/itsmars_orb_shadow.png", orb_full_size)
         orb_back = AssetCache.load("assets/status_orbs/itsmars_orb_back1.png", orb_half_size)
 
-        # Draw health orb with overlays
-        self.win.blit(health_orb, (health_orb_x, health_orb_y))
+        # Determine health orb fill image
+        if loop.player.character.status.has_effect("Poison"):
+            health_fill_path = "assets/status_orbs/poison_100.png"
+        else:
+            health_fill_path = "assets/status_orbs/health_100.png"
+
+        # Calculate exact health percentage (0.0 to 1.0)
+        health_ratio = loop.player.character.get_health() / loop.player.character.get_max_health()
+        health_ratio = max(0.0, min(1.0, health_ratio))
+
+        # Calculate exact mana percentage (0.0 to 1.0)
+        mana_ratio = loop.player.character.get_mana() / loop.player.character.get_max_mana()
+        mana_ratio = max(0.0, min(1.0, mana_ratio))
+
+        # Load full fill images (cached)
+        health_fill_full = AssetCache.load(health_fill_path, orb_full_size)
+        mana_fill_full = AssetCache.load("assets/status_orbs/mana_100.png", orb_full_size)
+
+        # Draw health orb: border first, then clipped fill, then overlays
+        self.win.blit(orb_border, (health_orb_x, health_orb_y))
+        self._draw_clipped_orb_fill(health_fill_full, health_orb_x, health_orb_y, orb_size, health_ratio)
         self.win.blit(orb_highlight, (health_orb_x, health_orb_y))
         self.win.blit(orb_shadow, (health_orb_x, health_orb_y))
         self.win.blit(orb_back, (health_orb_x, health_orb_y + orb_size // 2))
 
-        # Draw mana orb with overlays
-        self.win.blit(mana_orb, (mana_orb_x, mana_orb_y))
+        # Draw mana orb: border first, then clipped fill, then overlays
+        self.win.blit(orb_border, (mana_orb_x, mana_orb_y))
+        self._draw_clipped_orb_fill(mana_fill_full, mana_orb_x, mana_orb_y, orb_size, mana_ratio)
         self.win.blit(orb_highlight, (mana_orb_x, mana_orb_y))
         self.win.blit(orb_shadow, (mana_orb_x, mana_orb_y))
         self.win.blit(orb_back, (mana_orb_x, mana_orb_y + orb_size // 2))
+
+    def _draw_clipped_orb_fill(self, fill_surface, orb_x, orb_y, orb_size, fill_ratio):
+        """Draw the fill portion of an orb, clipped from the top based on fill_ratio.
+
+        Args:
+            fill_surface: The full orb fill image (e.g., health_100.png)
+            orb_x, orb_y: Top-left position of the orb
+            orb_size: Size of the orb (width and height)
+            fill_ratio: 0.0 (empty) to 1.0 (full)
+        """
+        if fill_ratio <= 0:
+            return  # Nothing to draw
+
+        # Calculate how many pixels to show from the bottom
+        visible_height = int(orb_size * fill_ratio)
+        if visible_height <= 0:
+            return
+
+        # The top of the visible portion (pixels to clip from top)
+        clip_from_top = orb_size - visible_height
+
+        # Create a subsurface that only includes the bottom portion
+        clip_rect = pygame.Rect(0, clip_from_top, orb_size, visible_height)
+        clipped_fill = fill_surface.subsurface(clip_rect)
+
+        # Draw at the correct Y position (offset down by the clipped amount)
+        self.win.blit(clipped_fill, (orb_x, orb_y + clip_from_top))
 
 
 
@@ -356,6 +380,8 @@ class Display:
 
     def refresh_screen(self):
         self.uiManager.clear_and_reset()
+        # Clear menu_buttons reference so they will be recreated
+        self.menu_buttons = None
 
     def stat_text(self, entity, stat):
         return str(stat)
@@ -423,6 +449,8 @@ class Display:
         player = loop.player
         if create:
             self.uiManager.clear_and_reset()
+            # Clear menu_buttons reference so they will be recreated
+            self.menu_buttons = None
         self.win.fill(UIColors.BLACK)
 
         # Get layout values from centralized config

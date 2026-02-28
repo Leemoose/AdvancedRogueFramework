@@ -4,6 +4,8 @@ from .ui_constants import UILayout
 
 def create_death_screen(display, loop):
     display.uiManager.clear_and_reset()
+    # Clear menu_buttons reference so they will be recreated
+    display.menu_buttons = None
     layout = UILayout.get_death_screen_layout(display.screen_width, display.screen_height)
 
     button = pygame_gui.elements.UIButton(
