@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # Logging files
-*.log.*
+debug.log.1
 
 # Distribution / packaging
 .Python
