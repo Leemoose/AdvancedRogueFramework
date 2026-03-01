@@ -16,6 +16,9 @@ class ItemSpawner():
         self.legendaryScrorbs = [i for i in self.ItemSpawns if i.item.rarity == "Legendary" and i.item.equipment_type == "Scrorb"]
         self.ExtraCommon = [i for i in self.ItemSpawns if i.item.rarity == "Extra Common"]
         self.commonCorpse = [i for i in self.ItemSpawns if i.item.has_trait("corpse")]
+        self.commonIngredients = [i for i in self.ItemSpawns if i.item.rarity == "Common" and i.item.has_trait("ingredient")]
+        self.rareIngredients = [i for i in self.ItemSpawns if i.item.rarity == "Rare" and i.item.has_trait("ingredient")]
+        self.legendaryIngredients = [i for i in self.ItemSpawns if i.item.rarity == "Legendary" and i.item.has_trait("ingredient")]
 
         # useful for debugging specific item_implementation, separate from generator
         self.forceSpawn = []
@@ -66,19 +69,26 @@ class ItemSpawner():
         commonPotiorbsAtDepth = [i for i in self.commonPotiorbs if i.AllowedAtDepth(depth, branch)]
         commonScrorbsAtDepth = [i for i in self.commonScrorbs if i.AllowedAtDepth(depth, branch)]
         commonCorpsesAtDepth = [i for i in self.commonCorpse if i.AllowedAtDepth(depth, branch)]
+        commonIngredientsAtDepth = [i for i in self.commonIngredients if i.AllowedAtDepth(depth, branch)]
 
         rareEquipAtDepth = [i for i in self.rareEquip if i.AllowedAtDepth(depth, branch)]
         rarePotiorbsAtDepth = [i for i in self.rarePotiorbs if i.AllowedAtDepth(depth, branch)]
         rareScrorbsAtDepth = [i for i in self.rareScrorbs if i.AllowedAtDepth(depth, branch)]
+        rareIngredientsAtDepth = [i for i in self.rareIngredients if i.AllowedAtDepth(depth, branch)]
         if rareEquipAtDepth == []:
             rareEquipAtDepth = commonEquipAtDepth
+        if rareIngredientsAtDepth == []:
+            rareIngredientsAtDepth = commonIngredientsAtDepth
         legendaryEquipAtDepth = [i for i in self.legendaryEquip if i.AllowedAtDepth(depth, branch)]
         legendaryScrorbsAtDepth = [i for i in self.legendaryScrorbs if i.AllowedAtDepth(depth, branch)]
+        legendaryIngredientsAtDepth = [i for i in self.legendaryIngredients if i.AllowedAtDepth(depth, branch)]
         if legendaryEquipAtDepth == []: # downgrade if no legendary item_implementation available
             if rareEquipAtDepth == []:
                 legendaryEquipAtDepth = commonEquipAtDepth
             else:
                 legendaryEquipAtDepth = rareEquipAtDepth
+        if legendaryIngredientsAtDepth == []: # downgrade if no legendary item_implementation available
+            legendaryIngredientsAtDepth = rareIngredientsAtDepth
 
         for i in range(distribution.countEquipment(depth)):
             if distribution.countEquipment(depth) > 0:
@@ -140,7 +150,20 @@ class ItemSpawner():
                 item = item_spawn.GetFreshCopy()
                 items.append(item)
 
-
+        for i in range(distribution.countIngredients(depth)):
+            rarity = random.random()
+            if rarity < distribution.ingredients[depth-1][0]:
+                item_spawn = random.choice(commonIngredientsAtDepth)
+                item = item_spawn.GetFreshCopy()
+                items.append(item)
+            elif rarity < distribution.ingredients[depth-1][0] + distribution.ingredients[depth-1][1]:
+                item_spawn = random.choice(rareIngredientsAtDepth)
+                item = item_spawn.GetFreshCopy()
+                items.append(item)
+            else:
+                item_spawn = random.choice(legendaryIngredientsAtDepth)
+                item = item_spawn.GetFreshCopy()
+                items.append(item)
         return items
     
 item_spawner = ItemSpawner(ItemSpawns)

@@ -1,8 +1,9 @@
 from typing import Dict
 import random
-from tag_manager import PotionTag
+from potion_system import PotionTag
+from item_implementation.items import Item
 
-class Ingredient():
+class Ingredient(Item):
     def __init__(self, render_tag, name, tagDict: Dict[PotionTag, float]):
         super().__init__(-1, -1, 0, render_tag, name)
         self.equipment_type = "Potion"
@@ -22,11 +23,11 @@ class Ingredient():
 
         self.tagNames = list(tagDict.keys())
         self.tagProbs = list(tagDict.values())
-        if sum(tagProbs) != 1.0:
+        if sum(self.tagProbs) != 1.0:
             self.tagNames.append(PotionTag.Nothing)
-            self.tagProbs.append(1.0 - sum(tagProbs))
-        assert(sum(tagProbs) == 1.0)
-        if len(tagNames) != 1:
+            self.tagProbs.append(1.0 - sum(self.tagProbs))
+        assert(sum(self.tagProbs) == 1.0)
+        if len(self.tagNames) != 1:
             self.basic = True
         else:
             self.basic = False

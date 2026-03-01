@@ -18,6 +18,8 @@ from item_implementation import (
     Ring, Amulet,
     # Consumables
     HealthPotion, MightPotion,
+    # Ingredients
+    FireLily, RockVine,
 )
 from .spawn_params import ItemSpawnParams
 
@@ -49,6 +51,10 @@ SPAWN_CONFIG = [
     # CONSUMABLES
     (HealthPotion, None,   1, 10),  # Common healing
     (MightPotion,  (404,), 3, 10),  # Damage boost, floor 3+
+
+    # INGREDIENTS
+    (FireLily, None,   1, 10),  # basic fire tag ingredient
+    (MightPotion,  None, 1, 10),  # basic stone tag ingredient
 ]
 
 
