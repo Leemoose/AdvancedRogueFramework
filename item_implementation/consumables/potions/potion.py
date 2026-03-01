@@ -2,6 +2,7 @@
 POTIONS
 """
 from item_implementation.items import Item
+from tag_system.tag_effects import TagEffectRegistry, UsageContext
 
 class Potion(Item):
     def __init__(self, render_tag, name):
@@ -18,6 +19,7 @@ class Potion(Item):
         self.description = "A potion that does something."
         self.action_description = "Something flows through your body"
         self.rarity = "Common"
+        self.tags = []
         self.traits["potion"] = True
 
     def can_be_equipped(self, entity):
@@ -27,21 +29,35 @@ class Potion(Item):
         return False
 
     def throw(self, x, y, loop):
-        pass
+        monster_map = loop.generator.monster_map
+        player = loop.player
+
+        if player.get_x() == x and player.get_y() == y:
+            self.apply_to_entity(player, loop)
+        elif monster_map.get_has_entity(x, y):
+            monster = monster_map.get_entity(x, y)
+            self.apply_to_entity(monster, loop)
+        else:
+            tile = loop.generator.tile_map.get_entity(x, y)
+            self.apply_to_tile(tile, loop)
+
+    def apply_to_entity(self, entity, loop):
+        loop.add_message(f"The {self.name} splashes onto {entity.name}!", (200, 200, 200))
+        TagEffectRegistry.apply_effects(self.tags, UsageContext.THROW, entity, loop)
+
+    def apply_to_tile(self, tile, loop):
+        loop.add_message(f"The {self.name} shatters on the ground!", (200, 200, 200))
+        TagEffectRegistry.apply_effects(self.tags, UsageContext.THROW, tile, loop)
 
     def quaff(self, entity):
         pass
 
-    def apply_to_equipment(self, entity):
-        pass
-
-    def apply_to_environment(self, entity):
-        pass
-
-    def apply_to_skin(self, entity):
-        pass
+    def apply_to_equipment(self, equipment, loop):
+        loop.add_message(f"You apply the {self.name} to your {equipment.name}!", (200, 200, 200))
+        TagEffectRegistry.apply_effects(self.tags, UsageContext.APPLY, equipment, loop)
 
     def activate(self, entity):
+        TagEffectRegistry.apply_effects(self.tags, UsageContext.DRINK, entity, None)
         self.stacks -= 1
         if self.stacks == 0:
             self.destroy = True

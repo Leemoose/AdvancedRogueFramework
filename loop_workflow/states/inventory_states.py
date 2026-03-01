@@ -151,6 +151,9 @@ class ItemScreenState(GameState):
         elif action == "activate":
             if player.character.activate(item, self.loop):
                 self._change_state(LoopType.inventory)
+        elif action == "apply":
+            if item.has_trait("potion"):
+                self._change_state(LoopType.apply_potion)
         elif action == "throw":
             self.loop.targets.set_target_range(player.get_location(), item.range)
             self.loop.targets.set_queued_action(player.do_throw)
@@ -213,4 +216,56 @@ class EnchantState(GameState):
         item.level_up()
         self._change_state(LoopType.action)
         player.inventory.change_limit_inventory("item")
+        self.loop.update_screen = True
+
+
+class ApplyPotionState(GameState):
+    """
+    Selection screen for applying a potion to equipped gear.
+
+    Shows only currently equipped items and allows selecting one
+    to apply the stored potion to.
+    """
+
+    loop_type = LoopType.apply_potion
+
+    def create_display(self, display):
+        from display_generation import create_apply_potion_screen
+        create_apply_potion_screen(display, self.loop)
+
+    def update_display(self, display):
+        display.update_screen(self.loop)
+
+    def handle_input(self, key):
+        player = self.loop.player
+
+        if key == "esc":
+            self._change_state(LoopType.inventory)
+            return True
+
+        equipped = self._get_equipped_items(player)
+        index = key_to_index(key)
+        if index is not None and index < len(equipped):
+            self._apply_potion(player, equipped[index])
+
+        return True
+
+    def _get_equipped_items(self, player):
+        """Return flat list of all currently equipped items."""
+        equipped = []
+        for slot_items in player.body.equipment_slots.values():
+            for item in slot_items:
+                if item is not None:
+                    equipped.append(item)
+        return equipped
+
+    def _apply_potion(self, player, equipment):
+        """Apply the stored potion to the selected equipment."""
+        potion = self.loop.targets.get_target()
+        potion.apply_to_equipment(equipment, self.loop)
+        potion.stacks -= 1
+        if potion.stacks <= 0:
+            potion.destroy = True
+            player.inventory.remove_item(potion)
+        self._change_state(LoopType.inventory)
         self.loop.update_screen = True

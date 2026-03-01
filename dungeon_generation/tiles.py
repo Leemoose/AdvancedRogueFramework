@@ -112,12 +112,12 @@ class Stairs(Tile):
 
 
 class DownStairs(Stairs):
-    def __init__(self, x, y, render_tag = 400, passable = True, id_tag = 0):  # 431 = NEW_FANTASY_STAIRS_DOWN (see asset_registry.py)
+    def __init__(self, x, y, render_tag = 410, passable = True, id_tag = 0):  # 431 = NEW_FANTASY_STAIRS_DOWN (see asset_registry.py)
         super().__init__(x, y, render_tag = render_tag, passable = passable, id_tag = id_tag)
         self.level_change = 1
 
 class UpStairs(Stairs):
-    def __init__(self, x, y, render_tag = 410, passable = True, id_tag = 0):  # 430 = NEW_FANTASY_STAIRS_UP (see asset_registry.py)
+    def __init__(self, x, y, render_tag = 400, passable = True, id_tag = 0):  # 430 = NEW_FANTASY_STAIRS_UP (see asset_registry.py)
         super().__init__(x, y, render_tag = render_tag, passable = passable, id_tag = id_tag)
         self.level_change = -1
 

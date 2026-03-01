@@ -12,7 +12,7 @@ States are organized into logical groups:
 
 from .gameplay_states import ActionState, TargetingState, ExamineState, SpecificExamineState
 from .menu_states import MainMenuState, PausedState, HelpState, StoryState
-from .inventory_states import InventoryState, EquipmentState, ItemScreenState, EnchantState
+from .inventory_states import InventoryState, EquipmentState, ItemScreenState, EnchantState, ApplyPotionState
 from .spell_states import SpellListState, SpellIndividualState, QuickcastState
 from .modal_states import DeathState, VictoryState, QuestState, TradeState, LevelUpState
 from .automated_states import RestingState, PathingState
@@ -25,7 +25,7 @@ __all__ = [
     # Menus
     'MainMenuState', 'PausedState', 'HelpState', 'StoryState',
     # Inventory
-    'InventoryState', 'EquipmentState', 'ItemScreenState', 'EnchantState',
+    'InventoryState', 'EquipmentState', 'ItemScreenState', 'EnchantState', 'ApplyPotionState',
     # Spells
     'SpellListState', 'SpellIndividualState', 'QuickcastState',
     # Modals
@@ -65,6 +65,7 @@ def create_all_states(loop):
         EquipmentState(loop),
         ItemScreenState(loop),
         EnchantState(loop),
+        ApplyPotionState(loop),
 
         # Spell system
         SpellListState(loop),

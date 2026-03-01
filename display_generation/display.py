@@ -149,7 +149,7 @@ class Display:
         self.draw_experience_bar(loop, action_screen_height)
         self.draw_menu_buttons(action_screen_height)
         self.depth_label.update(1)
-        self.draw_context_help(loop._current_loop_type)
+        # self.draw_context_help(loop._current_loop_type)
 
     def create_menu_buttons(self, action_screen_height):
         """Create menu buttons once - call on init or resize."""
@@ -529,6 +529,8 @@ class Display:
                     item_buttons.append(("Read", "r"))
                 elif item.has_trait("consumeable"):
                     item_buttons.append(("Activate", "a"))
+            if item.has_trait("potion"):
+                item_buttons.append(("Apply", "y"))
             if item.throwable:
                 item_buttons.append(("Throw", "t"))
             if item.dropable:
