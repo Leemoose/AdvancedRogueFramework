@@ -11,8 +11,8 @@ Add new tag effects here. The registry and the definitions are kept
 in separate files so the registry class stays clean.
 """
 
-from tag_system.tag_manager import PotionTag
-from tag_system.tag_effects import TagEffectRegistry, UsageContext
+from potion_system.tag_manager import PotionTag
+from potion_system.tag_effects import TagEffectRegistry, UsageContext
 from spell_system.status_effects import Burn, Slow, Might
 
 

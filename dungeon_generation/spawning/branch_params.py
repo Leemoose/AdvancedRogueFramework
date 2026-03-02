@@ -58,6 +58,17 @@ class BranchParams:
                         (0.4, 0.4, 0.2), # floor 8
                         (0.4, 0.4, 0.2), # floor 9
                         (0.4, 0.4, 0.2)] # floor 10
+
+        self.ingredients = [(0.7, 0.3, 0.0), # floor 1
+                            (0.7, 0.3, 0.0), # floor 2
+                            (0.5, 0.4, 0.1), # floor 3
+                            (0.5, 0.4, 0.2), # floor 4
+                            (0.4, 0.4, 0.2), # floor 5
+                            (0.4, 0.4, 0.2), # floor 6
+                            (0.4, 0.4, 0.2), # floor 7
+                            (0.4, 0.4, 0.2), # floor 8
+                            (0.4, 0.4, 0.2), # floor 9
+                            (0.4, 0.4, 0.2)] # floor 10
     
         # tier 0 is roll monster distribution from previous floors (unlikely to show up)
         # tier 1 is normal monsters from current floors (most common to show up)
@@ -121,6 +132,9 @@ class BranchParams:
 
     def countCorpses(self, depth):
         return 0
+
+    def countIngredients(self, depth):
+        return random.randint(int(1 + 0.2 * (depth)), int(4 + 0.4 * (depth)))
     
     # Monster spawn restriction system
     # Specific branches can override this to restrict monster spawning to specific tiles

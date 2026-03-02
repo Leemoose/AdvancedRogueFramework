@@ -11,7 +11,7 @@ Effect functions have signature: (target, loop) -> None
 """
 
 from enum import Enum
-from tag_system.tag_manager import PotionTag
+from potion_system.tag_manager import PotionTag
 
 class UsageContext(Enum):
     DRINK = "drink"

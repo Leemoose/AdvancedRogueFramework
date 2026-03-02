@@ -4,7 +4,7 @@ from loop_workflow import keyboard as K
 import loops as L
 import static_configs
 from spell_system import initialize_spell_system
-from tag_system import tag_manager as tags
+from potion_system import tag_manager as tags
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module = "PIL.PNGImagePlugin")

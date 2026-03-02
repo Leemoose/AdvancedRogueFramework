@@ -7,7 +7,13 @@ class PotionTag(Enum):
     Water = 1,
     Steam = 2,
     Stone = 3,
-    Magma = 4
+    Magma = 4,
+    Lightning = 5,
+    Scorch = 6,
+    Storm = 7,
+    Heal = 8,
+    GigaHeal = 9,
+    Nothing = 10,
 
 class PotionCombo():
     def __init__(self, leftTag, rightTag, priority, outputs):
@@ -55,5 +61,13 @@ class PotionManager():
 potionManager = PotionManager()
 
 def InitPotionTags():
-    potionManager.AddCombo(PotionCombo(PotionTag.Fire, PotionTag.Water, 1.0, [PotionTag.Steam]))
-    potionManager.AddCombo(PotionCombo(PotionTag.Fire, PotionTag.Stone, 0.5, [PotionTag.Magma]))
+    potionManager.AddCombo(PotionCombo(PotionTag.Fire, PotionTag.Water, 10.0, [PotionTag.Steam]))
+    potionManager.AddCombo(PotionCombo(PotionTag.Fire, PotionTag.Stone, 5.0, [PotionTag.Magma]))
+    potionManager.AddCombo(PotionCombo(PotionTag.Lightning, PotionTag.Fire, 9.0, [PotionTag.Scorch]))
+    potionManager.AddCombo(PotionCombo(PotionTag.Water, PotionTag.Lightning, 8.0, [PotionTag.Storm]))
+    potionManager.AddCombo(PotionCombo(PotionTag.Heal, PotionTag.Heal, 15.0, [PotionTag.GigaHeal]))
+
+
+# this will test tag manager if we call python tag_manager.py but not run it 
+if __name__ == "__main__":
+    pass
