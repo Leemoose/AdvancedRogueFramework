@@ -639,7 +639,7 @@ class Display:
             self.win.blit(tag, (self.textSize * (tile.get_x() - self.x_start), self.textSize * (tile.get_y() - self.y_start)))
             if loop.generator.interact_map.get_has_entity(tile.get_x(), tile.get_y()):
                 entity = loop.generator.interact_map.get_entity(tile.get_x(), tile.get_y())
-                print(entity.get_render_tag())
+                # print(entity.get_render_tag())
                 tag = loop.tileDict.tile_string(entity.get_render_tag())
                 self.win.blit(tag, (self.textSize * (tile.get_x() - self.x_start), self.textSize * (tile.get_y() - self.y_start)))
             for terrain in tile.get_terrain():

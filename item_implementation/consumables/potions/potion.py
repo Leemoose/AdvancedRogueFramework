@@ -2,7 +2,7 @@
 POTIONS
 """
 from item_implementation.items import Item
-from tag_system.tag_effects import TagEffectRegistry, UsageContext
+from potion_system.tag_effects import TagEffectRegistry, UsageContext
 
 class Potion(Item):
     def __init__(self, render_tag, name):

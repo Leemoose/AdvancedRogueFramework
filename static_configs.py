@@ -137,6 +137,11 @@ class TileDict():
         tiles[742] = image.load("assets/items/orbs/ocean_orb.png")  # OCEAN_ORB_PEDESTAL (placeholder)
         tiles[743] = tiles[0]  # OCEAN_ORB_PEDESTAL_EMPTY (placeholder)
 
+        # ----------------------------------------------------------------------
+        # Crafting (800-899)
+        # ----------------------------------------------------------------------
+        tiles[800] = image.load("assets/interactables/crafting_table.png") 
+
         # ======================================================================
         # CHARACTERS (1000-1999)
         # ======================================================================
@@ -167,6 +172,7 @@ class TileDict():
         tiles[1111] = image.load("assets/npc/guard.png")
         tiles[1120] = image.load("assets/npc/sensei.png")
         tiles[1121] = image.load("assets/npc/archmage.png")
+        tiles[1122] = image.load("assets/npc/forest_hermit.png")
         tiles[1130] = image.load("assets/npc/training_dummy.png")
         tiles[1131] = image.load("assets/npc/destroyed_dummy.png")
 

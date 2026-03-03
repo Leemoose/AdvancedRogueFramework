@@ -107,6 +107,9 @@ class Loops:
         self.after_pathing = lambda x: False
         self.after_rest = None
 
+        # crafting tracker
+        self.crafting_list = []
+
         # Register all states
         self.state_manager.register_states(create_all_states(self))
 

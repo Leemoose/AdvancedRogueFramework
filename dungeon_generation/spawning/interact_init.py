@@ -6,6 +6,7 @@ InteractableSpawns.append(InteractableSpawnParams(HealthFountain(), minFloor=1, 
 InteractableSpawns.append(InteractableSpawnParams(Statue(), minFloor=1, maxFloor=5, branch="all"))
 
 # NPCs - spawn in Hub and early dungeon floors
+InteractableSpawns.append(InteractableSpawnParams(CraftingTable(), minFloor=1, maxFloor=10, branch="all"))
 InteractableSpawns.append(InteractableSpawnParams(VillageElder(), minFloor=1, maxFloor=1, branch="Hub"))
 InteractableSpawns.append(InteractableSpawnParams(ForestHermit(), minFloor=1, maxFloor=2, branch="Dungeon"))
 InteractableSpawns.append(InteractableSpawnParams(WanderingTrader(), minFloor=2, maxFloor=4, branch="all"))

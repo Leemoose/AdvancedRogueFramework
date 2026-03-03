@@ -310,7 +310,7 @@ class QuestGiver(NPC):
 class ForestHermit(QuestGiver):
     """A hermit in the forest who gives an exploration quest."""
 
-    def __init__(self, x=-1, y=-1, render_tag=TileID.SENSEI, name="Forest Hermit"):
+    def __init__(self, x=-1, y=-1, render_tag=1122, name="Forest Hermit"):
         self._custom_quest = DungeonDelverQuest(target_depth=3)
         super().__init__(x=x, y=y, render_tag=render_tag, name=name)
         self.quest = self._custom_quest

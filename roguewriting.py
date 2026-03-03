@@ -22,7 +22,7 @@ tags.InitPotionTags()
 # Quick test of the tag updates! Adding Fire, Water, and Stone - Fire + Water is higher prio so it should result in Steam, Stone
 tagTest = [tags.PotionTag.Fire, tags.PotionTag.Water, tags.PotionTag.Stone]
 tags.potionManager.ApplyCombos(tagTest);
-print(tagTest)
+# print(tagTest)
 
 
 #Size of tiles

@@ -39,3 +39,4 @@ class LoopType(Enum):
     spell_individual = auto()
     quickcast = auto()
     apply_potion = auto()
+    crafting = auto()

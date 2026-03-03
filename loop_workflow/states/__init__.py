@@ -18,6 +18,7 @@ from .modal_states import DeathState, VictoryState, QuestState, TradeState, Leve
 from .automated_states import RestingState, PathingState
 from .binding_state import BindingState
 from .class_state import ClassState
+from .crafting_states import CraftingState
 
 __all__ = [
     # Gameplay
@@ -29,7 +30,7 @@ __all__ = [
     # Spells
     'SpellListState', 'SpellIndividualState', 'QuickcastState',
     # Modals
-    'DeathState', 'VictoryState', 'QuestState', 'TradeState', 'LevelUpState',
+    'DeathState', 'VictoryState', 'QuestState', 'TradeState', 'LevelUpState','CraftingState'
     # Automated
     'RestingState', 'PathingState',
     # Other
@@ -86,4 +87,7 @@ def create_all_states(loop):
         # Other
         BindingState(loop),
         ClassState(loop),
+
+        # Crafting
+        CraftingState(loop)
     ]
