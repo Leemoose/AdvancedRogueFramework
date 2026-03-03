@@ -375,8 +375,8 @@ class TileDict():
         # ----------------------------------------------------------------------
         # Ingredients (6500-6599)
         # ----------------------------------------------------------------------
-        tiles[6500] = image.load("assets/items/consumeables/ingredients/fire_lily.png")
-        tiles[6501] = image.load("assets/items/consumeables/ingredients/rockvine.png")
+        tiles[6500] = image.load("assets/items/consumeables/Ingredients/fire_lily.png")
+        tiles[6501] = image.load("assets/items/consumeables/Ingredients/rockvine.png")
 
         # ======================================================================
         # SPECIAL ITEMS (7000-7999)

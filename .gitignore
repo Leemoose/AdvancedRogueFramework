@@ -8,6 +8,10 @@ __pycache__/
 
 # Logging files
 debug.log.1
+debug.log
+
+# Tag files (Generated on linux for browsing)
+tags
 
 # Distribution / packaging
 .Python

@@ -36,7 +36,7 @@ class Ingredient(Item):
         return list(self.tagDict.keys())
     
     def GetTagAtActivate(self) -> str:
-        return random.choice(self.tagNames, self.tagProbs)
+        return random.choices(self.tagNames, self.tagProbs)
 
     def can_be_equipped(self, entity):
         return False

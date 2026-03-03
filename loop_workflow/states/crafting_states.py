@@ -14,6 +14,7 @@ from ..input_actions import (
     key_to_index,
 )
 from display_generation import create_inventory, create_equipment, create_crafting
+from potion_system import craft_potions
 
 logger = get_logger(__name__)
 
@@ -46,8 +47,18 @@ class CraftingState(GameState):
             items = player.inventory.get_limit_inventory()
             if index < len(items):
                 if len(self.loop.crafting_list) < 3:
-                    self.loop.crafting_list.pop(0)
+                    print("Crafting: " + str(items[index]));
                     self.loop.crafting_list.append(items[index])
+                    player.inventory.remove_item(items[index])
+                    return True
+
+        if key == "return":
+            print("Crafting!!")
+            potion = craft_potions.craft_potion(self.loop.crafting_list)
+            player.inventory.get_item(potion)
+            self._exit_inventory(player)
+            return True
+
 
         return True
 
