@@ -13,7 +13,7 @@ from ..input_actions import (
     get_item_action,
     key_to_index,
 )
-from display_generation import create_inventory, create_equipment, create_crafting
+from display_generation import create_inventory, create_equipment, create_crafting, update_crafting
 from potion_system import craft_potions
 
 logger = get_logger(__name__)
@@ -32,7 +32,7 @@ class CraftingState(GameState):
         create_crafting(display, self.loop)
 
     def update_display(self, display):
-        display.update_screen(self.loop)
+        update_crafting(display, self.loop)
 
     def handle_input(self, key):
         player = self.loop.player
@@ -44,7 +44,8 @@ class CraftingState(GameState):
         # Letter keys select items
         index = key_to_index(key)
         if index is not None:
-            items = player.inventory.get_limit_inventory()
+            # import ipdb; ipdb.set_trace()
+            items = player.inventory.get_limit_inventory(limit="ingredient")
             if index < len(items):
                 if len(self.loop.crafting_list) < 3:
                     print("Crafting: " + str(items[index]));

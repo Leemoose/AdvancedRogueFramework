@@ -22,6 +22,7 @@ class Inventory():
         if limit is None:
             limit = self.limit_inventory
         allowable = []
+        # import ipdb; ipdb.set_trace()
         for item in self.active_inventory:
             if item.has_trait(limit):
                 allowable.append(item)
