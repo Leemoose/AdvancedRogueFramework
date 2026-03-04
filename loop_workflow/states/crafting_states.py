@@ -27,6 +27,7 @@ class CraftingState(GameState):
     """
 
     loop_type = LoopType.crafting
+    removed_for_crafting = []
 
     def create_display(self, display):
         create_crafting(display, self.loop)
@@ -47,26 +48,30 @@ class CraftingState(GameState):
             # import ipdb; ipdb.set_trace()
             items = player.inventory.get_limit_inventory(limit="ingredient")
             if index < len(items):
-                if len(self.loop.crafting_list) < 3:
+                if len(self.loop.crafting_list) < 3 and items[index].stacks > 0:
                     print("Crafting: " + str(items[index]));
                     self.loop.crafting_list.append(items[index])
-                    player.inventory.remove_item(items[index])
+                    items[index].stacks -= 1
+                    self.removed_for_crafting.append(items[index])
                     return True
 
         if key == "return":
             print("Crafting!!")
             potion = craft_potions.craft_potion(self.loop.crafting_list)
             player.inventory.get_item(potion)
-            self._exit_inventory(player)
+            self._exit_inventory(player, force=False)
             return True
 
 
         return True
 
-    def _exit_inventory(self, player):
+    def _exit_inventory(self, player, force=True):
         """Handle exiting the inventory screen."""
         self._change_state(LoopType.action)
         player.inventory.change_limit_inventory("item")
+        if force:
+            for item in self.removed_for_crafting:
+                item.stacks += 1
         self.loop.crafting_list = []
 
 
