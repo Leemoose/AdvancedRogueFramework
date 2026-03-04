@@ -13,8 +13,8 @@ class Looter(Goblin):
     def __init__(self, x=-1, y=-1):
         super().__init__(
             x=x, y=y,
-            render_tag=2103,  # New render tag for looter
-            name="Looter",
+            render_tag=2100,  # New render tag for looter
+            name="Looter", 
             experience_given=25,
             health=15,
             min_damage=3,

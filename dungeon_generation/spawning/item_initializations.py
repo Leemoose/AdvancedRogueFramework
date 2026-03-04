@@ -54,7 +54,7 @@ SPAWN_CONFIG = [
 
     # INGREDIENTS
     (FireLily, None,   1, 10),  # basic fire tag ingredient
-    (MightPotion,  None, 1, 10),  # basic stone tag ingredient
+    (RockVine,  None, 1, 10),  # basic stone tag ingredient
 ]
 
 

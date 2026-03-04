@@ -409,7 +409,7 @@ class WanderingTrader(NPC):
     A trader NPC. Trading functionality placeholder for future implementation.
     """
 
-    def __init__(self, x=-1, y=-1, render_tag=121, name="Wandering Trader"):
+    def __init__(self, x=-1, y=-1, render_tag=1100, name="Wandering Trader"):
         super().__init__(x=x, y=y, render_tag=render_tag, name=name)
         self.options = ["Talk"]  # Trading disabled for now
 
