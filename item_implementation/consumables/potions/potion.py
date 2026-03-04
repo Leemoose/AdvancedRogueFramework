@@ -22,6 +22,11 @@ class Potion(Item):
         self.tags = []
         self.traits["potion"] = True
 
+    @property
+    def dynamic_description(self):
+        tag_string = ", ".join(self.tags)[:-2]
+        return f"A potion wiht the {tag_string} tags"
+
     def can_be_equipped(self, entity):
         return False
 

@@ -70,4 +70,4 @@ def InitPotionTags():
 
 # this will test tag manager if we call python tag_manager.py but not run it 
 if __name__ == "__main__":
-    pass
+    print(str(PotionTag.Fire).split(".")[-1])

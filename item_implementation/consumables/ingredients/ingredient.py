@@ -35,8 +35,20 @@ class Ingredient(Item):
     def GetTagsList(self):
         return list(self.tagDict.keys())
     
-    def GetTagAtActivate(self) -> str:
+    def GetTagAtActivate(self) -> PotionTag:
         return random.choices(self.tagNames, self.tagProbs)
+    
+    def GetTagString(self) -> str:
+        s = " ("
+        for tag, prob in zip(self.tagNames, self.tagProbs):
+            tag_str = str(tag).split(".")[-1]
+            s += f"{tag_str} {str(int(prob * 100))}\%, "
+        if len(s) > 1:
+            s = s[:-2]
+            s += ")"
+            return s
+        else:
+            return ""
 
     def can_be_equipped(self, entity):
         return False

@@ -16,6 +16,15 @@ def create_crafting(display, loop):
         item_name = item.name
         if item.stackable:
             item_name = item.name + " (x" + str(item.stacks) + ")"
+        if item.can_be_levelled:
+            item_level = item.level
+            if item_level > 1:
+                item_name = item_name + " (+" + str(item_level - 1) + ")"
+        if item.equipped:
+            item_name = item_name + " (equipped)"
+        if item.has_trait("ingredient"):
+            item_tags = item.GetTagString()
+            item_name += item_tags
         btn_x, btn_y = UILayout.get_panel_button_position(panel_layout, i)
         button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((btn_x, btn_y),
@@ -83,5 +92,55 @@ def create_crafting(display, loop):
         manager=display.uiManager,
         starting_height=1)
     preview_button.action = ""
+
+    display.uiManager.draw_ui(display.win)
+
+def update_crafting(display, loop):
+    # TODO: only update if loop.crafting_list changes
+    player = loop.player
+
+    # Use shared setup helper (eliminates ~15 lines of duplicate code)
+    panel_layout = setup_panel_screen(display, "Inventory")
+    sidebar_layout = UILayout.get_inventory_sidebar_layout(display.screen_width, display.screen_height, num_buttons=5)
+
+    # Inventory item buttons
+    for i, item in enumerate(player.inventory.get_limit_inventory(limit="ingredient")):
+        item_name = item.name
+        if item.stackable:
+            item_name = item.name + " (x" + str(item.stacks) + ")"
+        if item.can_be_levelled:
+            item_level = item.level
+            if item_level > 1:
+                item_name = item_name + " (+" + str(item_level - 1) + ")"
+        if item.equipped:
+            item_name = item_name + " (equipped)"
+        if item.has_trait("ingredient"):
+            item_tags = item.GetTagString()
+            item_name += item_tags
+        btn_x, btn_y = UILayout.get_panel_button_position(panel_layout, i)
+        button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((btn_x, btn_y),
+                                      (panel_layout['button_width'], panel_layout['button_height'])),
+            text=chr(ord("a") + i) + ". " + item_name,
+            manager=display.uiManager)
+        button.action = chr(ord("a") + i)
+
+    # Sidebar filter buttons (left side)
+    active_ingredients = loop.crafting_list
+    sidebar_buttons = []
+    for i in range(len(active_ingredients)):
+        sidebar_buttons.append((f"{i + 1}. {active_ingredients[i].name + active_ingredients[i].GetTagString()}", str(i + 1)))
+    for i in range(len(active_ingredients), 3):
+        sidebar_buttons.append((f"{i+ 1}. Ingredient {i + 1}", str(i + 1)))
+    sidebar_buttons.append(("4. Mix! (press enter)", "return"))
+
+    for i, (text, action) in enumerate(sidebar_buttons):
+        btn_x, btn_y = UILayout.get_sidebar_button_position(sidebar_layout, i)
+        button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((btn_x, btn_y, sidebar_layout['button_width'], sidebar_layout['button_height'])),
+            text=text,
+            manager=display.uiManager,
+            starting_height=1)
+        button.action = action
 
     display.uiManager.draw_ui(display.win)

@@ -10,7 +10,7 @@ from logging_config import get_logger
 from ..game_states import GameState
 from src.core.enums import LoopType
 from ..input_actions import key_to_index
-from display_generation import create_crafting
+from display_generation import create_crafting, update_crafting
 from potion_system import craft_potions
 
 logger = get_logger(__name__)
@@ -33,7 +33,7 @@ class CraftingState(GameState):
         create_crafting(display, self.loop)
 
     def update_display(self, display):
-        display.update_screen(self.loop)
+        update_crafting(display, self.loop)
 
     def handle_input(self, key):
         player = self.loop.player
