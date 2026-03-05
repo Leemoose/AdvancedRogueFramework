@@ -1,0 +1,68 @@
+Quick ramblings about potion ideas (Please modify or change!!)
+
+[Combo thoughts] ===============================================================================
+When you make a combo, you deprive the player of the natural double-stacking of the elements.
+	- E.G., they paid to add fire and water - if there's no combo, they get both base effects, so a 2x strength potion
+
+At a base level, combos need to be 2X as strong as their components - Minimum!
+	- Otherwise, players will want to find double stacks more than true combos
+	- Want to incentivize combo searching over sticking with base types
+
+
+[Base type thoughts] ===============================================================================
+Maybe worth it to introduce base elements in avatar-style fasion, or something similar - would onboard players without much extra work.
+
+Interaction types:
+	- Quaff
+		- Varied in effect, self application
+	- Throw
+	- Direct Application (throw that lands)
+	- Dip (Weapon application)
+	- Apply (Armor application)
+
+
+Double application of an element is a nice way to do "Babies first potion". We should let base elements all double stack for bonus effectivity,
+but they should definitely stay weaker than full combos (since combos are the more interesting side of our system).
+
+Main loop is something like>:
+	- Acquire materials
+	- Build what you can
+	- Use your potions to kill bigger monsters
+	- Get better materials
+	- Go deeper!
+
+We can add a layer of intuition to the system by letting base types have a specific flair. E.G, "Any base type + Life/Vigor == A buff potion of that type". If fire is all about damage, it could create a "Damage buff" type of potion.
+
+Base elemental types
+	- Fire
+		- Archetype: Agressive?
+	- Water
+		- Archetype: Situational, or maybe application?
+	- Air
+		- Archetype: Avoidance?
+	- Earth
+		- Archetype: Defense?
+	- Vigor/Life
+		- Archetype: Healing/Buffs
+		- Good plant tie in, easy tie in for buff/healing types
+
+[Tag combo ideas] ===============================================================================
+Double stack combos
+	- [Fire + Fire]
+	- [Water + Water]
+	- [Air + Air]
+	- [Earth + Earth]
+	- Healing [Life + Life]
+		- Bog standard healing potion!
+		- Really interesting to mess around with how this applies in other way - heals a group of enemies (charming them?), what about a healing weapon?
+			- Do heals kill zombies? Definitely should!!
+
+More interesting types
+	- Oil [Fire + Water]
+		- Slippery effect?
+	- Explosive [Fire + Oil]
+		- Yes, Rico - kaboom.
+	- Lava [Fire + Earth]
+	- Rage [Vigor + Fire]
+	- Haste [Vigor + Air]
+	- Steam [Water + Fire]
