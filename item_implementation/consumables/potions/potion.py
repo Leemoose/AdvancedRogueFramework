@@ -25,7 +25,7 @@ class Potion(Item):
     @property
     def dynamic_description(self):
         tag_string = ", ".join(self.tags)[:-2]
-        return f"A potion wiht the {tag_string} tags"
+        return f"A potion with the {tag_string} tags"
 
     def can_be_equipped(self, entity):
         return False
@@ -54,15 +54,14 @@ class Potion(Item):
         loop.add_message(f"The {self.name} shatters on the ground!", (200, 200, 200))
         TagEffectRegistry.apply_effects(self.tags, UsageContext.THROW, tile, loop)
 
-    def quaff(self, entity):
-        pass
+    def quaff(self, entity, loop):
+        loop.add_message(f"The {self.name} has been drank!", (200, 200, 200))
 
     def apply_to_equipment(self, equipment, loop):
         loop.add_message(f"You apply the {self.name} to your {equipment.name}!", (200, 200, 200))
         TagEffectRegistry.apply_effects(self.tags, UsageContext.APPLY, equipment, loop)
 
     def activate(self, entity):
-        TagEffectRegistry.apply_effects(self.tags, UsageContext.DRINK, entity, None)
         self.stacks -= 1
         if self.stacks == 0:
             self.destroy = True

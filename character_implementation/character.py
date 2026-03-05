@@ -115,7 +115,7 @@ class Character():
               #  loop.add_message(message)
 
     def quaff(self, potion, item_dict, item_map):
-        if potion.consumeable and potion.equipment_type == "Potiorb":
+        if potion.consumeable and potion.equipment_type == "Potion":
             potion.activate(self.parent)
             self.change_energy(-self.action_costs["quaff"])
             return True
@@ -127,7 +127,7 @@ class Character():
             return True
 
     def read(self, scroll, loop, item_dict, item_map):
-        if scroll.consumeable and scroll.equipment_type == "Scrorb":
+        if scroll.consumeable and scroll.equipment_type == "Scroll":
             scroll.activate(self.parent, loop)
             self.change_energy(-self.action_costs["read"])
             return True

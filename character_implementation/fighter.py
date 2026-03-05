@@ -55,6 +55,7 @@ class Fighter():
         finalDamage = max(0, int(damage * damage_shave) - defense)
         if finalDamage > 0:
             defender.fighter.do_on_damage_effect(self.parent.body.get_weapon(), loop)
+            #Add in a section here about on hit defense effects
         defender.character.take_damage(self.parent, finalDamage)
         return finalDamage
 

@@ -77,6 +77,7 @@ def steam_throw(target, loop):
         target.character.status.add_status_effect(slow)
         _msg(loop, f"{target.name} is engulfed in scalding steam!", (200, 200, 255))
 
+
 def steam_apply(target, loop):
     """Applying steam: equipment effect."""
     # TODO: implement steam equipment effect
