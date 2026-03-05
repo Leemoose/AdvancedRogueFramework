@@ -1,14 +1,29 @@
 from potion_system.tag_manager import PotionTag, potionManager
 from item_implementation.consumables.potions import Potion
+from random import random
 
-def get_tag_name(tag):
-    return tag.name
+def GetTagsAtActivate(inputIngredient):
+        outTags = []
+        tags = inputIngredient.GetTags()
+        weights = inputIngredient.GetTagProbabilities()
+
+        print("Starting choices!")
+        print("Tags: " + str(tags))
+        print("Weights: " + str(weights))
+
+        for tag, weight in zip(tags, weights):
+            if random() <= weight:
+                outTags.append(tag)
+
+        print("Choices: " + str(outTags))
+        return outTags
+
 
 def craft_potion(ingredient_list):
     print("Crafting!!")
     tags = []
     for ingredient in ingredient_list:
-        new_tags = ingredient.GetTagAtActivate()
+        new_tags = GetTagsAtActivate(ingredient)
         for new_tag in new_tags:
             tags.append(new_tag)
 

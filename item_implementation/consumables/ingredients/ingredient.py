@@ -32,18 +32,12 @@ class Ingredient(Item):
         else:
             self.basic = False
 
-    def GetTagsList(self):
-        return list(self.tagDict.keys())
-    
-    def GetTagAtActivate(self) -> PotionTag:
-        print("Starting choices!")
-        print("Tags: " + str(self.tagNames))
-        print("Weights: " + str(self.tagProbs))
+    def GetTags(self):
+        return self.tagNames
 
-        choice = random.choices(self.tagNames, self.tagProbs)
-        print("Choice: " + str(choice))
-        return choice
-    
+    def GetTagProbabilities(self):
+        return self.tagProbs
+        
     def GetTagString(self) -> str:
         s = " ("
         for tag, prob in zip(self.tagNames, self.tagProbs):
