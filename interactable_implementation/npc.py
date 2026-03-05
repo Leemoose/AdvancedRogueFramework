@@ -431,7 +431,7 @@ class WanderingTrader(NPC):
 class MysteriousStranger(NPC):
     """A mysterious NPC with cryptic dialogue."""
 
-    def __init__(self, x=-1, y=-1, render_tag=122, name="Mysterious Stranger"):
+    def __init__(self, x=-1, y=-1, render_tag=1122, name="Mysterious Stranger"):
         super().__init__(x=x, y=y, render_tag=render_tag, name=name)
 
     def build_dialogue_tree(self) -> DialogueTree:

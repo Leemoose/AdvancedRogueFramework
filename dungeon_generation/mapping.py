@@ -238,7 +238,7 @@ class DungeonGenerator:
 
     def get_random_passable_location_not_in_hallway(self, stairs_block = True):
         x,y = self.get_random_passable_location(stairs_block)
-        while self.get_is_in_corridor(x, y):
+        while self.get_is_in_corridor(x, y) or self.get_blocks_path(x, y):
             x,y = self.get_random_passable_location(stairs_block)
         return x,y
 
@@ -312,7 +312,7 @@ class DungeonGenerator:
             logger.warning("Tried to place an item at an invalid location")
 
     def place_interactable_at_location(self, interactable, x, y):
-        if self.get_passable((x, y)):
+        if self.get_passable((x, y)) and not self.get_is_in_corridor(x, y):
             interactable.set_location(x, y)
             self.interact_map.place_thing(interactable)
         else:
@@ -337,6 +337,20 @@ class DungeonGenerator:
                 if self.tile_map.get_passable(adj_x, adj_y):
                     min_passable = min(min_passable, self.count_passable_neighbors(adj_x, adj_y))
             return min_passable < 3
+
+    # pattern matching approach to make sure we don't add tiles that block areas
+    def get_blocks_path(self, x, y):
+        # vertical path blocked
+        if not self.tile_map.get_passable(x + 1, y) and not self.tile_map.get_passable(x - 1, y) and \
+            self.tile_map.get_passable(x, y - 1) and self.tile_map.get_passable(x, y + 1):
+            return True
+        
+        # horizontal path blocked
+        if not self.tile_map.get_passable(x, y - 1) and not self.tile_map.get_passable(x, y + 1) and \
+            self.tile_map.get_passable(x + 1, y) and self.tile_map.get_passable(x - 1, y):
+            return True
+
+        return False
 
     def get_passible_map_copy(self):
         tile_map = []
