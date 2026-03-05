@@ -13,7 +13,8 @@ in separate files so the registry class stays clean.
 
 from potion_system.tag_manager import PotionTag
 from potion_system.tag_effects import TagEffectRegistry, UsageContext
-from spell_system.status_effects import Burn, Slow, Might
+from spell_system.status_effects import *
+import random
 
 
 def _msg(loop, text, color):
@@ -35,7 +36,7 @@ def fire_throw(target, loop):
         effect = Burn(5, 3, None)
         target.character.status.add_status_effect(effect)
         _msg(loop, f"{target.name} catches fire!", (255, 100, 50))
-
+ 
 def fire_apply(target, loop):
     """Applying fire: coat equipment with fire."""
     # TODO: implement fire weapon coating once equipment effects exist
@@ -84,6 +85,50 @@ def steam_apply(target, loop):
     _msg(loop, "Steam hisses off the equipment!", (200, 200, 255))
 
 
+# --- Steam tag effects ---
+def stone_drink(target, loop):
+    """Drinking stone: armor buff"""
+    effect = Armored(5, 3)
+    target.character.status.add_status_effect(effect)
+    _msg(loop, f"{target.name} skin grows rocklike!", (200, 200, 255))
+
+def stone_throw(target, loop):
+    """Throwing stone: create obstacle if empty, provide armor buff to enemy target otherwise (negative)"""
+    if hasattr(target, 'character'):
+        effect = Armored(5, 3)
+        target.character.status.add_status_effect(effect)
+        _msg(loop, f"{target.name} skin grows rocklike!", (200, 200, 255))
+
+def stone_apply(target, loop):
+    """Applying stone: equipment effect."""
+    # TODO: implement stone equipment effect
+    _msg(loop, "Stone grows on the equipment!", (200, 200, 255))
+
+# --- magma tag effects ---
+def magma_drink(target, loop):
+    """Drinking magma: purified in magma (end a negative status effect)"""
+    if target.character.status.has_negative_effects:
+        negative_effects = target.character.status.get_all_negative_effects()
+        effect = random.choice(negative_effects)
+        target.character.status.remove_status_effect(effect)
+        _msg(loop, f"{target.name} is purified by the heat of magma", (200, 200, 255))
+    else:
+        _msg(loop, f"{target.name} feels warmth inside", (200, 200, 255))
+
+def magma_throw(target, loop):
+    """Throwing magma: root and burn"""
+    if hasattr(target, 'character'):
+        burn = Burn(3, 3, None)
+        root = Root(None, duration=3)
+        target.character.status.add_status_effect(burn)
+        target.character.status.add_status_effect(root)
+        _msg(loop, f"{target.name} is immobilized by magma!", (200, 200, 255))
+
+def magma_apply(target, loop):
+    """Applying magma: equipment effect."""
+    # TODO: implement stone equipment effect
+    _msg(loop, "Magma engulfs the equipment!", (200, 200, 255))
+
 def register_all_tag_effects():
     """Register all tag -> effect mappings. Call once at startup."""
     r = TagEffectRegistry
@@ -102,3 +147,13 @@ def register_all_tag_effects():
     r.register(PotionTag.Steam, UsageContext.DRINK, steam_drink)
     r.register(PotionTag.Steam, UsageContext.THROW, steam_throw)
     r.register(PotionTag.Steam, UsageContext.APPLY, steam_apply)
+
+    # Stone
+    r.register(PotionTag.Stone, UsageContext.DRINK, stone_drink)
+    r.register(PotionTag.Stone, UsageContext.THROW, stone_throw)
+    r.register(PotionTag.Stone, UsageContext.APPLY, stone_apply)
+    
+    # Magma
+    r.register(PotionTag.Magma, UsageContext.DRINK, magma_drink)
+    r.register(PotionTag.Magma, UsageContext.THROW, magma_throw)
+    r.register(PotionTag.Magma, UsageContext.APPLY, magma_apply)

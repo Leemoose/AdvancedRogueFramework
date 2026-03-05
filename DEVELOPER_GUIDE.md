@@ -634,7 +634,7 @@ from interactable_implementation.npc import NPC
 from interactable_implementation.dialogue import DialogueTree, Option, END
 
 class Merchant(NPC):
-    def __init__(self, x=-1, y=-1, render_tag=121, name="Merchant"):
+    def __init__(self, x=-1, y=-1, render_tag=1100, name="Merchant"):
         super().__init__(x=x, y=y, render_tag=render_tag, name=name)
 
     def build_dialogue_tree(self) -> DialogueTree:

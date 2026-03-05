@@ -57,6 +57,9 @@ class Status():
             if not x.positive:
                 return True
         return False
+    
+    def get_all_negative_effects(self):
+        return [x for x in self.status_effects if (not x.positive)]
 
     def has_effect(self, effect_name):
         if effect_name in [x.name for x in self.status_effects]:

@@ -134,7 +134,7 @@ class BranchParams:
         return 0
 
     def countIngredients(self, depth):
-        return random.randint(int(1 + 0.2 * (depth)), int(4 + 0.4 * (depth)))
+        return random.randint(int(3 + 0.2 * (depth)), int(6 + 0.4 * (depth)))
     
     # Monster spawn restriction system
     # Specific branches can override this to restrict monster spawning to specific tiles
