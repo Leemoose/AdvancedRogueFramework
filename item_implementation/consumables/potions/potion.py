@@ -58,6 +58,12 @@ class Potion(Item):
         loop.add_message(f"You apply the {self.name} to your {equipment.name}!", (200, 200, 200))
         TagEffectRegistry.apply_effects(self.tags, UsageContext.APPLY, equipment, loop)
 
+    def GetTags(self):
+        return self.tags
+
+    def GetTagProbabilities(self):
+        return [1.0 for x in self.tags]
+
     def activate(self, entity):
         self.stacks -= 1
         if self.stacks == 0:

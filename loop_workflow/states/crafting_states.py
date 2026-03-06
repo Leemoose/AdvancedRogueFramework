@@ -52,7 +52,7 @@ class CraftingState(GameState):
 
         # Mix: craft potion if 3 ingredients selected
         if key == "m" or key == "return":
-            if len(self.loop.crafting_list) == 3:
+            if len(self.loop.crafting_list) > 0:
                 potion = craft_potions.craft_potion(self.loop.crafting_list)
                 player.inventory.get_item(potion)
                 self.loop.crafting_list = []
