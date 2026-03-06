@@ -23,7 +23,7 @@ class Inventory():
         if limit is not None:
             limits.append(limit)
 
-        return get_limit_inventory_many(self, limits)
+        return self.get_limit_inventory_many(limits)
 
     def get_limit_inventory_many(self, limits):
         if len(limits) == 0:
@@ -35,7 +35,7 @@ class Inventory():
                 if item.has_trait(limit):
                     allowable.append(item)
         return allowable
-
+ 
     def get_inventory_size(self):
         return len(self.active_inventory)
 
