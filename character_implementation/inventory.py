@@ -19,13 +19,21 @@ class Inventory():
         return self.active_inventory
 
     def get_limit_inventory(self, limit = None):
-        if limit is None:
-            limit = self.limit_inventory
+        limits = []
+        if limit is not None:
+            limits.append(limit)
+
+        return get_limit_inventory_many(self, limits)
+
+    def get_limit_inventory_many(self, limits):
+        if len(limits) == 0:
+            limits.append(self.limit_inventory)
         allowable = []
         # import ipdb; ipdb.set_trace()
-        for item in self.active_inventory:
-            if item.has_trait(limit):
-                allowable.append(item)
+        for limit in limits:
+            for item in self.active_inventory:
+                if item.has_trait(limit):
+                    allowable.append(item)
         return allowable
 
     def get_inventory_size(self):

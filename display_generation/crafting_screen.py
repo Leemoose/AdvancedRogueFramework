@@ -12,7 +12,7 @@ def create_crafting(display, loop):
     sidebar_layout = UILayout.get_inventory_sidebar_layout(display.screen_width, display.screen_height, num_buttons=6)
 
     # Inventory item buttons (only ingredients not already selected)
-    for i, item in enumerate(player.inventory.get_limit_inventory(limit="ingredient")):
+    for i, item in enumerate(player.inventory.get_limit_inventory_many(["ingredient", "potion"])):
         item_name = item.name
         if item.stackable:
             item_name = item.name + " (x" + str(item.stacks) + ")"
@@ -104,7 +104,7 @@ def update_crafting(display, loop):
     sidebar_layout = UILayout.get_inventory_sidebar_layout(display.screen_width, display.screen_height, num_buttons=6)
 
     # Inventory item buttons (only ingredients not already selected)
-    for i, item in enumerate(player.inventory.get_limit_inventory(limit="ingredient")):
+    for i, item in enumerate(player.inventory.get_limit_inventory_many(["ingredient", "potion"])):
         item_name = item.name
         if item.stackable:
             item_name = item.name + " (x" + str(item.stacks) + ")"

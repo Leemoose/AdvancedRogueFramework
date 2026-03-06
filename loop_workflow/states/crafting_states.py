@@ -62,7 +62,7 @@ class CraftingState(GameState):
         # Letter keys select ingredients into next empty slot
         index = key_to_index(key)
         if index is not None:
-            items = player.inventory.get_limit_inventory(limit="ingredient")
+            items = player.inventory.get_limit_inventory_many(["ingredient", "potion"])
             if index < len(items) and len(self.loop.crafting_list) < 3:
                 item = items[index]
                 # Copy one unit off the stack for the crafting slot
