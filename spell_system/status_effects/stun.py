@@ -11,10 +11,10 @@ class Stun(StatusEffect):
         self.positive = False
 
     def apply_effect(self, target):
-        target.can_take_actions = False
+        target.character.status.can_take_actions = False
 
     def remove(self, target):
-        target.can_take_actions = True
+        target.character.status.can_take_actions = True
 
 
 # Alias for backwards compatibility

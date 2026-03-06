@@ -12,7 +12,7 @@ class Armored(StatusEffect):
         self.armor_increase = armor_increase
 
     def apply_effect(self, target):
-        target.attributes.change_armor(self.armor_increase)
+        target.character.attributes.change_armor(self.armor_increase)
 
     def remove(self, target):
-        target.attributes.change_armor(-self.armor_increase)
+        target.character.attributes.change_armor(-self.armor_increase)

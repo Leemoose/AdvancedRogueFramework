@@ -16,6 +16,7 @@ class Equipment(Item):
         self.traits["equipment"] = True
         self.slot = "hand_slot"
         self.slots_taken = 1
+        self.bonus_max_health = 0
 
     def get_slot(self):
         return self.slot
@@ -23,8 +24,13 @@ class Equipment(Item):
     def activate(self, entity):
         self.wearer = entity
         self.add_stats(entity)
+        if self.bonus_max_health > 0:
+            entity.character.change_max_health(self.bonus_max_health)
 
     def deactivate(self, entity):
+        if self.bonus_max_health > 0:
+            entity.character.change_max_health(-self.bonus_max_health)
+            entity.character.health = max(1, entity.character.health)
         self.wearer = None
         self.remove_stats(entity)
 

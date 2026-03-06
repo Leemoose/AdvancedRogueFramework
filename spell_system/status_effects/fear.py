@@ -17,13 +17,13 @@ class Fear(StatusEffect):
 
     def apply_effect(self, target):
         logger.debug("Applying fear effect to %s", target)
-        if target.parent.has_trait("monster"):
-            self.old_flee_tendency = target.parent.brain.get_tendency("flee")
-            target.parent.brain.change_tendency("flee", (1000, 0))
-            target.parent.flee = True
+        if target.has_trait("monster"):
+            self.old_flee_tendency = target.brain.get_tendency("flee")
+            target.brain.change_tendency("flee", (1000, 0))
+            target.character.status.flee = True
             logger.debug("The %s is inflicted with fear", target)
 
     def remove(self, target):
-        if target.parent.has_trait("monster"):
-            target.parent.brain.change_tendency("flee", self.old_flee_tendency)
-            target.parent.flee = False
+        if target.has_trait("monster"):
+            target.brain.change_tendency("flee", self.old_flee_tendency)
+            target.character.status.flee = False

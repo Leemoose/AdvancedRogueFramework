@@ -11,9 +11,10 @@ class Invincible(StatusEffect):
         self.positive = True
 
     def apply_effect(self, target):
-        target.invincible = True
+        target.character.status.invincible = True
 
     def remove(self, target):
-        target.invincible = False
+        target.character.status.invincible = False
         # Ensure at least 1 HP after invincibility ends
-        target.health = max(1, target.health)
+        if target.character.get_health() < 1:
+            target.character.change_health(1 - target.character.get_health())

@@ -12,7 +12,7 @@ class Sleep(StatusEffect):
         self.positive = False
 
     def apply_effect(self, target):
-        target.parent.asleep = True
+        target.character.status.set_awake(False)
 
     def remove(self, target):
-        target.parent.asleep = False
+        target.character.status.set_awake(True)

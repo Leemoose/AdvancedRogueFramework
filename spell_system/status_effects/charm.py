@@ -13,10 +13,10 @@ class Charm(StatusEffect):
         self.positive = False  # Negative from monster's perspective
 
     def apply_effect(self, target):
-        if target.parent.has_trait("monster"):
-            self.old_brain = target.parent.brain
-            target.parent.make_friendly()
+        if target.has_trait("monster"):
+            self.old_brain = target.brain
+            target.make_friendly()
 
     def remove(self, target):
-        if target.parent.has_trait("monster"):
-            target.parent.brain = self.old_brain
+        if target.has_trait("monster"):
+            target.brain = self.old_brain

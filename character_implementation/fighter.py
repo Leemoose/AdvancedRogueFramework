@@ -50,12 +50,13 @@ class Fighter():
             return 0
 
         defender.fighter.do_on_hit_effect(self.parent.body.get_weapon(), loop)
+        defender.fighter.do_armor_on_hit_effect(self.parent, loop)
         damage = self.get_damage() * self.parent.character.attributes.get_physical_damage_multiplier()
         defense = defender.do_defend(self.parent, loop) - self.get_armor_piercing()
         finalDamage = max(0, int(damage * damage_shave) - defense)
         if finalDamage > 0:
             defender.fighter.do_on_damage_effect(self.parent.body.get_weapon(), loop)
-            #Add in a section here about on hit defense effects
+            defender.fighter.do_armor_on_damage_effect(self.parent, loop)
         defender.character.take_damage(self.parent, finalDamage)
         return finalDamage
 
@@ -78,6 +79,16 @@ class Fighter():
     def do_on_damage_effect(self, weapon, loop):
         for effect in weapon.get_on_damage_effect():
             self.parent.character.status.add_status_effect(effect(self.parent))
+
+    def do_armor_on_hit_effect(self, attacker, loop):
+        for armor in self.parent.body.get_all_armor():
+            for effect in armor.get_on_hit_effect():
+                attacker.character.status.add_status_effect(effect(attacker))
+
+    def do_armor_on_damage_effect(self, attacker, loop):
+        for armor in self.parent.body.get_all_armor():
+            for effect in armor.get_on_damage_effect():
+                attacker.character.status.add_status_effect(effect(attacker))
 
 
     def get_armor_piercing(self):

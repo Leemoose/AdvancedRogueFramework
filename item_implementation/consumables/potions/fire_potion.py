@@ -26,7 +26,7 @@ class FirePotion(Potion):
         if equipment.has_trait("weapon"):
             equipment.add_on_damage_effect(Burn)
         elif equipment.has_trait("armor"):
-            #add part here about equipment gaining on hit defense effect
-            pass
+            equipment.add_on_damage_effect(Burn)
         else:
-            pass
+            equipment.bonus_max_health += 10
+            loop.player.character.change_max_health(10)

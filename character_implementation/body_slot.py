@@ -168,3 +168,13 @@ class Body():
             if item is not None:
                 return item
         return None
+
+    def get_all_armor(self):
+        armor = []
+        for slot_name, items in self.equipment_slots.items():
+            if slot_name == "hand_slot":
+                continue
+            for item in items:
+                if item is not None:
+                    armor.append(item)
+        return armor

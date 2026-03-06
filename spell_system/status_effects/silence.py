@@ -10,7 +10,7 @@ class Silence(StatusEffect):
         self.positive = False
 
     def apply_effect(self, target):
-        target.parent.can_spellcast = False
+        target.character.status.set_can_spellcast(False)
 
     def remove(self, target):
-        target.parent.can_spellcast = True
+        target.character.status.set_can_spellcast(True)

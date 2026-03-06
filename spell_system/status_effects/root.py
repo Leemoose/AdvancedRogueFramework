@@ -12,7 +12,7 @@ class Root(StatusEffect):
         self.positive = False
 
     def apply_effect(self, target):
-        target.can_move = False
+        target.character.status.can_move = False
 
     def remove(self, target):
-        target.can_move = True
+        target.character.status.can_move = True
