@@ -52,10 +52,18 @@ class TileDict():
 
         # ----------------------------------------------------------------------
         # Floors (100-199)
-        # 100=colorful, 110=dirty, 120=carpet, 130=wood, 140=stone,
+        # 100-103=grass variants, 104-107=path variants,
+        # 110=dirty, 120=carpet, 130=wood, 140=stone,
         # 150=forest, 160=sand, 170=ocean, 180=blood, 190=rounded
         # ----------------------------------------------------------------------
-        tiles[100] = pygame.transform.scale(image.load("assets/tiles/colorful_floor.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[100] = pygame.transform.scale(image.load("assets/tiles/tile_grass_1.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[101] = pygame.transform.scale(image.load("assets/tiles/tile_grass_2.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[102] = pygame.transform.scale(image.load("assets/tiles/tile_grass_3.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[103] = pygame.transform.scale(image.load("assets/tiles/tile_grass_4.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[104] = pygame.transform.scale(image.load("assets/tiles/tile_path_1.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[105] = pygame.transform.scale(image.load("assets/tiles/tile_path_2.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[106] = pygame.transform.scale(image.load("assets/tiles/tile_path_3.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[107] = pygame.transform.scale(image.load("assets/tiles/tile_path_4.png"), (TILE_SIZE, TILE_SIZE))
         tiles[110] = pygame.transform.scale(image.load("assets/tiles/floor_dirty.png"), (TILE_SIZE, TILE_SIZE))
         tiles[111] = pygame.transform.scale(image.load("assets/tiles/floor_dirty1.png"), (TILE_SIZE, TILE_SIZE))
         tiles[120] = image.load("assets/tiles/red_carpet.png")
@@ -74,7 +82,7 @@ class TileDict():
         # Walls (200-299)
         # 200=colorful, 210=rounded, 220=forest, 230=ocean, 240=stone
         # ----------------------------------------------------------------------
-        tiles[200] = pygame.transform.scale(image.load("assets/tiles/colorful_wall.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[200] = pygame.transform.scale(image.load("assets/tiles/tile_wall_modular.png"), (TILE_SIZE, TILE_SIZE))
         tiles[210] = pygame.transform.scale(image.load("assets/tiles/wall_extra_rounded.png"), (TILE_SIZE, TILE_SIZE))
         tiles[220] = image.load("assets/tiles/forest_wall.png")
         tiles[221] = pygame.transform.scale(image.load("assets/tiles/dense_forest_wall.png"), (TILE_SIZE, TILE_SIZE))
@@ -86,8 +94,8 @@ class TileDict():
         # Doors (300-399)
         # 300=closed, 301=open
         # ----------------------------------------------------------------------
-        tiles[300] = image.load("assets/tiles/door.png")
-        tiles[301] = image.load("assets/tiles/open_door.png")
+        tiles[300] = pygame.transform.scale(image.load("assets/tiles/tile_door_closed.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[301] = pygame.transform.scale(image.load("assets/tiles/tile_door_open.png"), (TILE_SIZE, TILE_SIZE))
         tiles[320] = pygame.transform.scale(image.load("assets/tiles/new_door_closed.png"), (TILE_SIZE, TILE_SIZE))
         tiles[321] = pygame.transform.scale(image.load("assets/tiles/new_door_open.png"), (TILE_SIZE, TILE_SIZE))
         tiles[322] = pygame.transform.scale(image.load("assets/tiles/dense_forest_door_closed.png"), (TILE_SIZE, TILE_SIZE))
@@ -97,9 +105,9 @@ class TileDict():
         # Stairs and Transitions (400-499)
         # 400=up, 410=down, 420=gateway
         # ----------------------------------------------------------------------
-        tiles[400] = image.load("assets/tiles/stairs_up.png")
-        tiles[410] = image.load("assets/tiles/stairs_down.png")
-        tiles[420] = image.load("assets/tiles/gateway.png")
+        tiles[400] = pygame.transform.scale(image.load("assets/tiles/tile_ladder_up.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[410] = pygame.transform.scale(image.load("assets/tiles/tile_ladder_down.png"), (TILE_SIZE, TILE_SIZE))
+        tiles[420] = pygame.transform.scale(image.load("assets/tiles/tile_portal_transparent.png"), (TILE_SIZE, TILE_SIZE))
         tiles[430] = pygame.transform.scale(image.load("assets/tiles/new_stairs_up.png"), (TILE_SIZE, TILE_SIZE))
         tiles[431] = pygame.transform.scale(image.load("assets/tiles/new_stairs_down.png"), (TILE_SIZE, TILE_SIZE))
         tiles[432] = pygame.transform.scale(image.load("assets/tiles/new_portal.png"), (TILE_SIZE, TILE_SIZE))

@@ -5,6 +5,7 @@ from navigation_utility import pathfinding
 from src.core.enums import LoopType
 from character_implementation import Inventory
 from item_implementation.consumables.potions import MightPotion
+from item_implementation.consumables.potions.fire_potion import FirePotion
 from src.core.player_config import PlayerConfig
 from src.core.directions import Directions
 from src.core.movement import MovementValidator
@@ -47,6 +48,9 @@ class Player(Objects):
             give_spell(self, 'blink')
             self.stat_points = PlayerConfig.DEBUG_STARTING_STAT_POINTS
             self.inventory.get_item(MightPotion())
+            fire_potion = FirePotion()
+            fire_potion.stacks = 5
+            self.inventory.get_item(fire_potion)
         logger.debug("Player initialization complete")
 
     def get_render_text(self):

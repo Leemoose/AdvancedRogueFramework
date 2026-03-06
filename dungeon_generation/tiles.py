@@ -77,11 +77,11 @@ class Floor(Tile):
         self.traits["floor"] = True
 
 class Door(Floor):
-    def __init__(self, x, y, render_tag = 320, passable = True, blocks_vision = True, id_tag = 0):  # 320 = NEW_FANTASY_DOOR_CLOSED (see asset_registry.py)
+    def __init__(self, x, y, render_tag = 300, passable = True, blocks_vision = True, id_tag = 0):  # 300 = DOOR_CLOSED (see asset_registry.py)
         super().__init__(x, y,  render_tag = render_tag, passable = passable, id_tag = id_tag, blocks_vision=blocks_vision)
 
     def open(self):
-        self.render_tag = 321  # 321 = NEW_FANTASY_DOOR_OPEN (see asset_registry.py)
+        self.render_tag = 301  # 301 = DOOR_OPEN (see asset_registry.py)
         self.blocks_vision = False
 
 class Wall(Tile):

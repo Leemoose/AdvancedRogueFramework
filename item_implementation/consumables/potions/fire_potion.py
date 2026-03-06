@@ -17,9 +17,9 @@ class FirePotion(Potion):
         loop.add_message(f"The {self.name} shatters on the ground!", (200, 200, 200))
         tile.add_terrain(Fire(duration=10))
 
-    def quaff(self, entity, loop):
-        loop.add_message(f"You drink the {self.name}!", (200, 200, 200))
+    def activate(self, entity):
         entity.character.status.add_status_effect(HealthBump(10))
+        super().activate(entity)
 
     def apply_to_equipment(self, equipment, loop):
         loop.add_message(f"You apply the {self.name} to your {equipment.name}!", (200, 200, 200))

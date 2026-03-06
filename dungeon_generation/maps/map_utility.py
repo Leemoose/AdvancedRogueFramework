@@ -194,14 +194,8 @@ def apply_forest_theme(tilemap) -> None:
     """
     Apply forest-themed tiles to the tilemap for the Forest branch.
 
-    Swaps default tiles to dense forest variants:
-    - Floor: 195 (NEW_FANTASY_FLOOR) -> 151 (DENSE_FOREST_FLOOR)
-    - Wall: 250 (NEW_FANTASY_WALL) -> 221 (DENSE_FOREST_WALL)
-    - Door closed: 320 -> 322 (DENSE_FOREST_DOOR_CLOSED)
-    - Door open: 321 -> 323 (DENSE_FOREST_DOOR_OPEN)
-    - Stairs up: 430 -> 433 (DENSE_FOREST_STAIRS_UP)
-    - Stairs down: 431 -> 434 (DENSE_FOREST_STAIRS_DOWN)
-    - Portal: 432 -> 435 (DENSE_FOREST_PORTAL)
+    Swaps default tiles (grass/path floors, wall, doors, stairs, portal)
+    to dense forest variants.
 
     Args:
         tilemap: The tilemap to apply forest theme to
@@ -209,14 +203,22 @@ def apply_forest_theme(tilemap) -> None:
     logger.info("Applying forest theme to tilemap")
 
     # Define render tag mappings (default -> forest theme)
+    # Maps all grass/path floor variants + wall/door/stairs/portal defaults
     tile_mappings = {
-        195: 151,  # Floor: NEW_FANTASY_FLOOR -> DENSE_FOREST_FLOOR
-        250: 221,  # Wall: NEW_FANTASY_WALL -> DENSE_FOREST_WALL
-        320: 322,  # Door closed: NEW_FANTASY_DOOR_CLOSED -> DENSE_FOREST_DOOR_CLOSED
-        321: 323,  # Door open: NEW_FANTASY_DOOR_OPEN -> DENSE_FOREST_DOOR_OPEN
-        430: 433,  # Stairs up: NEW_FANTASY_STAIRS_UP -> DENSE_FOREST_STAIRS_UP
-        431: 434,  # Stairs down: NEW_FANTASY_STAIRS_DOWN -> DENSE_FOREST_STAIRS_DOWN
-        432: 435,  # Portal: NEW_FANTASY_PORTAL -> DENSE_FOREST_PORTAL
+        100: 151,  # Floor: GRASS_1 -> DENSE_FOREST_FLOOR
+        101: 151,  # Floor: GRASS_2 -> DENSE_FOREST_FLOOR
+        102: 151,  # Floor: GRASS_3 -> DENSE_FOREST_FLOOR
+        103: 151,  # Floor: GRASS_4 -> DENSE_FOREST_FLOOR
+        104: 151,  # Floor: PATH_1 -> DENSE_FOREST_FLOOR
+        105: 151,  # Floor: PATH_2 -> DENSE_FOREST_FLOOR
+        106: 151,  # Floor: PATH_3 -> DENSE_FOREST_FLOOR
+        107: 151,  # Floor: PATH_4 -> DENSE_FOREST_FLOOR
+        200: 221,  # Wall: DEFAULT -> DENSE_FOREST_WALL
+        300: 322,  # Door closed: DEFAULT -> DENSE_FOREST_DOOR_CLOSED
+        301: 323,  # Door open: DEFAULT -> DENSE_FOREST_DOOR_OPEN
+        400: 433,  # Stairs up: DEFAULT -> DENSE_FOREST_STAIRS_UP
+        410: 434,  # Stairs down: DEFAULT -> DENSE_FOREST_STAIRS_DOWN
+        420: 435,  # Portal: DEFAULT -> DENSE_FOREST_PORTAL
     }
 
     tiles_changed = 0

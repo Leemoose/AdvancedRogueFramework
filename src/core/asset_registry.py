@@ -140,11 +140,21 @@ class TileID:
 
     # --------------------------------------------------------------------------
     # Floors (100-199)
-    # Subcategories: 100=colorful, 110=dirty, 120=carpet, 130=wood, 140=stone,
+    # Subcategories: 100-103=grass variants (room floors),
+    #                104-107=path variants (corridor floors),
+    #                110=dirty, 120=carpet, 130=wood, 140=stone,
     #                150=forest, 160=sand, 170=ocean, 180=blood, 190=rounded,
     #                195=new_fantasy
     # --------------------------------------------------------------------------
-    COLORFUL_FLOOR = 100
+    GRASS_FLOOR_1 = 100       # Grass variant 1 (default room floor)
+    GRASS_FLOOR_2 = 101       # Grass variant 2
+    GRASS_FLOOR_3 = 102       # Grass variant 3
+    GRASS_FLOOR_4 = 103       # Grass variant 4
+    PATH_FLOOR_1 = 104        # Path/cobblestone variant 1 (corridor floor)
+    PATH_FLOOR_2 = 105        # Path/cobblestone variant 2
+    PATH_FLOOR_3 = 106        # Path/cobblestone variant 3
+    PATH_FLOOR_4 = 107        # Path/cobblestone variant 4
+    COLORFUL_FLOOR = 100      # Legacy alias for GRASS_FLOOR_1
     FLOOR_DIRTY = 110
     FLOOR_DIRTY_ALT = 111
     RED_CARPET = 120

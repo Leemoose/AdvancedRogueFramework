@@ -6,7 +6,7 @@ from potion_system.tag_effects import TagEffectRegistry, UsageContext
 
 class Potion(Item):
     def __init__(self, render_tag, name):
-        super().__init__(-1, -1, 0, render_tag, name)
+        super().__init__(-1, -1, 0, 6003, name)
         self.equipment_type = "Potion"
         self.consumeable = True
         self.throwable = True
@@ -53,9 +53,6 @@ class Potion(Item):
     def apply_to_tile(self, tile, loop):
         loop.add_message(f"The {self.name} shatters on the ground!", (200, 200, 200))
         TagEffectRegistry.apply_effects(self.tags, UsageContext.THROW, tile, loop)
-
-    def quaff(self, entity, loop):
-        loop.add_message(f"The {self.name} has been drank!", (200, 200, 200))
 
     def apply_to_equipment(self, equipment, loop):
         loop.add_message(f"You apply the {self.name} to your {equipment.name}!", (200, 200, 200))

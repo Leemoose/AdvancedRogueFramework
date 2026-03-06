@@ -8,6 +8,7 @@ Provides common functionality and defines the interface that all
 dungeon map generators must implement.
 """
 
+import random
 from abc import ABC, abstractmethod
 from typing import List, Any, TYPE_CHECKING
 
@@ -90,18 +91,35 @@ class MapGenerator(ABC):
         """Return the 2D list of tile entities."""
         return self.entity_map
 
+    # Grass variant IDs (room floors) and path variant IDs (corridor floors)
+    GRASS_FLOOR_IDS = [100, 101, 102, 103]
+    PATH_FLOOR_IDS = [104, 105, 106, 107]
+
     def create_floor(self, x: int, y: int) -> Floor:
         """
-        Create a Floor tile at the given coordinates.
+        Create a Floor tile at the given coordinates with a random grass variant.
 
         Args:
             x: X coordinate for the tile
             y: Y coordinate for the tile
 
         Returns:
-            A new Floor tile instance
+            A new Floor tile instance with a random grass render_tag
         """
-        return Floor(x, y)
+        return Floor(x, y, render_tag=random.choice(self.GRASS_FLOOR_IDS))
+
+    def create_corridor_floor(self, x: int, y: int) -> Floor:
+        """
+        Create a corridor Floor tile with a random path/cobblestone variant.
+
+        Args:
+            x: X coordinate for the tile
+            y: Y coordinate for the tile
+
+        Returns:
+            A new Floor tile instance with a random path render_tag
+        """
+        return Floor(x, y, render_tag=random.choice(self.PATH_FLOOR_IDS))
 
     def create_wall(self, x: int, y: int) -> Wall:
         """
@@ -132,13 +150,23 @@ class MapGenerator(ABC):
 
     def set_floor(self, x: int, y: int) -> None:
         """
-        Set the tile at (x, y) to a Floor.
+        Set the tile at (x, y) to a Floor (grass variant).
 
         Args:
             x: X coordinate
             y: Y coordinate
         """
         self.entity_map[x][y] = self.create_floor(x, y)
+
+    def set_corridor_floor(self, x: int, y: int) -> None:
+        """
+        Set the tile at (x, y) to a corridor Floor (path variant).
+
+        Args:
+            x: X coordinate
+            y: Y coordinate
+        """
+        self.entity_map[x][y] = self.create_corridor_floor(x, y)
 
     def set_wall(self, x: int, y: int) -> None:
         """

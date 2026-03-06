@@ -337,7 +337,7 @@ class RoomsAndCorridorsGenerator(MapGenerator):
         for x in range(lower1_x, upper1_x):
             for y in range(lower1_y, upper1_y):
                 if self.is_wall(x, y):
-                    self.set_floor(x, y)
+                    self.set_corridor_floor(x, y)
                     tiles_carved_1 += 1
 
         # Second corridor segment (corner to room2 center)
@@ -350,7 +350,7 @@ class RoomsAndCorridorsGenerator(MapGenerator):
         for x in range(lower2_x, upper2_x):
             for y in range(lower2_y, upper2_y):
                 if self.is_wall(x, y):
-                    self.set_floor(x, y)
+                    self.set_corridor_floor(x, y)
                     tiles_carved_2 += 1
 
         logger.debug(
